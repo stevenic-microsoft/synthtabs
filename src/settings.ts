@@ -15,7 +15,7 @@ export interface Settings {
 export const DefaultSettings: Settings = {
     serviceApiKey: '',
     model: '',
-    maxTokens: 8000,
+    maxTokens: 32000,
     imageQuality: 'standard',
     instructions: '',
     logCompletions: false

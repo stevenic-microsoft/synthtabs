@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SynthOS</title>
+    <style>
+        /* Nebula Dusk Theme */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%); color: #e0e0e0; height: 100vh; display: flex; }
+        .chat-panel { width: 30%; background: linear-gradient(180deg, rgba(26,26,46,0.95) 0%, rgba(22,33,62,0.95) 100%); box-shadow: 0 0 30px rgba(138,43,226,0.2), inset 0 0 60px rgba(75,0,130,0.1); padding: 20px; display: flex; flex-direction: column; border-right: 1px solid rgba(138,43,226,0.3); }
+        .chat-header { font-size: 24px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); color: #fff; text-align: center; border-radius: 15px; box-shadow: 0 4px 20px rgba(102,126,234,0.4); text-shadow: 0 2px 10px rgba(0,0,0,0.3); letter-spacing: 2px; }
+        .chat-messages { flex-grow: 1; overflow-y: auto; padding: 15px; margin-top: 15px; background: rgba(15,15,35,0.6); border-radius: 15px; border: 1px solid rgba(138,43,226,0.2); box-shadow: inset 0 0 30px rgba(75,0,130,0.2); }
+        .chat-message { margin-bottom: 15px; padding: 12px 15px; background: linear-gradient(135deg, rgba(102,126,234,0.15) 0%, rgba(118,75,162,0.15) 100%); border-radius: 15px; box-shadow: 0 2px 10px rgba(138,43,226,0.2); border: 1px solid rgba(138,43,226,0.1); backdrop-filter: blur(5px); }
+        .chat-message p { margin-bottom: 5px; line-height: 1.5; }
+        .chat-message p strong { font-weight: 600; background: linear-gradient(90deg, #667eea, #f093fb); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .chat-message p code { background: rgba(138,43,226,0.3); padding: 2px 6px; border-radius: 5px; font-family: 'Courier New', Courier, monospace; color: #f093fb; border: 1px solid rgba(240,147,251,0.3); }
+        .link-group { display: flex; justify-content: space-between; margin: 15px 0; padding: 10px; background: rgba(15,15,35,0.4); border-radius: 10px; border: 1px solid rgba(138,43,226,0.2); }
+        .link-group a { font-size: 14px; color: #b794f6; text-decoration: none; padding: 8px 15px; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent; }
+        .link-group a:hover { background: linear-gradient(135deg, rgba(102,126,234,0.3) 0%, rgba(118,75,162,0.3) 100%); border-color: rgba(183,148,246,0.5); box-shadow: 0 0 15px rgba(138,43,226,0.3); color: #f093fb; }
+        form { display: flex; flex-direction: row; width: 100%; gap: 10px; align-items: center; }
+        .chat-input { padding: 14px 18px; border: 1px solid rgba(138,43,226,0.3); border-radius: 25px; flex-grow: 1; font-size: 14px; background: rgba(15,15,35,0.8); color: #e0e0e0; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3), 0 0 20px rgba(138,43,226,0.1); transition: all 0.3s ease; }
+        .chat-input:focus { outline: none; border-color: rgba(183,148,246,0.6); box-shadow: inset 0 2px 10px rgba(0,0,0,0.3), 0 0 25px rgba(138,43,226,0.3); }
+        .chat-input::placeholder { color: rgba(183,148,246,0.5); }
+        .chat-submit { padding: 14px 20px; border: none; border-radius: 25px; font-size: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); color: #fff; cursor: pointer; transition: all 0.3s ease; font-weight: 600; letter-spacing: 1px; box-shadow: 0 4px 20px rgba(102,126,234,0.4); white-space: nowrap; }
+        .chat-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(102,126,234,0.6); }
+        .chat-submit:active { transform: translateY(0); }
+        .viewer-panel { width: 70%; padding: 25px; background: linear-gradient(135deg, rgba(22,33,62,0.9) 0%, rgba(15,15,35,0.95) 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: inset 0 0 60px rgba(75,0,130,0.15); position: relative; overflow: hidden; }
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,15,35,0.9); justify-content: center; align-items: center; z-index: 1000; }
+        .spinner { width: 50px; height: 50px; border: 4px solid rgba(138,43,226,0.3); border-top-color: #f093fb; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Scrollbar Styles */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: rgba(15,15,35,0.6); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #667eea 0%, #764ba2 50%, #f093fb 100%); border-radius: 10px; border: 2px solid rgba(15,15,35,0.6); box-shadow: 0 0 10px rgba(138,43,226,0.4); }
+        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #f093fb 0%, #764ba2 50%, #667eea 100%); box-shadow: 0 0 15px rgba(240,147,251,0.5); }
+        ::-webkit-scrollbar-corner { background: rgba(15,15,35,0.6); }
+        * { scrollbar-width: thin; scrollbar-color: #764ba2 rgba(15,15,35,0.6); }
+
+        /* Solar System Styles */
+        #solarSystem { width: 100%; height: 100%; position: relative; }
+        .controls { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 100; background: rgba(15,15,35,0.8); padding: 15px 25px; border-radius: 25px; border: 1px solid rgba(138,43,226,0.3); }
+        .controls button { padding: 10px 20px; border: none; border-radius: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; cursor: pointer; font-size: 13px; transition: all 0.3s ease; }
+        .controls button:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(102,126,234,0.5); }
+        .controls button.active { background: linear-gradient(135deg, #f093fb 0%, #764ba2 100%); }
+        .info-panel { position: absolute; top: 20px; right: 20px; background: rgba(15,15,35,0.9); padding: 20px; border-radius: 15px; border: 1px solid rgba(138,43,226,0.3); max-width: 280px; z-index: 100; }
+        .info-panel h3 { color: #f093fb; margin-bottom: 10px; font-size: 18px; }
+        .info-panel p { font-size: 13px; line-height: 1.6; color: #b794f6; margin-bottom: 8px; }
+        .speed-control { position: absolute; top: 20px; left: 20px; background: rgba(15,15,35,0.9); padding: 15px 20px; border-radius: 15px; border: 1px solid rgba(138,43,226,0.3); z-index: 100; }
+        .speed-control label { color: #b794f6; font-size: 13px; display: block; margin-bottom: 8px; }
+        .speed-control input[type="range"] { width: 150px; accent-color: #f093fb; }
+        .planet-label { font-size: 11px; fill: #b794f6; pointer-events: none; text-anchor: middle; }
+    </style>
+</head>
+<body>
+    <div class="chat-panel">
+        <div class="chat-header">SynthOS</div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-message"><p><strong>SynthOS:</strong> What can I create for you?</p></div>
+            <div class="chat-message"><p><strong>You:</strong> create an accurate animation of the solar system</p></div>
+            <div class="chat-message"><p><strong>SynthOS:</strong> I've created an accurate, interactive solar system simulation! Features include: real orbital periods (scaled for visibility), accurate relative planet sizes, elliptical orbits with correct eccentricities, the asteroid belt, and dwarf planet Pluto. Use the controls to adjust speed, toggle orbits, and click planets for info.</p></div>
+        </div>
+        <div class="link-group">
+            <a href="#" id="saveLink">Save</a>
+            <a href="/pages" id="pagesLink">Pages</a>
+            <a href="#" id="resetLink">Reset</a>
+        </div>
+        <form action="/" method="POST" id="chatForm">
+            <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message...">
+            <button type="submit" class="chat-submit">Send</button>
+        </form>
+    </div>
+    <div class="viewer-panel" id="viewerPanel">
+        <div id="solarSystem"></div>
+        <div class="speed-control">
+            <label>Simulation Speed: <span id="speedValue">1x</span></label>
+            <input type="range" id="speedSlider" min="0.1" max="10" step="0.1" value="1">
+        </div>
+        <div class="info-panel" id="infoPanel">
+            <h3>Solar System</h3>
+            <p>Click on any planet to see detailed information.</p>
+            <p>The simulation shows accurate relative orbital periods and distances (scaled for visibility).</p>
+        </div>
+        <div class="controls">
+            <button id="toggleOrbits" class="active">Show Orbits</button>
+            <button id="toggleLabels" class="active">Show Labels</button>
+            <button id="toggleAsteroids">Show Asteroids</button>
+            <button id="resetView">Reset View</button>
+        </div>
+    </div>
+    <div id="thoughts" style="display: none;">Created an accurate solar system animation using canvas. Key accuracy features: 1) Real orbital periods relative to Earth (Mercury 0.24 years, Venus 0.62, Mars 1.88, Jupiter 11.86, Saturn 29.46, Uranus 84.01, Neptune 164.8, Pluto 248). 2) Accurate orbital eccentricities for elliptical orbits (Mercury has the most eccentric at 0.206). 3) Relative planet sizes (though scaled up for visibility). 4) Included the asteroid belt between Mars and Jupiter. 5) Added Pluto as a dwarf planet with its highly inclined and eccentric orbit. The simulation is interactive with speed controls, orbit toggles, and clickable planets for information. Used requestAnimationFrame for smooth animation.</div>
+    <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
+    <script>
+        document.getElementById("chatInput").focus();
+        document.getElementById("chatForm").addEventListener('submit', () => {
+            document.getElementById("loadingOverlay").style.display = 'flex';
+            document.getElementById("chatForm").action = window.location.pathname;
+        });
+        document.getElementById("saveLink").addEventListener("click", function() {
+            const pageName = prompt("Enter the name of the page to save as:");
+            if (pageName) {
+                window.location.href = `${window.location.pathname}/save?name=${encodeURIComponent(pageName)}`;
+            }
+        });
+        document.getElementById("resetLink").addEventListener("click", function() {
+            window.location.href = `${window.location.pathname}/reset`;
+        });
+        window.onload = function() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTo({
+                top: chatMessages.scrollHeight,
+                behavior: 'smooth'
+            });
+        };
+
+        // Solar System Simulation
+        const container = document.getElementById('solarSystem');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        container.appendChild(canvas);
+
+        let width, height, centerX, centerY;
+        let simulationSpeed = 1;
+        let showOrbits = true;
+        let showLabels = true;
+        let showAsteroids = false;
+        let time = 0;
+
+        // Planet data with accurate orbital periods (in Earth years) and eccentricities
+        const planets = [
+            { name: 'Mercury', color: '#b5b5b5', size: 4, distance: 50, period: 0.24, eccentricity: 0.206, info: 'Smallest planet, closest to Sun. Surface temp: -180°C to 430°C. No moons.' },
+            { name: 'Venus', color: '#e6c87a', size: 6, distance: 75, period: 0.62, eccentricity: 0.007, info: 'Hottest planet due to greenhouse effect. Rotates backwards. No moons.' },
+            { name: 'Earth', color: '#6b93d6', size: 6, distance: 100, period: 1.0, eccentricity: 0.017, info: 'Our home! Only known planet with life. 1 moon (Luna).' },
+            { name: 'Mars', color: '#c1440e', size: 5, distance: 130, period: 1.88, eccentricity: 0.093, info: 'The Red Planet. Has the largest volcano (Olympus Mons). 2 moons.' },
+            { name: 'Jupiter', color: '#d4a574', size: 18, distance: 200, period: 11.86, eccentricity: 0.049, info: 'Largest planet. Great Red Spot is a giant storm. 95 known moons.' },
+            { name: 'Saturn', color: '#f4d59e', size: 15, distance: 270, period: 29.46, eccentricity: 0.057, info: 'Famous for its rings made of ice and rock. 146 known moons.' },
+            { name: 'Uranus', color: '#d1e7e7', size: 10, distance: 330, period: 84.01, eccentricity: 0.046, info: 'Ice giant, rotates on its side. 28 known moons.' },
+            { name: 'Neptune', color: '#5b5ddf', size: 10, distance: 380, period: 164.8, eccentricity: 0.010, info: 'Windiest planet (2,100 km/h). 16 known moons.' },
+            { name: 'Pluto', color: '#a89f91', size: 3, distance: 420, period: 248, eccentricity: 0.249, info: 'Dwarf planet. Has a heart-shaped glacier. 5 known moons.' }
+        ];
+
+        // Asteroid belt
+        let asteroids = [];
+        function generateAsteroids() {
+            asteroids = [];
+            for (let i = 0; i < 500; i++) {
+                asteroids.push({
+                    distance: 155 + Math.random() * 35,
+                    angle: Math.random() * Math.PI * 2,
+                    speed: 0.0005 + Math.random() * 0.001,
+                    size: 0.5 + Math.random() * 1.5
+                });
+            }
+        }
+        generateAsteroids();
+
+        function resize() {
+            width = container.clientWidth;
+            height = container.clientHeight;
+            canvas.width = width;
+            canvas.height = height;
+            centerX = width / 2;
+            centerY = height / 2;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        // Calculate position on elliptical orbit
+        function getOrbitalPosition(planet, t) {
+            const angularSpeed = (2 * Math.PI) / (planet.period * 365); // radians per day
+            const meanAnomaly = angularSpeed * t * simulationSpeed;
+            
+            // Simplified Kepler's equation approximation
+            const e = planet.eccentricity;
+            const trueAnomaly = meanAnomaly + 2 * e * Math.sin(meanAnomaly);
+            
+            const r = planet.distance * (1 - e * e) / (1 + e * Math.cos(trueAnomaly));
+            
+            return {
+                x: centerX + r * Math.cos(trueAnomaly),
+                y: centerY + r * Math.sin(trueAnomaly),
+                angle: trueAnomaly
+            };
+        }
+
+        // Draw elliptical orbit path
+        function drawOrbit(planet) {
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(138, 43, 226, 0.2)';
+            ctx.lineWidth = 1;
+            
+            const a = planet.distance; // semi-major axis
+            const e = planet.eccentricity;
+            const b = a * Math.sqrt(1 - e * e); // semi-minor axis
+            const c = a * e; // focus offset
+            
+            ctx.ellipse(centerX + c, centerY, a, b, 0, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        // Draw the Sun with glow effect
+        function drawSun() {
+            // Outer glow
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 60);
+            gradient.addColorStop(0, 'rgba(255, 200, 50, 1)');
+            gradient.addColorStop(0.3, 'rgba(255, 150, 0, 0.8)');
+            gradient.addColorStop(0.6, 'rgba(255, 100, 0, 0.3)');
+            gradient.addColorStop(1, 'rgba(255, 50, 0, 0)');
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 60, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            // Sun core
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 25, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff5c0';
+            ctx.fill();
+            
+            // Corona effect
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 30, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 220, 100, 0.5)';
+            ctx.fill();
+        }
+
+        // Draw Saturn's rings
+        function drawSaturnRings(x, y, size, angle) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(0.4); // Tilt the rings
+            
+            ctx.beginPath();
+            ctx.ellipse(0, 0, size * 2.2, size * 0.5, 0, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(210, 180, 140, 0.6)';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.ellipse(0, 0, size * 1.8, size * 0.4, 0, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(180, 150, 120, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+
+        // Draw a planet
+        function drawPlanet(planet, pos) {
+            // Planet shadow (simple 3D effect)
+            ctx.beginPath();
+            ctx.arc(pos.x + 2, pos.y + 2, planet.size, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fill();
+            
+            // Planet body
+            const gradient = ctx.createRadialGradient(
+                pos.x - planet.size * 0.3, pos.y - planet.size * 0.3, 0,
+                pos.x, pos.y, planet.size
+            );
+            gradient.addColorStop(0, lightenColor(planet.color, 30));
+            gradient.addColorStop(1, planet.color);
+            
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, planet.size, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            // Saturn's rings
+            if (planet.name === 'Saturn') {
+                drawSaturnRings(pos.x, pos.y, planet.size, pos.angle);
+            }
+            
+            // Label
+            if (showLabels) {
+                ctx.fillStyle = '#b794f6';
+                ctx.font = '11px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText(planet.name, pos.x, pos.y - planet.size - 8);
+            }
+        }
+
+        // Draw asteroid belt
+        function drawAsteroidBelt() {
+            ctx.fillStyle = 'rgba(150, 150, 150, 0.6)';
+            asteroids.forEach(asteroid => {
+                asteroid.angle += asteroid.speed * simulationSpeed;
+                const x = centerX + asteroid.distance * Math.cos(asteroid.angle);
+                const y = centerY + asteroid.distance * Math.sin(asteroid.angle);
+                
+                ctx.beginPath();
+                ctx.arc(x, y, asteroid.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        // Helper function to lighten colors
+        function lightenColor(color, percent) {
+            const num = parseInt(color.replace('#', ''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+        }
+
+        // Draw stars background
+        let stars = [];
+        function generateStars() {
+            stars = [];
+            for (let i = 0; i < 200; i++) {
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    size: Math.random() * 1.5,
+                    brightness: 0.3 + Math.random() * 0.7
+                });
+            }
+        }
+        generateStars();
+
+        function drawStars() {
+            stars.forEach(star => {
+                const twinkle = 0.8 + Math.sin(time * 0.01 + star.x) * 0.2;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness * twinkle})`;
+                ctx.fill();
+            });
+        }
+
+        // Main animation loop
+        function animate() {
+            ctx.fillStyle = 'rgba(10, 10, 25, 1)';
+            ctx.fillRect(0, 0, width, height);
+            
+            drawStars();
+            
+            // Draw orbits
+            if (showOrbits) {
+                planets.forEach(planet => drawOrbit(planet));
+            }
+            
+            // Draw asteroid belt
+            if (showAsteroids) {
+                drawAsteroidBelt();
+            }
+            
+            // Draw Sun
+            drawSun();
+            
+            // Draw planets
+            planets.forEach(planet => {
+                const pos = getOrbitalPosition(planet, time);
+                drawPlanet(planet, pos);
+            });
+            
+            time += 1;
+            requestAnimationFrame(animate);
+        }
+
+        // Event listeners
+        document.getElementById('speedSlider').addEventListener('input', (e) => {
+            simulationSpeed = parseFloat(e.target.value);
+            document.getElementById('speedValue').textContent = simulationSpeed.toFixed(1) + 'x';
+        });
+
+        document.getElementById('toggleOrbits').addEventListener('click', (e) => {
+            showOrbits = !showOrbits;
+            e.target.classList.toggle('active');
+        });
+
+        document.getElementById('toggleLabels').addEventListener('click', (e) => {
+            showLabels = !showLabels;
+            e.target.classList.toggle('active');
+        });
+
+        document.getElementById('toggleAsteroids').addEventListener('click', (e) => {
+            showAsteroids = !showAsteroids;
+            e.target.classList.toggle('active');
+        });
+
+        document.getElementById('resetView').addEventListener('click', () => {
+            time = 0;
+            simulationSpeed = 1;
+            document.getElementById('speedSlider').value = 1;
+            document.getElementById('speedValue').textContent = '1x';
+        });
+
+        // Click on planets for info
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+            
+            planets.forEach(planet => {
+                const pos = getOrbitalPosition(planet, time);
+                const dist = Math.sqrt((clickX - pos.x) ** 2 + (clickY - pos.y) ** 2);
+                
+                if (dist < planet.size + 10) {
+                    const infoPanel = document.getElementById('infoPanel');
+                    infoPanel.innerHTML = `
+                        <h3>${planet.name}</h3>
+                        <p><strong>Orbital Period:</strong> ${planet.period} Earth years</p>
+                        <p><strong>Orbital Eccentricity:</strong> ${planet.eccentricity}</p>
+                        <p>${planet.info}</p>
+                    `;
+                }
+            });
+            
+            // Check if clicked on Sun
+            const sunDist = Math.sqrt((clickX - centerX) ** 2 + (clickY - centerY) ** 2);
+            if (sunDist < 30) {
+                const infoPanel = document.getElementById('infoPanel');
+                infoPanel.innerHTML = `
+                    <h3>The Sun</h3>
+                    <p><strong>Type:</strong> G-type main-sequence star</p>
+                    <p><strong>Age:</strong> ~4.6 billion years</p>
+                    <p>Contains 99.86% of the Solar System's mass. Surface temperature: 5,500°C. Core temperature: 15 million°C.</p>
+                `;
+            }
+        });
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>

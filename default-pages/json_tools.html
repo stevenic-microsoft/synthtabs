@@ -5,64 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SynthOS - JSON Tools</title>
     <style>
-        /* Nebula Dusk Theme */
-        :root { --bg-primary:#1a1a2e; --bg-secondary:#16213e; --bg-tertiary:#0f0f23; --accent-primary:#667eea; --accent-secondary:#764ba2; --accent-tertiary:#f093fb; --accent-glow:rgba(138,43,226,0.3); --text-primary:#e0e0e0; --text-secondary:#b794f6; --border-color:rgba(138,43,226,0.3); }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%); color: var(--text-primary); height: 100vh; display: flex; }
-        .chat-panel { width: 30%; background: linear-gradient(180deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%); box-shadow: 0 0 30px var(--accent-glow), inset 0 0 60px rgba(75, 0, 130, 0.1); padding: 20px; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); }
-        .chat-header { font-size: 24px; padding: 15px; background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 50%, var(--accent-tertiary) 100%); color: white; text-align: center; border-radius: 15px; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4); text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); letter-spacing: 2px; }
-        .chat-messages { flex-grow: 1; overflow-y: auto; padding: 15px; margin-top: 15px; background: rgba(15, 15, 35, 0.6); border-radius: 15px; border: 1px solid var(--border-color); box-shadow: inset 0 0 30px rgba(75, 0, 130, 0.2); }
-        .chat-message { margin-bottom: 15px; padding: 12px 15px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); border-radius: 15px; box-shadow: 0 2px 10px var(--accent-glow); border: 1px solid rgba(138, 43, 226, 0.1); backdrop-filter: blur(5px); }
-        .chat-message p { margin-bottom: 5px; line-height: 1.5; }
-        .chat-message p strong { font-weight: 600; background: linear-gradient(90deg, var(--accent-primary), var(--accent-tertiary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .chat-message p code { background: rgba(138, 43, 226, 0.3); padding: 2px 6px; border-radius: 5px; font-family: 'Courier New', Courier, monospace; color: var(--accent-tertiary); border: 1px solid rgba(240, 147, 251, 0.3); }
-        .link-group { display: flex; justify-content: space-between; margin: 15px 0; padding: 10px; background: rgba(15, 15, 35, 0.4); border-radius: 10px; border: 1px solid var(--border-color); }
-        .link-group a { font-size: 14px; color: var(--text-secondary); text-decoration: none; padding: 8px 15px; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent; }
-        .link-group a:hover { background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%); border-color: rgba(183, 148, 246, 0.5); box-shadow: 0 0 15px var(--accent-glow); color: var(--accent-tertiary); }
-        form { display: flex; flex-direction: row; width: 100%; gap: 10px; align-items: center; }
-        .chat-input { padding: 14px 18px; border: 1px solid var(--border-color); border-radius: 25px; flex-grow: 1; font-size: 14px; background: rgba(15, 15, 35, 0.8); color: var(--text-primary); box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 20px rgba(138, 43, 226, 0.1); transition: all 0.3s ease; }
-        .chat-input:focus { outline: none; border-color: rgba(183, 148, 246, 0.6); box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 25px var(--accent-glow); }
-        .chat-input::placeholder { color: rgba(183, 148, 246, 0.5); }
-        .chat-submit { padding: 14px 20px; border: none; border-radius: 25px; font-size: 14px; background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 50%, var(--accent-tertiary) 100%); color: white; cursor: pointer; transition: all 0.3s ease; font-weight: 600; letter-spacing: 1px; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4); white-space: nowrap; }
-        .chat-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6); }
-        .chat-submit:active { transform: translateY(0); }
-        .viewer-panel { width: 70%; padding: 25px; background: linear-gradient(135deg, rgba(22, 33, 62, 0.9) 0%, rgba(15, 15, 35, 0.95) 100%); display: flex; flex-direction: column; justify-content: flex-start; align-items: center; box-shadow: inset 0 0 60px rgba(75, 0, 130, 0.15); position: relative; overflow: hidden; }
-        .viewer-panel::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at center, rgba(138, 43, 226, 0.05) 0%, transparent 70%); animation: nebula-pulse 8s ease-in-out infinite; pointer-events: none; }
-        @keyframes nebula-pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } }
-        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 15, 35, 0.9); justify-content: center; align-items: center; z-index: 1000; }
-        .spinner { width: 50px; height: 50px; border: 4px solid var(--border-color); border-top-color: var(--accent-tertiary); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
-        /* Page Style */
-        .dialog-title { font-size: 22px; font-weight: 700; padding: 14px 30px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; text-align: center; border-radius: 12px; width: 100%; max-width: 800px; box-shadow: 0 6px 25px var(--accent-glow); position: relative; z-index: 1; }
-        .dialog-content { font-size: 14px; color: rgba(224, 224, 224, 0.8); padding: 15px 0; flex-grow: 1; width: 100%; max-width: 800px; position: relative; z-index: 1; overflow-y: auto; }
-        .api-section { margin: 8px 0; border-radius: 10px; width: 100%; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border: 1px solid var(--border-color); overflow: hidden; }
-        .api-header { font-size: 14px; cursor: pointer; background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%); padding: 12px 15px; text-align: left; transition: all 0.3s; color: var(--text-secondary); font-weight: 500; }
-        .api-header:hover { background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%); color: var(--accent-tertiary); }
-        .api-content { display: none; padding: 12px 15px; background: rgba(15, 15, 35, 0.5); border-top: 1px solid var(--border-color); font-size: 13px; line-height: 1.5; }
-        .api-input { margin-top: 10px; }
-        .api-input input, .api-input textarea, .api-input select { width: 100%; padding: 10px 12px; margin-bottom: 8px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(15, 15, 35, 0.8); color: var(--text-primary); font-size: 13px; transition: all 0.3s; }
-        .api-input input:focus, .api-input textarea:focus, .api-input select:focus { outline: none; border-color: var(--text-secondary); box-shadow: 0 0 15px var(--accent-glow); }
-        .api-input textarea { min-height: 80px; resize: vertical; }
-        .api-input select { cursor: pointer; }
-        .api-input select option { background: var(--bg-tertiary); color: var(--text-primary); }
-        .api-input button { padding: 10px 18px; border: none; border-radius: 20px; background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%); color: white; cursor: pointer; transition: all 0.3s; font-weight: 500; font-size: 13px; box-shadow: 0 3px 15px var(--accent-glow); }
-        .api-input button:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5); }
-        .api-input button:disabled { background: rgba(102, 126, 234, 0.3); cursor: not-allowed; transform: none; box-shadow: none; }
-        .api-output { margin-top: 10px; min-height: 100px; max-height: 200px; background: rgba(15, 15, 35, 0.8); color: var(--accent-tertiary); padding: 12px; border-radius: 8px; overflow-y: auto; white-space: pre-wrap; font-family: 'Courier New', Courier, monospace; font-size: 12px; border: 1px solid var(--border-color); }
-        .generated-image { max-width: 100%; height: auto; margin-top: 10px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px var(--accent-glow); }
-
-        /* Scrollbar Styles */
-        ::-webkit-scrollbar { width: 10px; height: 10px; }
-        ::-webkit-scrollbar-track { background: rgba(15, 15, 35, 0.6); border-radius: 10px; border: 1px solid var(--border-color); }
-        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--accent-primary) 0%, var(--accent-secondary) 50%, var(--accent-tertiary) 100%); border-radius: 10px; border: 2px solid rgba(15, 15, 35, 0.6); box-shadow: 0 0 10px var(--accent-glow); }
-        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, var(--accent-tertiary) 0%, var(--accent-secondary) 50%, var(--accent-primary) 100%); box-shadow: 0 0 15px rgba(240, 147, 251, 0.5); }
-        ::-webkit-scrollbar-corner { background: rgba(15, 15, 35, 0.6); }
-        * { scrollbar-width: thin; scrollbar-color: var(--accent-secondary) rgba(15, 15, 35, 0.6); }
+        :root{--bg-primary:#1a1a2e;--bg-secondary:#16213e;--bg-tertiary:#0f0f23;--accent-primary:#667eea;--accent-secondary:#764ba2;--accent-tertiary:#f093fb;--accent-glow:rgba(138,43,226,0.3);--text-primary:#e0e0e0;--text-secondary:#b794f6;--border-color:rgba(138,43,226,0.3)}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,var(--bg-primary) 0%,var(--bg-secondary) 50%,var(--bg-tertiary) 100%);color:var(--text-primary);height:100vh;display:flex}
+        .chat-panel{width:30%;background:linear-gradient(180deg,rgba(26,26,46,0.95) 0%,rgba(22,33,62,0.95) 100%);box-shadow:0 0 30px var(--accent-glow),inset 0 0 60px rgba(75,0,130,0.1);padding:20px;display:flex;flex-direction:column;border-right:1px solid var(--border-color)}
+        .chat-header{font-size:24px;padding:15px;background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 50%,var(--accent-tertiary) 100%);color:white;text-align:center;border-radius:15px;box-shadow:0 4px 20px rgba(102,126,234,0.4);text-shadow:0 2px 10px rgba(0,0,0,0.3);letter-spacing:2px}
+        .chat-messages{flex-grow:1;overflow-y:auto;padding:15px;margin-top:15px;background:rgba(15,15,35,0.6);border-radius:15px;border:1px solid var(--border-color);box-shadow:inset 0 0 30px rgba(75,0,130,0.2)}
+        .chat-message{margin-bottom:15px;padding:12px 15px;background:linear-gradient(135deg,rgba(102,126,234,0.15) 0%,rgba(118,75,162,0.15) 100%);border-radius:15px;box-shadow:0 2px 10px var(--accent-glow);border:1px solid rgba(138,43,226,0.1);backdrop-filter:blur(5px)}
+        .chat-message p{margin-bottom:5px;line-height:1.5}
+        .chat-message p strong{font-weight:600;background:linear-gradient(90deg,var(--accent-primary),var(--accent-tertiary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .link-group{display:flex;justify-content:space-between;margin:15px 0;padding:10px;background:rgba(15,15,35,0.4);border-radius:10px;border:1px solid var(--border-color)}
+        .link-group a{font-size:14px;color:var(--text-secondary);text-decoration:none;padding:8px 15px;border-radius:8px;transition:all 0.3s ease;border:1px solid transparent}
+        .link-group a:hover{background:linear-gradient(135deg,rgba(102,126,234,0.3) 0%,rgba(118,75,162,0.3) 100%);border-color:rgba(183,148,246,0.5);box-shadow:0 0 15px var(--accent-glow);color:var(--accent-tertiary)}
+        form{display:flex;flex-direction:row;width:100%;gap:10px;align-items:center}
+        .chat-input{padding:14px 18px;border:1px solid var(--border-color);border-radius:25px;flex-grow:1;font-size:14px;background:rgba(15,15,35,0.8);color:var(--text-primary);box-shadow:inset 0 2px 10px rgba(0,0,0,0.3),0 0 20px rgba(138,43,226,0.1);transition:all 0.3s ease}
+        .chat-input:focus{outline:none;border-color:rgba(183,148,246,0.6);box-shadow:inset 0 2px 10px rgba(0,0,0,0.3),0 0 25px var(--accent-glow)}
+        .chat-input::placeholder{color:rgba(183,148,246,0.5)}
+        .chat-submit{padding:14px 20px;border:none;border-radius:25px;font-size:14px;background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 50%,var(--accent-tertiary) 100%);color:white;cursor:pointer;transition:all 0.3s ease;font-weight:600;letter-spacing:1px;box-shadow:0 4px 20px rgba(102,126,234,0.4);white-space:nowrap}
+        .chat-submit:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(102,126,234,0.6)}
+        .viewer-panel{width:70%;padding:25px;background:linear-gradient(135deg,rgba(22,33,62,0.9) 0%,rgba(15,15,35,0.95) 100%);display:flex;flex-direction:column;align-items:center;box-shadow:inset 0 0 60px rgba(75,0,130,0.15);position:relative;overflow:hidden}
+        .viewer-panel::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at center,rgba(138,43,226,0.05) 0%,transparent 70%);animation:nebula-pulse 8s ease-in-out infinite;pointer-events:none}
+        @keyframes nebula-pulse{0%,100%{opacity:0.5;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
+        .loading-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,15,35,0.9);justify-content:center;align-items:center;z-index:1000}
+        .spinner{width:50px;height:50px;border:4px solid var(--border-color);border-top-color:var(--accent-tertiary);border-radius:50%;animation:spin 1s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .dialog-title{font-size:22px;font-weight:700;padding:14px 30px;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:white;text-align:center;border-radius:12px;width:100%;max-width:800px;box-shadow:0 6px 25px var(--accent-glow);position:relative;z-index:1}
+        .dialog-content{font-size:14px;color:rgba(224,224,224,0.8);padding:15px 0;flex-grow:1;width:100%;max-width:800px;position:relative;z-index:1;overflow-y:auto;display:flex;flex-direction:column;gap:15px}
+        .conversion-select{width:100%;padding:12px 15px;border-radius:10px;border:1px solid var(--border-color);background:rgba(15,15,35,0.8);color:var(--text-primary);font-size:14px;cursor:pointer;transition:all 0.3s}
+        .conversion-select:focus{outline:none;border-color:var(--text-secondary);box-shadow:0 0 15px var(--accent-glow)}
+        .conversion-select option{background:var(--bg-tertiary);color:var(--text-primary)}
+        .multi-line-input{width:100%;min-height:220px;padding:15px;border-radius:10px;border:1px solid var(--border-color);background:rgba(15,15,35,0.8);color:var(--text-primary);font-size:14px;font-family:'Courier New',monospace;resize:vertical;transition:all 0.3s}
+        .multi-line-input:focus{outline:none;border-color:var(--text-secondary);box-shadow:0 0 15px var(--accent-glow)}
+        .button-group{display:flex;justify-content:space-between;align-items:center;gap:10px}
+        .button-group div{display:flex;gap:10px}
+        .action-btn{padding:12px 24px;border:none;border-radius:25px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s;letter-spacing:1px}
+        .convert-btn{background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 100%);color:white;box-shadow:0 4px 20px var(--accent-glow)}
+        .convert-btn:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(102,126,234,0.6)}
+        .reset-btn{background:rgba(102,126,234,0.2);color:var(--text-secondary);border:1px solid var(--border-color)}
+        .reset-btn:hover{background:rgba(102,126,234,0.3);color:var(--accent-tertiary)}
+        .copy-btn{background:linear-gradient(135deg,rgba(240,147,251,0.3) 0%,rgba(118,75,162,0.3) 100%);color:var(--text-secondary);border:1px solid var(--border-color)}
+        .copy-btn:hover:not(:disabled){background:linear-gradient(135deg,rgba(240,147,251,0.5) 0%,rgba(118,75,162,0.5) 100%);color:var(--accent-tertiary)}
+        .copy-btn:disabled{opacity:0.5;cursor:not-allowed}
+        .result-panel{width:100%;min-height:220px;max-height:350px;padding:15px;border-radius:10px;border:1px solid var(--border-color);background:rgba(15,15,35,0.8);color:var(--accent-tertiary);font-size:13px;font-family:'Courier New',monospace;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+        ::-webkit-scrollbar{width:10px;height:10px}
+        ::-webkit-scrollbar-track{background:rgba(15,15,35,0.6);border-radius:10px;border:1px solid var(--border-color)}
+        ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--accent-primary) 0%,var(--accent-secondary) 50%,var(--accent-tertiary) 100%);border-radius:10px;border:2px solid rgba(15,15,35,0.6);box-shadow:0 0 10px var(--accent-glow)}
+        ::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,var(--accent-tertiary) 0%,var(--accent-secondary) 50%,var(--accent-primary) 100%)}
+        *{scrollbar-width:thin;scrollbar-color:var(--accent-secondary) rgba(15,15,35,0.6)}
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.0/mermaid.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
 </head>
 <body>
@@ -82,116 +72,88 @@
         </form>
     </div>
     <div class="viewer-panel" id="viewerPanel">
-        <div class="application-title">JSON Tools</div>
-        <div class="application-content">
-            <select class="conversion-type" id="conversionType">
+        <div class="dialog-title">JSON Tools</div>
+        <div class="dialog-content">
+            <select class="conversion-select" id="conversionType">
                 <option value="escape">Escape JSON</option>
                 <option value="unescape">Unescape JSON</option>
                 <option value="format">Format JSON</option>
                 <option value="unformat">Unformat JSON</option>
                 <option value="toYaml">Convert to YAML</option>
-                <option value="fromYaml">Convert from YAML</option>
+                <option value="fromYaml" selected>Convert from YAML</option>
             </select>
-            <textarea class="multi-line-input" id="userInput" placeholder="Enter your text here..."></textarea>
+            <textarea class="multi-line-input" id="userInput" placeholder="Enter your text here..."># Sample YAML Configuration
+server:
+  host: localhost
+  port: 8080
+  ssl: true
+
+database:
+  type: postgresql
+  connection:
+    host: db.example.com
+    port: 5432
+    name: myapp_db
+  credentials:
+    username: admin
+    password: secret123
+
+features:
+  - authentication
+  - logging
+  - caching
+  - rate_limiting
+
+users:
+  - name: Alice
+    role: admin
+    active: true
+  - name: Bob
+    role: user
+    active: false
+
+settings:
+  debug_mode: false
+  max_connections: 100
+  timeout_seconds: 30
+  allowed_origins:
+    - https://example.com
+    - https://api.example.com</textarea>
             <div class="button-group">
                 <div>
-                    <button class="convert-button" id="convertButton">Convert</button>
-                    <button class="reset-button" id="resetButton">Reset</button>
+                    <button class="action-btn convert-btn" id="convertButton">Convert</button>
+                    <button class="action-btn reset-btn" id="resetButton">Reset</button>
                 </div>
-                <button class="copy-button" id="copyButton" disabled>Copy to Clipboard</button>
+                <button class="action-btn copy-btn" id="copyButton" disabled>Copy to Clipboard</button>
             </div>
-            <div id="resultPanel" class="application-content"></div>
+            <div id="resultPanel" class="result-panel"></div>
         </div>
     </div>
-    <div id="thoughts" style="display: none;">I've instructed the user for how to use the tool.</div>
+    <div id="thoughts" style="display: none;">User asked for test YAML data. I've added a comprehensive sample YAML configuration that includes various data types: nested objects, arrays, booleans, numbers, and strings. I also set the dropdown to "Convert from YAML" so they can immediately test the conversion to JSON.</div>
     <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     <script>
-        // Basic chat functionality
         document.getElementById("chatInput").focus();
-        document.getElementById("chatForm").addEventListener('submit', () => {
-            document.getElementById("loadingOverlay").style.display = 'flex';
-            document.getElementById("chatForm").action = window.location.pathname;
+        document.getElementById("chatForm").addEventListener('submit',()=>{document.getElementById("loadingOverlay").style.display='flex';document.getElementById("chatForm").action=window.location.pathname});
+        document.getElementById("saveLink").addEventListener("click",function(){const pageName=prompt("Enter the name of the page to save as:");if(pageName){window.location.href=`${window.location.pathname}/save?name=${encodeURIComponent(pageName)}`}});
+        document.getElementById("resetLink").addEventListener("click",function(){window.location.href=`${window.location.pathname}/reset`});
+        window.onload=function(){const chatMessages=document.getElementById('chatMessages');chatMessages.scrollTo({top:chatMessages.scrollHeight,behavior:'smooth'})};
+        document.getElementById("copyButton").addEventListener("click",function(){const resultPanel=document.getElementById("resultPanel");navigator.clipboard.writeText(resultPanel.innerText).then(()=>alert('Text copied to clipboard!'),(err)=>console.error('Could not copy text: ',err))});
+        document.getElementById("convertButton").addEventListener("click",function(){
+            const userInput=document.getElementById("userInput").value;
+            const conversionType=document.getElementById("conversionType").value;
+            let result="";
+            try{
+                if(conversionType==="escape")result=JSON.stringify(userInput);
+                else if(conversionType==="unescape")result=JSON.parse(userInput);
+                else if(conversionType==="format")result=JSON.stringify(JSON.parse(userInput),null,2);
+                else if(conversionType==="unformat")result=JSON.stringify(JSON.parse(userInput));
+                else if(conversionType==="toYaml")result=jsyaml.dump(JSON.parse(userInput),{indent:2});
+                else if(conversionType==="fromYaml")result=JSON.stringify(jsyaml.load(userInput),null,2);
+            }catch(e){result="Invalid input: "+e.message}
+            document.getElementById("resultPanel").innerText=result;
+            document.getElementById("copyButton").disabled=false;
         });
-        document.getElementById("saveLink").addEventListener("click", function() {
-            const pageName = prompt("Enter the name of the page to save as:");
-            if (pageName) {
-                window.location.href = `${window.location.pathname}/save?name=${encodeURIComponent(pageName)}`;
-            }
-        });
-        document.getElementById("resetLink").addEventListener("click", function() {
-            window.location.href = `${window.location.pathname}/reset`;
-        });
-        window.onload = function() {
-            const chatMessages = document.getElementById('chatMessages');
-            chatMessages.scrollTo({
-                top: chatMessages.scrollHeight,
-                behavior: 'smooth'
-            });
-s        };
-
-        // Copy to clipboard functionality
-        document.getElementById("copyButton").addEventListener("click", function() {
-            const resultPanel = document.getElementById("resultPanel");
-            const textToCopy = resultPanel.innerText;
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                alert('Text copied to clipboard!');
-            }, (err) => {
-                console.error('Could not copy text: ', err);
-            });
-        });
-
-        // Conversion functionality
-        document.getElementById("convertButton").addEventListener("click", function() {
-            const userInput = document.getElementById("userInput").value;
-            const conversionType = document.getElementById("conversionType").value;
-            let result = "";
-            if (conversionType === "escape") {
-                result = JSON.stringify(userInput);
-            } else if (conversionType === "unescape") {
-                try {
-                    result = JSON.parse(userInput);
-                } catch (e) {
-                    result = "Invalid JSON input";
-                }
-            } else if (conversionType === "format") {
-                try {
-                    const jsonObject = JSON.parse(userInput);
-                    result = JSON.stringify(jsonObject, null, 2);
-                } catch (e) {
-                    result = "Invalid JSON input";
-                }
-            } else if (conversionType === "unformat") {
-                try {
-                    const jsonObject = JSON.parse(userInput);
-                    result = JSON.stringify(jsonObject);
-                } catch (e) {
-                    result = "Invalid JSON input";
-                }
-            } else if (conversionType === "toYaml") {
-                try {
-                    const jsonObject = JSON.parse(userInput);
-                    result = jsyaml.dump(jsonObject, { indent: 2 });
-                } catch (e) {
-                    result = "Invalid JSON input";
-                }
-            } else if (conversionType === "fromYaml") {
-                try {
-                    const yamlObject = jsyaml.load(userInput);
-                    result = JSON.stringify(yamlObject, null, 2);
-                } catch (e) {
-                    result = "Invalid YAML input";
-                }
-            }
-            document.getElementById("resultPanel").innerText = result;
-            document.getElementById("copyButton").disabled = false;
-        });
-
-        // Reset functionality
-        document.getElementById("resetButton").addEventListener("click", function() {
-            document.getElementById("userInput").value = "";
-            document.getElementById("resultPanel").innerText = "";
-            document.getElementById("copyButton").disabled = true;
-        });
+        document.getElementById("resetButton").addEventListener("click",function(){document.getElementById("userInput").value="";document.getElementById("resultPanel").innerText="";document.getElementById("copyButton").disabled=true});
     </script>
 </body>
 </html>
