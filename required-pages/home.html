@@ -5,31 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SynthOS</title>
     <style>
+        /* Nebula Dusk Theme */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a1a; color: #e0e0e0; height: 100vh; display: flex; }
-        .chat-panel { width: 30%; background: #2a2a2a; box-shadow: 0 0 10px rgba(0,0,0,0.3); padding: 20px; display: flex; flex-direction: column; }
-        .chat-header { font-size: 24px; padding: 10px; background: #3a7bc8; color: white; text-align: center; border-radius: 10px 10px 0 0; }
-        .chat-messages { flex-grow: 1; overflow-y: auto; padding: 15px; margin-top: 10px; background: #333; border-radius: 10px; }
-        .chat-message { margin-bottom: 15px; padding: 10px; background: #444; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .chat-message p { margin-bottom: 5px; line-height: 1.4; }
-        .chat-message p strong { font-weight: 600; color: #4a90e2; }
-        .chat-message p code { background: #555; padding: 2px 4px; border-radius: 3px; font-family: 'Courier New', Courier, monospace; color: #e0e0e0; }
-        .link-group { display: flex; justify-content: space-between; margin: 15px 0; }
-        .link-group a { font-size: 14px; color: #4a90e2; text-decoration: none; padding: 5px 10px; border-radius: 5px; transition: background-color 0.3s; }
-        .link-group a:hover { background-color: #3a3a3a; }
-        form { display: flex; flex-direction: column; width: 100%; }
-        .chat-input, .chat-submit { padding: 12px; border: none; border-radius: 25px; width: 100%; font-size: 14px; }
-        .chat-input { background: #444; color: #e0e0e0; margin-bottom: 10px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); }
-        .chat-submit { background: #3a7bc8; color: white; cursor: pointer; transition: background-color 0.3s; }
-        .chat-submit:hover { background: #2a6cb8; }
-        .viewer-panel { width: 70%; padding: 30px; background: #2a2a2a; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: -5px 0 10px rgba(0,0,0,0.2); }
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 26, 26, 0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .spinner { border: 8px solid #333; border-top: 8px solid #3a7bc8; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: #333; }
-        ::-webkit-scrollbar-thumb { background: #555; border-radius: 5px; }
-        ::-webkit-scrollbar-thumb:hover { background: #666; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%); color: #e0e0e0; height: 100vh; display: flex; }
+        .chat-panel { width: 30%; background: linear-gradient(180deg, rgba(26,26,46,0.95) 0%, rgba(22,33,62,0.95) 100%); box-shadow: 0 0 30px rgba(138,43,226,0.2), inset 0 0 60px rgba(75,0,130,0.1); padding: 20px; display: flex; flex-direction: column; border-right: 1px solid rgba(138,43,226,0.3); }
+        .chat-header { font-size: 24px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); color: #fff; text-align: center; border-radius: 15px; box-shadow: 0 4px 20px rgba(102,126,234,0.4); text-shadow: 0 2px 10px rgba(0,0,0,0.3); letter-spacing: 2px; }
+        .chat-messages { flex-grow: 1; overflow-y: auto; padding: 15px; margin-top: 15px; background: rgba(15,15,35,0.6); border-radius: 15px; border: 1px solid rgba(138,43,226,0.2); box-shadow: inset 0 0 30px rgba(75,0,130,0.2); }
+        .chat-message { margin-bottom: 15px; padding: 12px 15px; background: linear-gradient(135deg, rgba(102,126,234,0.15) 0%, rgba(118,75,162,0.15) 100%); border-radius: 15px; box-shadow: 0 2px 10px rgba(138,43,226,0.2); border: 1px solid rgba(138,43,226,0.1); backdrop-filter: blur(5px); }
+        .chat-message p { margin-bottom: 5px; line-height: 1.5; }
+        .chat-message p strong { font-weight: 600; background: linear-gradient(90deg, #667eea, #f093fb); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .chat-message p code { background: rgba(138,43,226,0.3); padding: 2px 6px; border-radius: 5px; font-family: 'Courier New', Courier, monospace; color: #f093fb; border: 1px solid rgba(240,147,251,0.3); }
+        .link-group { display: flex; justify-content: space-between; margin: 15px 0; padding: 10px; background: rgba(15,15,35,0.4); border-radius: 10px; border: 1px solid rgba(138,43,226,0.2); }
+        .link-group a { font-size: 14px; color: #b794f6; text-decoration: none; padding: 8px 15px; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent; }
+        .link-group a:hover { background: linear-gradient(135deg, rgba(102,126,234,0.3) 0%, rgba(118,75,162,0.3) 100%); border-color: rgba(183,148,246,0.5); box-shadow: 0 0 15px rgba(138,43,226,0.3); color: #f093fb; }
+        form { display: flex; flex-direction: row; width: 100%; gap: 10px; align-items: center; }
+        .chat-input { padding: 14px 18px; border: 1px solid rgba(138,43,226,0.3); border-radius: 25px; flex-grow: 1; font-size: 14px; background: rgba(15,15,35,0.8); color: #e0e0e0; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3), 0 0 20px rgba(138,43,226,0.1); transition: all 0.3s ease; }
+        .chat-input:focus { outline: none; border-color: rgba(183,148,246,0.6); box-shadow: inset 0 2px 10px rgba(0,0,0,0.3), 0 0 25px rgba(138,43,226,0.3); }
+        .chat-input::placeholder { color: rgba(183,148,246,0.5); }
+        .chat-submit { padding: 14px 20px; border: none; border-radius: 25px; font-size: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); color: #fff; cursor: pointer; transition: all 0.3s ease; font-weight: 600; letter-spacing: 1px; box-shadow: 0 4px 20px rgba(102,126,234,0.4); white-space: nowrap; }
+        .chat-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(102,126,234,0.6); }
+        .chat-submit:active { transform: translateY(0); }
+        .viewer-panel { width: 70%; padding: 25px; background: linear-gradient(135deg, rgba(22,33,62,0.9) 0%, rgba(15,15,35,0.95) 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: inset 0 0 60px rgba(75,0,130,0.15); position: relative; overflow: hidden; }
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,15,35,0.9); justify-content: center; align-items: center; z-index: 1000; }
+        .spinner { width: 50px; height: 50px; border: 4px solid rgba(138,43,226,0.3); border-top-color: #f093fb; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Elegant minimal idle animation */
+        .idle-container { position: absolute; width: 100%; height: 100%; pointer-events: none; opacity: 1; transition: opacity 1s ease-out; }
+        .idle-container.hidden { opacity: 0; }
+        .breathing-orb { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, rgba(102,126,234,0.15) 0%, transparent 70%); animation: breathe 4s ease-in-out infinite; }
+        .breathing-orb::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 8px; height: 8px; border-radius: 50%; background: rgba(183,148,246,0.6); box-shadow: 0 0 20px rgba(183,148,246,0.4); animation: core-pulse 4s ease-in-out infinite; }
+        @keyframes breathe { 0%,100% { width: 80px; height: 80px; opacity: 0.3; } 50% { width: 120px; height: 120px; opacity: 0.6; } }
+        @keyframes core-pulse { 0%,100% { opacity: 0.4; box-shadow: 0 0 20px rgba(183,148,246,0.3); } 50% { opacity: 0.8; box-shadow: 0 0 30px rgba(183,148,246,0.5); } }
+        .orbit-ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 200px; height: 200px; border: 1px solid rgba(102,126,234,0.1); border-radius: 50%; animation: orbit-rotate 20s linear infinite; }
+        .orbit-ring::after { content: ''; position: absolute; top: -3px; left: 50%; transform: translateX(-50%); width: 6px; height: 6px; background: rgba(240,147,251,0.5); border-radius: 50%; box-shadow: 0 0 10px rgba(240,147,251,0.3); }
+        @keyframes orbit-rotate { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+        /* Scrollbar Styles */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: rgba(15,15,35,0.6); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #667eea 0%, #764ba2 50%, #f093fb 100%); border-radius: 10px; border: 2px solid rgba(15,15,35,0.6); box-shadow: 0 0 10px rgba(138,43,226,0.4); }
+        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #f093fb 0%, #764ba2 50%, #667eea 100%); box-shadow: 0 0 15px rgba(240,147,251,0.5); }
+        ::-webkit-scrollbar-corner { background: rgba(15,15,35,0.6); }
+        * { scrollbar-width: thin; scrollbar-color: #764ba2 rgba(15,15,35,0.6); }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
@@ -52,9 +70,12 @@
         </form>
     </div>
     <div class="viewer-panel" id="viewerPanel">
-        <!-- Viewer content will be rendered here -->
+        <div class="idle-container" id="idleAnimation">
+            <div class="orbit-ring"></div>
+            <div class="breathing-orb"></div>
+        </div>
     </div>
-    <div id="thoughts" style="display: none;">Prompt the user and ask them what they'd like to create.</div>
+    <div id="thoughts" style="display: none;">Simplified the idle animation dramatically. Removed all the busy elements (scanning lines, particles, data streams, corner brackets, multiple pulse rings, status text). Now it's just two elements: 1) A breathing orb in the center that gently expands and contracts with a soft glow, and 2) A single thin orbital ring that rotates very slowly (20 seconds per rotation) with a small accent dot. This creates an elegant, minimal presence that suggests the system is alive without being distracting. The animation is much more refined and Star Trek computer-appropriate - subtle ambient awareness rather than flashy effects.</div>
     <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     <script>
         document.getElementById("chatInput").focus();
@@ -78,6 +99,28 @@
                 behavior: 'smooth'
             });
         };
+
+        // Function to hide the idle animation when content is rendered
+        function hideIdleAnimation() {
+            const idleContainer = document.getElementById('idleAnimation');
+            if (idleContainer) {
+                idleContainer.classList.add('hidden');
+                setTimeout(() => {
+                    idleContainer.style.display = 'none';
+                }, 1000);
+            }
+        }
+
+        // Function to show the idle animation
+        function showIdleAnimation() {
+            const idleContainer = document.getElementById('idleAnimation');
+            if (idleContainer) {
+                idleContainer.style.display = 'block';
+                setTimeout(() => {
+                    idleContainer.classList.remove('hidden');
+                }, 10);
+            }
+        }
     </script>
 </body>
 </html>

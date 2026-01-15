@@ -2,11 +2,12 @@ import {anthropic, completePrompt, logCompletePrompt, openai} from 'agentm-core'
 import { loadSettings } from '../settings';
 
 export const availableModels = [
-    'claude-3-5-sonnet-20240620',
-    'gpt-4o-mini',
-    'gpt-4o-2024-08-06',
-    'o1-mini',
-    'o1-preview'
+    'claude-opus-4-5',
+    'Claude Sonnet 4.5',
+    'Claude Haiku 4.5',
+    'GPT-5.2',
+    'GPT-5 mini',
+    'GPT-5 nano'
 ];
 
 export async function createCompletePrompt(pagesFolder: string, model?: string): Promise<completePrompt> {
