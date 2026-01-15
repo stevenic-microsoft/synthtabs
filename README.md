@@ -1,12 +1,28 @@
 # SynthOS: An AI Powered Interactive Shell Experience
 
-[SynthOS](https://github.com/Stevenic/synthos) is an interactive shell experience powered by generative AI, featuring a user interface that is entirely AI-generated. Similar to a wiki, it organizes everything into pages, but with a twist: these pages are self-modifying and can transform into anything. Each page includes a chat panel and a content viewer. Entering a command into the chat panel prompts the configured Large Language Model (LLM) to completely rewrite the current page. The page can morph into anything—from providing answers to questions to becoming a tool that assists you with complex tasks.
+[SynthOS](https://github.com/Stevenic/synthos) is an interactive shell experience powered by generative AI, featuring a user interface that is entirely AI-generated. Similar to a wiki, it organizes everything into pages, but with a twist: these pages are self-modifying and can transform into anything. Each page includes a chat panel and a content viewer. Entering a command into the chat panel prompts the configured Large Language Model (LLM) to completely rewrite the current page. The page can morph into anything—from providing answers to questions to becoming a tool that assists you with complex tasks. It supports the latest language models like Claude-Opus-4.5 and GPT-5.2.
 
 SynthOS has access to tools in the form of APIs and scripts. Built-in APIs enable SynthOS to read and write objects to local storage or make additional generative AI calls. Scripts are user-defined extensions that allow SynthOS to perform local actions on your machine. You can add scripts that let SynthOS start a build, make a Git commit, or run a cURL command.
 
+You can create anything you want from animations:
+
+<img width="1901" height="988" alt="image" src="https://github.com/user-attachments/assets/8da6dedd-e568-48d3-b2ac-106a8ab50117" />
+
+To games:
+
+<img width="1888" height="979" alt="image" src="https://github.com/user-attachments/assets/496b0be0-39f5-4bbf-9a40-2d6877f8a6cc" />
+
+To developer tools:
+
+<img width="1891" height="987" alt="image" src="https://github.com/user-attachments/assets/951053f0-f025-45d3-8799-7bcd33942b80" />
+
+SynthOS is like a wiki for apps. You can save the apps you create to your pages directory;
+
+<img width="1888" height="976" alt="image" src="https://github.com/user-attachments/assets/5c727cf5-30de-4d08-80ee-54eed7b64d20" />
+
 ## Installing SynthOS
 
-To get started using SynthOS you'll need to first install a recent version of [Node.js](https://nodejs.org/en/download/package-manager/current). I use version `18.20.2` but any relatively recent version should work.  You'll also want to go to OpenAI.com [create a developer account](https://platform.openai.com/login?launch) if you don't have one (it's free.)  Once you have your account created you'll need to [generate an API Key](https://platform.openai.com/api-keys) from the Dashboard. Save this key somewhere as you'll need it in a few moments.
+To get started using SynthOS you'll need to first install a recent version of [Node.js](https://nodejs.org/en/download/package-manager/current). I use version `22.20.0` but any version >20 should work. 
 
 Open a terminal window and run the following commands:
 
@@ -17,55 +33,60 @@ synthos start
 
 This will install the CLI and start the SynthOS server running. This terminal window needs to stay open to keep the server running.  You should see a message saying `SynthOS's server is running on http://localhost:4242`.  You can open your browser to that link and you should land on the `settings` page.
 
+## Configuring Your Model
+
+When the server first runs it's going to show you a settings dialog. You'll need to pick the model you;d like to use and configure it with a developer key. 
+
+<img width="1885" height="975" alt="image" src="https://github.com/user-attachments/assets/34c662c2-3ea5-421d-bad2-4c98d13c72f3" />
+
+For Opus (recomended) you'll want to sign up for a developer account at [Anthropics Developer Platform](https://platform.claude.com/login) You can then generate an API key [here](https://platform.claude.com/settings/keys). For GPT-5.2 you can sign up for an [OpenAI Developer account](https://auth.openai.com/create-account) and then generate an API key [here](https://platform.openai.com/api-keys)
 
 ## Using SynthOS
 
-The first time you open SynthOS you're going to be directed to a `settings` page where you can enter your API key: 
+Once you've configured your model you will be then sent to the home page. You can then specify any thing you want to create and it will be rendered to the display port.
 
-![SynthOS Settings Page](./images/settings.png)
+<img width="1882" height="980" alt="image" src="https://github.com/user-attachments/assets/57cb01c7-f060-4dfc-8100-de85d850b104" />
 
-Enter the OpenAI API key you saved into the API Key field and select the version of GPT-4o you'd like to use from the drop down. `gpt-4o-mini` is the cheapest but it's not as creative as `gpt-4o-2024-08-06`. If you're on a trial account then I'd recommend sticking with `gpt-4o-mini` otherwise I'd go with `gpt-4o` for the best creativity. Another strategy would be to stick with `gpt-4o-mini` while using an app but switch to `gpt-4o` when you want to create something new.  It's also worth noting, that you only incur LLM costs when chatting with the LLM from the chat window so if you're just using an app it created, there's no cost.  And if you're curious the average number of output tokens generated for a simple page is around 2,000 tokens. Add another 500 or so in prompt overhead and most requests will be around 2,500 input tokens and 2,000 generated output tokens.
+You can make as many changes as you want to the app and you have controlls above the chat box that let you save the app to the pages gallery, reset the view port, or navigate to the pages gallery:
 
-Once you've entered your API key and selected your model press Update and you should be navigated to the `home` page:
+<img width="542" height="155" alt="image" src="https://github.com/user-attachments/assets/34acf4a0-4dde-4a0f-b766-e5aec46a6496" />
 
-![SynthOS Home Page](./images/home.png)
+Each saved page is as stand alone HTML page that can be found in a `.synthos` folder in the directory where you started the server, There are system pages which can't be deleted but you can save changes to them and SynthOS will use those over the defaults. If you wish to delete a page/app just delete it from your `.synthos` folder:
 
-Type in a query like "create a snake game. make it fill the viewer and include a score" to just verify that all of your settings are properly configured and everything is working.
+<img width="825" height="589" alt="image" src="https://github.com/user-attachments/assets/2e7c8432-24d2-4f49-a608-3207bf1c1cda" />
+
+## Application Templates
+
+There are a set of pre-built application templates that give you a good starting point.
+
+The `[application]` template is great for creating tools:
+
+<img width="1891" height="984" alt="image" src="https://github.com/user-attachments/assets/6216c1fc-e1f8-4db8-86d3-d6041cbbf841" />
+
+The `[markdown]` template has a rich built-in markdown viewer:
+
+<img width="1887" height="979" alt="image" src="https://github.com/user-attachments/assets/99828cac-bb95-4de5-85c6-d164b37c8505" />
+
+The `[sidebar]` template allows for rich content that's not markdown based:
+
+<img width="1876" height="976" alt="image" src="https://github.com/user-attachments/assets/0a9ae38b-354f-4709-b92a-b466458aa3ba" />
+
+The `[split-application]` template has two panes with a movable splitter:
+
+<img width="1882" height="975" alt="image" src="https://github.com/user-attachments/assets/770b17c5-e9c3-44d4-8015-5cf401efba26" />
+
+## API Explorer
+
+One of the more powerful capabilities of SynthOS is that it has built in APIs for things like storage that you're apps can use to persist data. You can use the API Explorer to test the API's out:
+
+<img width="1882" height="973" alt="image" src="https://github.com/user-attachments/assets/6a1e2823-7313-429c-9b28-79c5687fdef7" />
+
+## Script Editor
+
+You can also create custom scripts that your apps can invoke vi a scripts API:
+
+<img width="1889" height="982" alt="image" src="https://github.com/user-attachments/assets/8047d3c3-e5d3-4be8-b403-88169610b3b2" />
 
 
-## Page Management
-
-A SynthOS server instance is just a collection of named pages. You can think of it almost like a wiki but every page is generated by an LLM with direction from you. If you look directly above the chat input box you'll see controls for performing basic page management:
-
-![SynthOS Page Management](./images/page-management.png)
-
-- **Save** - Will save the current page to either a new page or over the top of the current page. Any page can be replaced, even the home page.
-- **Pages** - Navigates you to the `pages` page where you can see a listing of all the current pages. You can navigate to a different page from either the `pages` page or by setting the `/{page_name}` directly in your browsers address bar.
-- **Reset** - Restores the current page back to its last save point. The modifications to a page are cached in the servers memory until their either saved using **Save** or the server is restarted.  Clicking **Reset** lets you manually roll back changes and, trust me, you will be clicking this a lot.
-
-One thing you'll notice is that there's no **Delete** action. This is actually by design. The LLM has direct access to all of these page management features and I didn't want it randomly deciding to write a program that would delete all of its pages.
-
-When you start SynthOS, it creates a `.synthos` subfolder under the folder it was started in. This folder contains your current `settings.json` file and a `.html` file for last save point of every page.  Deleting this .html file will delete the page from the collection but you may need to restart the SynthOS server for the changes to take effect.
-
-Since all of the pages are just static .html files it means that you're to edit them directly using a tool like [VSCode](https://code.visualstudio.com/). You'll need to click **Reset** in the UI to see your manual changes take effect.  Sometimes it's easier to just go in and tweak the final layout of a page manually.
 
 
-## Tips and Tricks
-
-I'm new to working with SynthOS as well but here's a couple of things I've already figured out.
-
-**Manual Reset**\
-Sometimes the LLM will decide to make a change that breaks the entire page. This is when it's useful to know how to manually reset the page to its last save point.  From the address bar append a `/reset` to the current address. So `https://localhost:4242/home/reset` will restore the home page back to its starting state.
-
-
-**Save Often**\
-This goes along with the reset tip. Most things you create are going to take a bit of iteration. You're going to ask the LLM to make a change and it's not going to do exactly what you want or worse break the whole page. Anytime you get something you like save it. Saving is cheap and you can have as many drafts as you want. Just use a naming scheme like `my_app_v2`.
-
-**Walk the LLM to a Design Step-by-Step**\
-We're asking the LLM to re-generate an entire page on every request. That's asking a lot. You'll get your best results if you have the model focus on one change at a time (start with layout) and then step your way to a final design, saving anytime you get a result you like.
-
-**Leverage the [templates]**\
-Use the provided templates as a starting point for structure or better yet, build your own templates!  I'm still figuring this out but it seems like you want to start with defining the pages layout first because the LLM will naturally want to make any changes within the confines of the current layout. Once you get your layout the way you want add in visual elements like input boxes and such. Then once you get everything visually the way you want you can add in behavior like calling API's or saving to storage.
-
-**Give the LLM Libraries to Use**\
-If you have a specific JavaScript library you want to use, find the link on a CDN or the web and then tell the LLM to use that specific version and it will.
