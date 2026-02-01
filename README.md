@@ -4,6 +4,8 @@
 
 SynthOS has access to tools in the form of APIs and scripts. Built-in APIs enable SynthOS to read and write objects to local storage or make additional generative AI calls. Scripts are user-defined extensions that allow SynthOS to perform local actions on your machine. You can add scripts that let SynthOS start a build, make a Git commit, or run a cURL command.
 
+> Version 0.4.0 is coming... Create complex presentations in less then 2 minutes. [Star Trek Computer Deck](https://tinyurl.com/StarTrekComputer)  
+
 You can create anything you want from animations:
 
 <img width="1901" height="988" alt="image" src="https://github.com/user-attachments/assets/8da6dedd-e568-48d3-b2ac-106a8ab50117" />
