@@ -3,10 +3,23 @@ import { usePageRoutes } from './usePageRoutes';
 import { useApiRoutes } from './useApiRoutes';
 import { SynthOSConfig } from '../init';
 import { useDataRoutes } from './useDataRoutes';
+import { cyan, yellow, formatTime } from './debugLog';
 
 export function server(config: SynthOSConfig): Application {
     const app = express();
-    
+
+    // Debug request-logging middleware
+    if (config.debug) {
+        app.use((req, res, next) => {
+            const start = Date.now();
+            res.on('finish', () => {
+                const ms = Date.now() - start;
+                console.log(`${cyan(req.method + ' ' + req.originalUrl)} → ${res.statusCode} ${yellow('(' + formatTime(ms) + ')')}`);
+            });
+            next();
+        });
+    }
+
     // Middleware to parse URL-encoded data (form data)
     app.use(express.urlencoded({ extended: true }));
 
@@ -21,6 +34,6 @@ export function server(config: SynthOSConfig): Application {
 
     // Data routes
     useDataRoutes(config, app);
-    
+
     return app;
 }

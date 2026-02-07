@@ -1,10 +1,12 @@
 import { loadPageState, normalizePageName, savePageState, updatePageState } from "../pages";
 import { hasConfiguredSettings, loadSettings } from "../settings";
 import { Application } from 'express';
-import { transformPage, transformPageAsObject } from "./transformPage";
+import { transformPage } from "./transformPage";
+import { getModelInstructions } from "./modelInstructions";
 import { SynthOSConfig } from "../init";
 import { createCompletePrompt } from "./createCompletePrompt";
 import { completePrompt } from "agentm-core";
+import { green, red, dim, estimateTokens } from "./debugLog";
 
 const HOME_PAGE_ROUTE = '/home';
 const PAGE_NOT_FOUND = 'Page not found';
@@ -109,27 +111,55 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
 
             // Create model instance
             const innerCompletePrompt = await createCompletePrompt(config.pagesFolder, req.body.model);
-            const completePrompt: completePrompt = (args) => {
-                // console.log(`SYSTEM:\n${args.system!.content}`);
-                // console.log(`PROMPT:\n${args.prompt!.content}`);
-                return innerCompletePrompt(args);
+            const debugVerbose = config.debugPageUpdates;
+            let inputChars = 0;
+            let outputChars = 0;
+            const completePrompt: completePrompt = async (args) => {
+                if (debugVerbose) {
+                    console.log(green(dim('\n  ===== PAGE UPDATE REQUEST =====')));
+                    console.log(green(`  SYSTEM:\n${args.system?.content}`));
+                    console.log(green(`\n  PROMPT:\n${args.prompt.content}`));
+                }
+                inputChars += (args.system?.content?.length ?? 0) + (args.prompt.content?.length ?? 0);
+                const result = await innerCompletePrompt(args);
+                if (result.completed) {
+                    outputChars += result.value?.length ?? 0;
+                }
+                if (debugVerbose) {
+                    console.log(green(dim('\n  ----- PAGE UPDATE RESPONSE -----')));
+                    if (result.completed) {
+                        console.log(green(`  RESPONSE:\n${result.value}`));
+                    } else {
+                        console.log(red(`  ERROR: ${result.error?.message}`));
+                    }
+                    console.log(green(dim('  ================================\n')));
+                }
+                return result;
             }
 
-
-            // Transform and cache updated page 
+            // Transform and cache updated page
             const pagesFolder = config.pagesFolder;
             const { maxTokens, instructions, model } = await loadSettings(config.pagesFolder);
-            const result = model.startsWith('gpt-') ? 
-                await transformPageAsObject({ pagesFolder, pageState, message, maxTokens, instructions, completePrompt }) :
-                await transformPage({ pagesFolder, pageState, message, maxTokens, instructions, completePrompt });
+            const modelInstructions = getModelInstructions(model);
+            const result = await transformPage({ pagesFolder, pageState, message, maxTokens, instructions, modelInstructions, completePrompt });
             if (result.completed) {
-                updatePageState(page, result.value!);
-                res.send(result.value!);
+                const { html, changeCount } = result.value!;
+                if (config.debug) {
+                    const inTokens = estimateTokens(inputChars).toLocaleString();
+                    const outTokens = estimateTokens(outputChars).toLocaleString();
+                    console.log(`  page: ${page} | message: ${message.length} chars | changes: ${changeCount} ops | ~${inTokens} in / ~${outTokens} out tokens`);
+                }
+                updatePageState(page, html);
+                res.send(html);
             } else {
                 throw result.error;
             }
         } catch (err: unknown) {
-            console.error(err);
+            if (config.debug) {
+                console.log(red(`  ERROR: ${(err as Error).message}`));
+            } else {
+                console.error(err);
+            }
             res.status(500).send((err as Error).message);
         }
     });

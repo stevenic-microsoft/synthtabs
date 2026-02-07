@@ -20,9 +20,19 @@ export async function run() {
                     type: 'boolean',
                     default: true
                 })
+                .option('debug', {
+                    describe: `Log all server requests with timing and page update summaries.`,
+                    type: 'boolean',
+                    default: false
+                })
+                .option('debug-page-updates', {
+                    describe: `Log model input/output for page transformations to the console.`,
+                    type: 'boolean',
+                    default: false
+                })
                 .demandOption([]);
         }, async (args) => {
-            const config = createConfig();
+            const config = createConfig('.synthos', { debug: args.debug, debugPageUpdates: args.debugPageUpdates });
             await init(config, args.pages);
             await server(config).listen(args.port, async () => {
                 console.log(`SynthOS server is running on http://localhost:${args.port}`);

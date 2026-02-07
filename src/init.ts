@@ -7,14 +7,18 @@ export interface SynthOSConfig {
     requiredPagesFolder: string;
     defaultPagesFolder: string;
     defaultScriptsFolder: string;
+    debug: boolean;
+    debugPageUpdates: boolean;
 }
 
-export function createConfig(pagesFolder = '.synthos'): SynthOSConfig {
+export function createConfig(pagesFolder = '.synthos', options?: { debug?: boolean; debugPageUpdates?: boolean }): SynthOSConfig {
     return {
         pagesFolder: path.join(process.cwd(), pagesFolder),
         requiredPagesFolder: path.join(__dirname, '../required-pages'),
         defaultPagesFolder: path.join(__dirname, '../default-pages'),
-        defaultScriptsFolder: path.join(__dirname, '../default-scripts')
+        defaultScriptsFolder: path.join(__dirname, '../default-scripts'),
+        debug: options?.debug ?? false,
+        debugPageUpdates: options?.debugPageUpdates ?? false
     };
 }
 
