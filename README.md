@@ -89,6 +89,36 @@ You can also create custom scripts that your apps can invoke vi a scripts API:
 
 <img width="1889" height="982" alt="image" src="https://github.com/user-attachments/assets/8047d3c3-e5d3-4be8-b403-88169610b3b2" />
 
+## Contributing with Claude Code
 
+This repo includes a `SHARED-MEMORIES.md` file that gives Claude Code project-level context (architecture, APIs, folder structure). When you first clone the repo and start working with Claude Code, ask it:
 
+> "Initialize my personal MEMORY.md file using SHARED-MEMORIES.md"
 
+Claude will create a personal `MEMORY.md` inside `~/.claude/projects/` with the shared knowledge as a starting point.
+
+You can then personalize it by telling Claude:
+- What OS you're on
+- Where your checkout lives on disk
+- Your editor and path conventions (e.g. VS Code with forward-slash paths)
+
+These personal details stay in your `MEMORY.md` and are never checked in.
+
+Here's an example of what a developer's `MEMORY.md` might look like:
+
+```markdown
+# Synthos — Developer-Specific Memory
+
+Shared project knowledge (architecture, APIs, folder structure, etc.) lives in
+`SHARED-MEMORIES.md` at the project root. This file holds per-developer context only.
+
+## Session Start
+- **Always** read `SHARED-MEMORIES.md` from the project root at the start of every new coding session to load project-level context.
+
+## Environment
+- **Windows** machine
+- When opening files in VS Code, use `code "C:/source/synthos/<path>"` (quoted, forward slashes)
+- **Auto-run VS Code launches** — when opening files in VS Code via `code`, run the Bash command without asking for permission
+```
+
+> **Note:** The `## Environment` section is entirely developer-specific. Your entries will differ based on your OS, editor, file paths, and workflow preferences. This is the right place to capture anything unique to your local setup.
