@@ -7,6 +7,7 @@ import { SynthOSConfig } from "../init";
 import { createCompletePrompt } from "./createCompletePrompt";
 import { completePrompt } from "agentm-core";
 import { green, red, dim, estimateTokens } from "./debugLog";
+import { loadThemeInfo } from "../themes";
 
 const HOME_PAGE_ROUTE = '/home';
 const PAGE_NOT_FOUND = 'Page not found';
@@ -139,9 +140,10 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
 
             // Transform and cache updated page
             const pagesFolder = config.pagesFolder;
-            const { maxTokens, instructions, model } = await loadSettings(config.pagesFolder);
+            const { maxTokens, instructions, model, theme } = await loadSettings(config.pagesFolder);
+            const themeInfo = await loadThemeInfo(theme ?? 'nebula-dusk', config);
             const modelInstructions = getModelInstructions(model);
-            const result = await transformPage({ pagesFolder, pageState, message, maxTokens, instructions, modelInstructions, completePrompt });
+            const result = await transformPage({ pagesFolder, pageState, message, maxTokens, instructions, modelInstructions, completePrompt, themeInfo });
             if (result.completed) {
                 const { html, changeCount } = result.value!;
                 if (config.debug) {

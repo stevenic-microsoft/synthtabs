@@ -50,5 +50,14 @@ Users conversationally build apps, tools, games, visualizations — anything exp
 ## Settings
 Stored in `.synthos/settings.json`. Fields: `serviceApiKey`, `model`, `maxTokens`, `imageQuality`, `instructions`, `logCompletions`
 
+## Theme System
+- Themes live in `themes/` as folders (e.g. `themes/nebula-dusk/`, `themes/nebula-dawn/`).
+- Each theme folder contains a `theme.json` (metadata, CSS variable values, mode) and a `theme.css` (compiled stylesheet).
+- `theme.json` declares `mode: "dark"` or `mode: "light"`, plus color values for CSS custom properties (`--accent-primary`, `--accent-secondary`, `--text-primary`, `--text-secondary`, `--border-color`, `--accent-glow`, etc.).
+- `theme-info.js` (served at `/api/theme-info.js`) runs at page load: sets `window.themeInfo` with the active theme's metadata/colors and adds a `light-mode` or `dark-mode` class to `<html>`.
+- `theme.css` (served at `/api/theme.css`) handles shared shell elements (chat panel, viewer panel, scrollbar, buttons, loading overlay).
+- **Page-specific light-mode support:** Each page's `<style>` block contains its own dark-mode defaults. Pages that need light-mode adaptation have `.light-mode` CSS overrides appended at the end of their `<style>` block. Canvas-based scenes (solar_system, space_invaders) keep their canvas dark; only UI chrome adapts.
+- Three pages need no light-mode overrides: `home.html`, `pages.html`, `[split-application].html` (they use only accent-color CSS variables).
+
 ## Models Supported
 Claude (Opus/Sonnet/Haiku) and GPT (5.2/5 mini/5 nano). Model prefix `claude-` routes to Anthropic, `gpt-` routes to OpenAI. All models use a single `transformPage` pipeline that returns delta-based JSON change operations. Provider-specific prompt tuning is handled by `getModelInstructions()` in `src/service/modelInstructions.ts`.

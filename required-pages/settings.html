@@ -1,74 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<!DOCTYPE html><html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SynthOS - Settings</title>
+    <script src="/api/theme-info.js"></script>
+    <link rel="stylesheet" href="/api/theme.css">
     <style>
-        /* Nebula Dusk Theme */
-        :root { --bg-primary:#1a1a2e; --bg-secondary:#16213e; --bg-tertiary:#0f0f23; --accent-primary:#667eea; --accent-secondary:#764ba2; --accent-tertiary:#f093fb; --accent-glow:rgba(138,43,226,0.3); --text-primary:#e0e0e0; --text-secondary:#b794f6; --border-color:rgba(138,43,226,0.3); }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:linear-gradient(135deg,var(--bg-primary) 0%,var(--bg-secondary) 50%,var(--bg-tertiary) 100%); color:var(--text-primary); height:100vh; display:flex; }
+        /* Settings Page Styles */
+        .settings-title { font-size: 22px; font-weight: 700; min-height: var(--header-min-height); padding: var(--header-padding-vertical) var(--header-padding-horizontal); line-height: var(--header-line-height); display: flex; align-items: center; justify-content: center; box-sizing: border-box; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; border-radius: 12px 12px 0 0; width: 100%; max-width: 800px; box-shadow: 0 6px 25px var(--accent-glow); letter-spacing: 2px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .settings-container { display: flex; flex-direction: column; width: 100%; max-width: 800px; max-height: calc(100vh - 160px); background: rgba(15, 15, 35, 0.8); border-radius: 0 0 12px 12px; border: 1px solid rgba(138, 43, 226, 0.2); border-top: none; overflow: hidden; }
 
-        .chat-panel { width:30%; background:linear-gradient(180deg,rgba(26,26,46,0.95) 0%,rgba(22,33,62,0.95) 100%); box-shadow:0 0 30px var(--accent-glow),inset 0 0 60px rgba(75,0,130,0.1); padding:20px; display:flex; flex-direction:column; border-right:1px solid var(--border-color); }
-        .chat-header { font-size:24px; padding:15px; background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 50%,var(--accent-tertiary) 100%); color:white; text-align:center; border-radius:15px; box-shadow:0 4px 20px rgba(102,126,234,0.4); text-shadow:0 2px 10px rgba(0,0,0,0.3); letter-spacing:2px; }
-        .chat-messages { flex-grow:1; overflow-y:auto; padding:15px; margin-top:15px; background:rgba(15,15,35,0.6); border-radius:15px; border:1px solid var(--border-color); box-shadow:inset 0 0 30px rgba(75,0,130,0.2); }
-        .chat-message { margin-bottom:15px; padding:12px 15px; background:linear-gradient(135deg,rgba(102,126,234,0.15) 0%,rgba(118,75,162,0.15) 100%); border-radius:15px; box-shadow:0 2px 10px var(--accent-glow); border:1px solid rgba(138,43,226,0.1); backdrop-filter:blur(5px); }
-        .chat-message p { margin-bottom:5px; line-height:1.5; }
-        .chat-message p strong { font-weight:600; background:linear-gradient(90deg,var(--accent-primary),var(--accent-tertiary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-        .chat-message p code { background:rgba(138,43,226,0.3); padding:2px 6px; border-radius:5px; font-family:'Courier New',Courier,monospace; color:var(--accent-tertiary); border:1px solid rgba(240,147,251,0.3); }
+        /* Tab bar */
+        .tab-bar { display: flex; flex-shrink: 0; border-bottom: 1px solid var(--border-color); }
+        .tab-btn { flex: 1; padding: 14px 20px; background: transparent; border: none; border-bottom: 3px solid transparent; color: var(--text-secondary); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; letter-spacing: 0.5px; }
+        .tab-btn:hover { color: var(--text-primary); background: rgba(138, 43, 226, 0.05); }
+        .tab-btn.active { color: var(--text-primary); border-bottom-color: var(--accent-primary); }
 
-        .link-group { display:flex; justify-content:space-between; margin:15px 0; padding:10px; background:rgba(15,15,35,0.4); border-radius:10px; border:1px solid var(--border-color); }
-        .link-group a { font-size:14px; color:var(--text-secondary); text-decoration:none; padding:8px 15px; border-radius:8px; transition:all 0.3s ease; border:1px solid transparent; }
-        .link-group a:hover { background:linear-gradient(135deg,rgba(102,126,234,0.3) 0%,rgba(118,75,162,0.3) 100%); border-color:rgba(183,148,246,0.5); box-shadow:0 0 15px var(--accent-glow); color:var(--accent-tertiary); }
+        /* Tab content */
+        .tab-content { display: none; flex-direction: column; gap: 15px; flex-grow: 1; overflow-y: auto; padding: 25px; }
+        .tab-content.active { display: flex; }
 
-        .chat-panel > form { display:flex; flex-direction:row; width:100%; gap:10px; align-items:center; }
-        .chat-input { padding:14px 18px; border:1px solid var(--border-color); border-radius:25px; flex-grow:1; font-size:14px; background:rgba(15,15,35,0.8); color:var(--text-primary); box-shadow:inset 0 2px 10px rgba(0,0,0,0.3),0 0 20px rgba(138,43,226,0.1); transition:all 0.3s ease; }
-        .chat-input:focus { outline:none; border-color:rgba(183,148,246,0.6); box-shadow:inset 0 2px 10px rgba(0,0,0,0.3),0 0 25px var(--accent-glow); }
-        .chat-input::placeholder { color:rgba(183,148,246,0.5); }
+        /* Form groups (kept from original) */
+        .form-group { display: flex; flex-direction: column; width: 100%; }
+        .form-group label { display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 600; font-size: 14px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border-color); background: rgba(15, 15, 35, 0.8); color: var(--text-primary); font-size: 14px; transition: all 0.3s ease; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3); }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: rgba(183, 148, 246, 0.6); box-shadow: inset 0 2px 10px rgba(0,0,0,0.3), 0 0 20px var(--accent-glow); }
+        .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(183, 148, 246, 0.5); }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .form-group select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23b794f6' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 15px center; }
+        .form-group select option { background: var(--bg-tertiary); color: var(--text-primary); padding: 10px; }
 
-        .chat-submit { padding:14px 20px; border:none; border-radius:25px; font-size:14px; background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 50%,var(--accent-tertiary) 100%); color:white; cursor:pointer; transition:all 0.3s ease; font-weight:600; letter-spacing:1px; box-shadow:0 4px 20px rgba(102,126,234,0.4); white-space:nowrap; }
-        .chat-submit:hover { transform:translateY(-2px); box-shadow:0 6px 25px rgba(102,126,234,0.6); }
-        .chat-submit:active { transform:translateY(0); }
+        /* Button row */
+        .button-row { display: flex; justify-content: flex-end; padding: 15px 25px; border-top: 1px solid var(--border-color); flex-shrink: 0; }
+        .update-btn { padding: 12px 30px; border: none; border-radius: 12px; font-size: 15px; background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 50%, var(--accent-tertiary) 100%); color: white; cursor: pointer; transition: all 0.3s ease; font-weight: 600; letter-spacing: 1px; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4); }
+        .update-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6); }
+        .update-btn:active { transform: translateY(0); }
 
-        .viewer-panel { width:70%; padding:25px; background:linear-gradient(135deg,rgba(22,33,62,0.9) 0%,rgba(15,15,35,0.95) 100%); display:flex; flex-direction:column; justify-content:flex-start; align-items:center; box-shadow:inset 0 0 60px rgba(75,0,130,0.15); position:relative; overflow:hidden; }
-        .viewer-panel::before { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:radial-gradient(ellipse at center,rgba(138,43,226,0.05) 0%,transparent 70%); animation:nebula-pulse 8s ease-in-out infinite; pointer-events:none; }
-        @keyframes nebula-pulse { 0%,100%{opacity:0.5;transform:scale(1);} 50%{opacity:1;transform:scale(1.1);} }
+        .disabled { background: rgba(102, 126, 234, 0.2) !important; cursor: not-allowed !important; opacity: 0.6; }
+        .info-text { color: rgba(183, 148, 246, 0.7); font-size: 13px; line-height: 1.6; text-align: center; padding: 15px; background: rgba(15, 15, 35, 0.4); border-radius: 10px; border: 1px solid var(--border-color); }
+        .info-text a { color: var(--accent-tertiary); text-decoration: none; transition: all 0.3s; font-weight: 500; }
+        .info-text a:hover { color: var(--text-secondary); text-shadow: 0 0 10px var(--accent-glow); }
 
-        .loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,15,35,0.9); justify-content:center; align-items:center; z-index:1000; }
-        .spinner { width:50px; height:50px; border:4px solid var(--border-color); border-top-color:var(--accent-tertiary); border-radius:50%; animation:spin 1s linear infinite; }
-        @keyframes spin { to{transform:rotate(360deg);} }
-
-        /* Scrollbar Styles */
-        ::-webkit-scrollbar { width:10px; height:10px; }
-        ::-webkit-scrollbar-track { background:rgba(15,15,35,0.6); border-radius:10px; border:1px solid var(--border-color); }
-        ::-webkit-scrollbar-thumb { background:linear-gradient(180deg,var(--accent-primary) 0%,var(--accent-secondary) 50%,var(--accent-tertiary) 100%); border-radius:10px; border:2px solid rgba(15,15,35,0.6); box-shadow:0 0 10px var(--accent-glow); }
-        ::-webkit-scrollbar-thumb:hover { background:linear-gradient(180deg,var(--accent-tertiary) 0%,var(--accent-secondary) 50%,var(--accent-primary) 100%); box-shadow:0 0 15px rgba(240,147,251,0.5); }
-        ::-webkit-scrollbar-corner { background:rgba(15,15,35,0.6); }
-        * { scrollbar-width:thin; scrollbar-color:var(--accent-secondary) rgba(15,15,35,0.6); }
-
-        /* Settings Form Styles - Nebula Theme */
-        .settings-form { background:linear-gradient(135deg,rgba(26,26,46,0.95) 0%,rgba(22,33,62,0.95) 100%); border-radius:15px; padding:0; box-shadow:0 6px 30px var(--accent-glow),inset 0 0 40px rgba(75,0,130,0.1); border:1px solid var(--border-color); width:100%; max-width:500px; position:relative; z-index:1; overflow:hidden; }
-        .dialog-title { font-size:22px; font-weight:700; padding:18px 30px; background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary)); color:white; text-align:center; box-shadow:0 4px 20px rgba(102,126,234,0.4); text-shadow:0 2px 10px rgba(0,0,0,0.3); letter-spacing:2px; }
-        .dialog-content { padding:25px; background:rgba(15,15,35,0.5); }
-        #settingsForm { display:flex; flex-direction:column; gap:15px; }
-        .form-group { display:flex; flex-direction:column; width:100%; }
-        .form-group label { display:block; margin-bottom:8px; color:var(--text-secondary); font-weight:600; font-size:14px; }
-        .form-group input,.form-group select,.form-group textarea { width:100%; padding:14px 18px; border-radius:12px; border:1px solid var(--border-color); background:rgba(15,15,35,0.8); color:var(--text-primary); font-size:14px; transition:all 0.3s ease; box-shadow:inset 0 2px 10px rgba(0,0,0,0.3); }
-        .form-group input:focus,.form-group select:focus,.form-group textarea:focus { outline:none; border-color:rgba(183,148,246,0.6); box-shadow:inset 0 2px 10px rgba(0,0,0,0.3),0 0 20px var(--accent-glow); }
-        .form-group input::placeholder,.form-group textarea::placeholder { color:rgba(183,148,246,0.5); }
-        .form-group textarea { resize:vertical; min-height:100px; }
-        .form-group select { cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23b794f6' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 15px center; }
-        .form-group select option { background:var(--bg-tertiary); color:var(--text-primary); padding:10px; }
-
-        .settings-form .update-btn { width:100%; padding:16px 20px; border:none; border-radius:12px; font-size:15px; background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 50%,var(--accent-tertiary) 100%); color:white; cursor:pointer; transition:all 0.3s ease; font-weight:600; letter-spacing:1px; box-shadow:0 4px 20px rgba(102,126,234,0.4); margin-top:5px; }
-        .settings-form .update-btn:hover { transform:translateY(-2px); box-shadow:0 6px 25px rgba(102,126,234,0.6); }
-        .settings-form .update-btn:active { transform:translateY(0); }
-
-        .disabled { background:rgba(102,126,234,0.2)!important; cursor:not-allowed!important; opacity:0.6; }
-        .info-text { color:rgba(183,148,246,0.7); margin-top:20px; font-size:13px; line-height:1.6; text-align:center; padding:15px; background:rgba(15,15,35,0.4); border-radius:10px; border:1px solid var(--border-color); }
-        .info-text a { color:var(--accent-tertiary); text-decoration:none; transition:all 0.3s; font-weight:500; }
-        .info-text a:hover { color:var(--text-secondary); text-shadow:0 0 10px var(--accent-glow); }
+        /* Light-mode overrides */
+        .light-mode .settings-container {
+            background: rgba(255, 255, 255, 0.8);
+        }
+        .light-mode .tab-btn { color: rgba(107, 79, 138, 0.7); }
+        .light-mode .tab-btn:hover { background: rgba(118, 75, 162, 0.05); color: var(--text-primary); }
+        .light-mode .tab-btn.active { color: var(--text-primary); }
+        .light-mode .form-group input,
+        .light-mode .form-group select,
+        .light-mode .form-group textarea {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: inset 0 2px 10px rgba(118, 75, 162, 0.05);
+        }
+        .light-mode .form-group input:focus,
+        .light-mode .form-group select:focus,
+        .light-mode .form-group textarea:focus {
+            box-shadow: inset 0 2px 10px rgba(118, 75, 162, 0.05), 0 0 20px var(--accent-glow);
+        }
+        .light-mode .form-group input::placeholder,
+        .light-mode .form-group textarea::placeholder { color: rgba(107, 79, 138, 0.5); }
+        .light-mode .info-text {
+            color: rgba(107, 79, 138, 0.7);
+            background: rgba(255, 255, 255, 0.4);
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
@@ -93,36 +88,48 @@
             <button type="submit" class="chat-submit">Send</button>
         </form>
     </div>
-    <div class="viewer-panel" id="viewerPanel">
-        <div class="settings-form">
-            <div class="dialog-title">Settings</div>
-            <div class="dialog-content">
-                <form action="/api/settings" method="POST" id="settingsForm">
-                    <div class="form-group">
-                        <label for="serviceApiKey">Service API Key</label>
-                        <input type="password" id="serviceApiKey" name="serviceApiKey" placeholder="Enter your API Key" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="model">Model</label>
-                        <select id="model" name="model" required>
-                            <option value="">Select a model</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="maxTokens">Max Output Tokens</label>
-                        <input type="number" id="maxTokens" name="maxTokens" placeholder="Enter max token count" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="instructions">Additional Instructions</label>
-                        <textarea id="instructions" name="instructions" placeholder="Enter any additional instructions"></textarea>
-                    </div>
-                    <button type="submit" class="chat-submit" action="/api/submit">Update</button>
-                </form>
+    <div class="viewer-panel" id="viewerPanel" style="justify-content: flex-start; align-items: stretch;">
+        <div class="settings-title" style="max-width: none; border-radius: 12px 12px 0 0;">Settings</div>
+        <div class="settings-container" style="max-width: none; border-radius: 0; max-height: none; flex-grow: 1;">
+            <div class="tab-bar">
+                <button class="tab-btn active" data-tab="models">Models</button>
+                <button class="tab-btn" data-tab="preferences">Preferences</button>
+            </div>
+            <div class="tab-content active" id="tab-models">
+                <div class="form-group">
+                    <label for="serviceApiKey">Service API Key</label>
+                    <input type="password" id="serviceApiKey" placeholder="Enter your API Key" required="">
+                </div>
+                <div class="form-group">
+                    <label for="model">Model</label>
+                    <select id="model" required="">
+                        <option value="">Select a model</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="maxTokens">Max Output Tokens</label>
+                    <input type="number" id="maxTokens" placeholder="Enter max token count" required="">
+                </div>
+                <div class="form-group">
+                    <label for="instructions">Additional Instructions</label>
+                    <textarea id="instructions" placeholder="Enter any additional instructions"></textarea>
+                </div>
                 <p class="info-text">An API Key is required which can be generated from either <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI API Keys</a> or <a href="https://console.anthropic.com/settings/keys" target="_blank">Anthropic API Keys</a>.</p>
+            </div>
+            <div class="tab-content" id="tab-preferences">
+                <div class="form-group">
+                    <label for="theme">Theme</label>
+                    <select id="theme">
+                        <option value="">Loading themes...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="button-row">
+                <button class="update-btn" id="updateBtn">Update</button>
             </div>
         </div>
     </div>
-    <div id="thoughts" style="display: none;">Ask the user to update their settings.</div>
+    <div id="thoughts" style="display: none;">Added border-radius: 12px 12px 0 0 to the settings title to round only the top-left and top-right corners, maintaining the flat bottom edge that connects with the settings container.</div>
     <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     <script>
         // Basic chat functionality
@@ -145,41 +152,80 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         };
 
-        // Form validation
-        document.getElementById('settingsForm').addEventListener('submit', function(event) {
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Fetch settings and themes in parallel, then populate form
+        let isConfigured = false;
+        Promise.all([
+            fetch('/api/settings').then(r => r.json()),
+            fetch('/api/themes').then(r => r.json())
+        ]).then(([data, themes]) => {
+            // Populate Models tab
+            const serviceApiKey = data.serviceApiKey || '';
+            const model = data.model || '';
+            const maxTokens = data.maxTokens || '';
+            isConfigured = serviceApiKey && model && maxTokens;
+            document.getElementById('serviceApiKey').value = serviceApiKey;
+            document.getElementById('model').innerHTML = data.availableModels.map(m => `<option value="${m}">${m}</option>`).join('');
+            document.getElementById('model').value = model;
+            document.getElementById('maxTokens').value = maxTokens;
+            document.getElementById('instructions').value = data.instructions || '';
+
+            // Populate Preferences tab
+            const currentTheme = data.theme || 'nebula-dusk';
+            document.getElementById('theme').innerHTML = themes.map(t => `<option value="${t}">${t}</option>`).join('');
+            document.getElementById('theme').value = currentTheme;
+
+            // Disable chat input if not configured
+            if (!isConfigured) {
+                document.getElementById('chatInput').disabled = true;
+                document.getElementById('chatInput').classList.add('disabled');
+            }
+        }).catch(error => console.error('Error fetching settings:', error));
+
+        // Update button — collect fields from both tabs, POST JSON, reload on success
+        document.getElementById('updateBtn').addEventListener('click', () => {
             const serviceApiKey = document.getElementById('serviceApiKey').value;
             const model = document.getElementById('model').value;
             const maxTokens = document.getElementById('maxTokens').value;
 
             if (!serviceApiKey || !model || !maxTokens) {
-                alert('Please fill in all required fields before submitting.');
-                event.preventDefault();
+                alert('Please fill in all required fields (API Key, Model, Max Output Tokens).');
+                return;
             }
-        });
 
-        // Fetch settings and populate form
-        let isConfigured = false;
-        fetch('/api/settings')
-            .then(response => response.json())
-            .then(data => {
-                console.log('Settings:', data);
-                const serviceApiKey = data.serviceApiKey || '';
-                const model = data.model || '';
-                const maxTokens = data.maxTokens || '';
-                isConfigured = serviceApiKey && model && maxTokens;
-                document.getElementById('serviceApiKey').value = serviceApiKey;
-                document.getElementById('model').innerHTML = data.availableModels.map(model => `<option value="${model}">${model}</option>`).join('');
-                document.getElementById('model').value = model;
-                document.getElementById('maxTokens').value = maxTokens;
-                document.getElementById('instructions').value = data.instructions || '';
+            const body = {
+                serviceApiKey,
+                model,
+                maxTokens,
+                instructions: document.getElementById('instructions').value,
+                theme: document.getElementById('theme').value
+            };
 
-                // Disable chat input if not configured
-                if (!isConfigured) {
-                    document.getElementById('chatInput').disabled = true;
-                    document.getElementById('chatInput').classList.add('disabled');
+            fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            }).then(res => {
+                if (res.ok || res.redirected) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to save settings. Please try again.');
                 }
-            })
-            .catch(error => console.error('Error fetching settings:', error));
+            }).catch(err => {
+                console.error('Error saving settings:', err);
+                alert('Failed to save settings. Please try again.');
+            });
+        });
     </script>
-</body>
-</html>
+
+
+</body></html>

@@ -10,6 +10,7 @@ export interface Settings {
     imageQuality: 'standard' | 'hd';
     instructions?: string;
     logCompletions?: boolean;
+    theme?: string;
 }
 
 export const DefaultSettings: Settings = {
@@ -18,7 +19,8 @@ export const DefaultSettings: Settings = {
     maxTokens: 32000,
     imageQuality: 'standard',
     instructions: '',
-    logCompletions: false
+    logCompletions: false,
+    theme: 'nebula-dusk'
 };
 
 export async function hasConfiguredSettings(folder: string): Promise<boolean> {

@@ -7,6 +7,7 @@ import { generateDefaultImage, generateImage } from "./generateImage";
 import { chainOfThought } from "agentm-core";
 import { requiresSettings } from "./requiresSettings";
 import { executeScript } from "../scripts";
+import { listThemes, loadTheme, loadThemeInfo } from "../themes";
 
 export function useApiRoutes(config: SynthOSConfig, app: Application): void {
     // List pages
@@ -91,5 +92,53 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
                 res.status(500).send(response.error);
             }
         });
+    });
+
+    // Return theme info as a self-executing JS script
+    app.get('/api/theme-info.js', async (req, res) => {
+        try {
+            const settings = await loadSettings(config.pagesFolder);
+            const themeName = settings.theme ?? 'nebula-dusk';
+            const info = await loadThemeInfo(themeName, config);
+            if (!info) {
+                res.status(404).send(`// Theme info for "${themeName}" not found`);
+                return;
+            }
+            const js = `window.themeInfo=${JSON.stringify(info)};document.documentElement.classList.add(window.themeInfo.mode+"-mode");`;
+            res.set('Content-Type', 'application/javascript');
+            res.send(js);
+        } catch (err: unknown) {
+            console.error(err);
+            res.status(500).send(`// ${(err as Error).message}`);
+        }
+    });
+
+    // Return the current theme as CSS
+    app.get('/api/theme.css', async (req, res) => {
+        try {
+            const settings = await loadSettings(config.pagesFolder);
+            const themeName = settings.theme ?? 'nebula-dusk';
+            const css = await loadTheme(themeName, config);
+            if (!css) {
+                res.status(404).send(`Theme "${themeName}" not found`);
+                return;
+            }
+            res.set('Content-Type', 'text/css');
+            res.send(css);
+        } catch (err: unknown) {
+            console.error(err);
+            res.status(500).send((err as Error).message);
+        }
+    });
+
+    // List available themes
+    app.get('/api/themes', async (req, res) => {
+        try {
+            const themes = await listThemes(config);
+            res.json(themes);
+        } catch (err: unknown) {
+            console.error(err);
+            res.status(500).send((err as Error).message);
+        }
     });
 }

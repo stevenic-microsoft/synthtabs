@@ -1,6 +1,7 @@
 import { AgentArgs, AgentCompletion, SystemMessage, UserMessage } from "agentm-core";
 import { listScripts } from "../scripts";
 import * as cheerio from "cheerio";
+import { ThemeInfo } from "../themes";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -14,6 +15,8 @@ export interface TransformPageArgs extends AgentArgs {
     instructions?: string;
     /** Provider-specific formatting instructions injected into the prompt. */
     modelInstructions?: string;
+    /** Active theme metadata for theme-aware page generation. */
+    themeInfo?: ThemeInfo;
 }
 
 export type ChangeOp =
@@ -44,9 +47,19 @@ export async function transformPage(args: TransformPageArgs): Promise<AgentCompl
         const scripts = await listScripts(pagesFolder);
         const serverScripts = scripts.length > 0 ? `<SERVER_SCRIPTS>\n${scripts}\n\n` : '';
 
+        // Build theme context block
+        let themeBlock = '';
+        if (args.themeInfo) {
+            const { mode, colors } = args.themeInfo;
+            const colorList = Object.entries(colors)
+                .map(([name, value]) => `  --${name}: ${value}`)
+                .join('\n');
+            themeBlock = `<THEME>\nMode: ${mode}\nCSS custom properties (use instead of hardcoded values):\n${colorList}\n\nShared shell classes (pre-styled by theme, do not redefine):\n  .chat-panel — Left sidebar container (30% width)\n  .chat-header — Chat panel title bar\n  .chat-messages — Scrollable message container\n  .chat-message — Individual message wrapper\n  .link-group — Navigation links row (Save, Pages, Reset)\n  .chat-input — Message text input\n  .chat-submit — Send button\n  .viewer-panel — Right content area (70% width)\n  .loading-overlay — Full-screen loading overlay\n  .spinner — Animated loading spinner\n\nPage title bars: To align with the chat header, apply these styles:\n  min-height: var(--header-min-height);\n  padding: var(--header-padding-vertical) var(--header-padding-horizontal);\n  line-height: var(--header-line-height);\n  display: flex; align-items: center; justify-content: center; box-sizing: border-box;\n\nFull-viewer mode: For games, animations, or full-screen content, add class "full-viewer" to the viewer-panel element to remove its padding.\n\nThe <html> element has class "${mode}-mode". Always add .light-mode CSS overrides for any page-specific styles so the page works in both light and dark themes, unless the user has explicitly requested a very specific color scheme.\n\n`;
+        }
+
         const system: SystemMessage = {
             role: 'system',
-            content: `<CURRENT_PAGE>\n${annotatedHtml}\n\n<SERVER_APIS>\n${serverAPIs}\n\n${serverScripts}<USER_MESSAGE>\n${message}`
+            content: `<CURRENT_PAGE>\n${annotatedHtml}\n\n<SERVER_APIS>\n${serverAPIs}\n\n${serverScripts}${themeBlock}<USER_MESSAGE>\n${message}`
         };
 
         const modelInstr = args.modelInstructions ? `\n\n<MODEL_INSTRUCTIONS>\n${args.modelInstructions}` : '';

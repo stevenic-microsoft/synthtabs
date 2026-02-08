@@ -1,0 +1,19 @@
+{
+    "mode": "light",
+    "colors": {
+        "bg-primary": "#f0e6f6",
+        "bg-secondary": "#e8dff0",
+        "bg-tertiary": "#f7f2fa",
+        "accent-primary": "#667eea",
+        "accent-secondary": "#764ba2",
+        "accent-tertiary": "#c054d4",
+        "accent-glow": "rgba(118,75,162,0.15)",
+        "text-primary": "#2d2640",
+        "text-secondary": "#6b4f8a",
+        "border-color": "rgba(118,75,162,0.25)",
+        "header-min-height": "58px",
+        "header-padding-vertical": "14px",
+        "header-padding-horizontal": "20px",
+        "header-line-height": "1.25"
+    }
+}

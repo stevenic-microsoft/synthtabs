@@ -1,55 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SynthOS - {Application Title}</title>
+    <script src="/api/theme-info.js"></script>
+    <link rel="stylesheet" href="/api/theme.css">
     <style>
-        /* Nebula Dusk Theme */
-        :root { --accent-primary: #667eea; --accent-secondary: #764ba2; --accent-tertiary: #f093fb; --accent-glow: rgba(138, 43, 226, 0.3); --border-color: rgba(138, 43, 226, 0.3); }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0a0a0f; color: #e0e0e0; height: 100vh; display: flex; }
-        .chat-panel { width: 30%; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%); box-shadow: 0 0 20px rgba(138, 43, 226, 0.3); padding: 5px; display: flex; flex-direction: column; border-right: 1px solid rgba(138, 43, 226, 0.3); }
-        .chat-header { font-size: 24px; padding: 10px; background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%); color: white; text-align: center; border-radius: 10px 10px 0 0; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
-        .chat-messages { flex-grow: 1; overflow-y: auto; padding: 15px; margin-top: 10px; background: rgba(15, 15, 35, 0.8); border-radius: 10px; border: 1px solid rgba(138, 43, 226, 0.2); }
-        .chat-message { margin-bottom: 15px; padding: 10px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%); border-radius: 15px; box-shadow: 0 2px 10px rgba(138, 43, 226, 0.2); border: 1px solid rgba(138, 43, 226, 0.1); }
-        .chat-message p { margin-bottom: 5px; line-height: 1.4; }
-        .chat-message p strong { font-weight: 600; color: #a78bfa; }
-        .chat-message p code { background: rgba(138, 43, 226, 0.3); padding: 2px 4px; border-radius: 3px; font-family: 'Courier New', Courier, monospace; color: #e0e0e0; }
-        .link-group { display: flex; justify-content: space-between; margin: 15px 0; }
-        .link-group a { font-size: 14px; color: #a78bfa; text-decoration: none; padding: 5px 10px; border-radius: 5px; transition: all 0.3s; }
-        .link-group a:hover { background: rgba(138, 43, 226, 0.3); text-shadow: 0 0 10px rgba(167, 139, 250, 0.5); }
-        form { display: flex; flex-direction: row; width: 100%; gap: 10px; }
-        .chat-input { padding: 12px; border: none; border-radius: 25px; flex-grow: 1; font-size: 14px; background: rgba(30, 30, 60, 0.8); color: #e0e0e0; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); border: 1px solid rgba(138, 43, 226, 0.3); }
-        .chat-input:focus { outline: none; border-color: #a78bfa; box-shadow: 0 0 10px rgba(167, 139, 250, 0.3); }
-        .chat-submit { padding: 12px 20px; border: none; border-radius: 25px; font-size: 14px; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color: white; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
-        .chat-submit:hover { box-shadow: 0 0 20px rgba(138, 43, 226, 0.5); transform: translateY(-2px); }
-        .viewer-panel { width: 90%; padding: 20px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%); display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 15, 0.9); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .spinner { border: 8px solid rgba(138, 43, 226, 0.2); border-top: 8px solid #a78bfa; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Page Specific Styles */
+        .application-title {
+            font-size: 22px;
+            font-weight: 700;
+            min-height: var(--header-min-height);
+            padding: var(--header-padding-vertical) var(--header-padding-horizontal);
+            line-height: var(--header-line-height);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-radius: 12px 12px 0 0;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 6px 25px var(--accent-glow);
+        }
 
-        /* Page Specific Styles - Updated with dialog colors */
-        .application-title { font-size: 22px; font-weight: 700; padding: 14px 30px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; text-align: center; border-radius: 12px 12px 0 0; width: 100%; max-width: 800px; box-shadow: 0 6px 25px var(--accent-glow); }
-        .application-content { font-size: 14px; color: rgba(224, 224, 224, 0.8); padding: 20px; flex-grow: 1; width: 100%; max-width: 800px; background: rgba(15, 15, 35, 0.8); border-radius: 0 0 12px 12px; border: 1px solid rgba(138, 43, 226, 0.2); border-top: none; }
+        .application-content {
+            font-size: 14px;
+            color: rgba(224, 224, 224, 0.8);
+            padding: 20px;
+            flex-grow: 1;
+            width: 100%;
+            max-width: 800px;
+            background: rgba(15, 15, 35, 0.8);
+            border-radius: 0 0 12px 12px;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            border-top: none;
+        }
 
-        /* Scrollbar Styles */
-        ::-webkit-scrollbar { width: 10px; height: 10px; }
-        ::-webkit-scrollbar-track { background: rgba(15, 15, 35, 0.6); border-radius: 10px; border: 1px solid var(--border-color); }
-        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--accent-primary) 0%, var(--accent-secondary) 50%, var(--accent-tertiary) 100%); border-radius: 10px; border: 2px solid rgba(15, 15, 35, 0.6); box-shadow: 0 0 10px var(--accent-glow); }
-        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, var(--accent-tertiary) 0%, var(--accent-secondary) 50%, var(--accent-primary) 100%); box-shadow: 0 0 15px rgba(240, 147, 251, 0.5); }
-        ::-webkit-scrollbar-corner { background: rgba(15, 15, 35, 0.6); }
-        * { scrollbar-width: thin; scrollbar-color: var(--accent-secondary) rgba(15, 15, 35, 0.6); }
+        /* Light-mode overrides */
+        .light-mode .application-content {
+            color: rgba(45, 38, 64, 0.8);
+            background: rgba(255, 255, 255, 0.8);
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.0/mermaid.min.js"></script>
 </head>
+
 <body>
-       <div class="chat-panel">
+    <div class="chat-panel">
         <div class="chat-header">SynthOS</div>
         <div class="chat-messages" id="chatMessages">
-            <div class="chat-message"><p><strong>SynthOS:</strong> what kind of application would you like?</p></div>
+            <div class="chat-message">
+                <p><strong>SynthOS:</strong> what kind of application would you like?</p>
+            </div>
         </div>
         <div class="link-group">
             <a href="#" id="saveLink">Save</a>
@@ -62,11 +70,17 @@
         </form>
     </div>
     <div class="viewer-panel" id="viewerPanel">
-        <div class="application-title">{Application Title}</div>
-        <div class="application-content">{Application Content}</div>
+        <div class="application-title" style="max-width: none;">{Application Title}</div>
+        <div class="application-content" style="max-width: none;">{Application Content}</div>
     </div>
-    <div id="thoughts" style="display: none;">I've prompted the user for the type of application to create.</div>
-    <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
+    <div id="thoughts" style="display: none;">The user wants the application containers to span the full width of the
+        viewer panel. I've removed the max-width: 800px constraint from both the application-title and
+        application-content elements by setting max-width: none inline. The viewer panel already has padding
+        (var(--viewer-padding)), so the application will naturally respect that padding while filling the available
+        width.</div>
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
     <script>
         // Basic chat functionality
         document.getElementById("chatInput").focus();
@@ -74,16 +88,16 @@
             document.getElementById("loadingOverlay").style.display = 'flex';
             document.getElementById("chatForm").action = window.location.pathname;
         });
-        document.getElementById("saveLink").addEventListener("click", function() {
+        document.getElementById("saveLink").addEventListener("click", function () {
             const pageName = prompt("Enter the name of the page to save as:");
             if (pageName) {
                 window.location.href = `${window.location.pathname}/save?name=${encodeURIComponent(pageName)}`;
             }
         });
-        document.getElementById("resetLink").addEventListener("click", function() {
+        document.getElementById("resetLink").addEventListener("click", function () {
             window.location.href = `${window.location.pathname}/reset`;
         });
-        window.onload = function() {
+        window.onload = function () {
             const chatMessages = document.getElementById('chatMessages');
             chatMessages.scrollTo({
                 top: chatMessages.scrollHeight,
@@ -91,5 +105,7 @@
             });
         };
     </script>
+
 </body>
+
 </html>
