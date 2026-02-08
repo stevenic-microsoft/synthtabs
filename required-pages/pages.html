@@ -1,21 +1,1325 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SynthOS - Pages</title>
     <script src="/api/theme-info.js"></script>
     <link rel="stylesheet" href="/api/theme.css">
     <style>
+        .advanced-options {
+            margin-top: 8px;
+        }
+
+        .advanced-toggle {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s ease;
+        }
+
+        .advanced-toggle:hover {
+            color: var(--accent-primary);
+        }
+
+        .toggle-icon {
+            font-size: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        .toggle-icon.open {
+            transform: rotate(90deg);
+        }
+
+        .advanced-content {
+            padding-left: 16px;
+            border-left: 2px solid var(--border-color);
+            margin-left: 4px;
+        }
+    </style>
+    <style>
         /* Page Style */
-        .saved-pages { font-size: 22px; font-weight: 700; min-height: var(--header-min-height); padding: var(--header-padding-vertical) var(--header-padding-horizontal); line-height: var(--header-line-height); display: flex; align-items: center; justify-content: center; box-sizing: border-box; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; border-radius: 12px; width: 100%; max-width: 800px; box-shadow: 0 6px 25px var(--accent-glow); position: relative; z-index: 1; margin-bottom: 20px; }
-        .page-category { width: 100%; max-width: 800px; margin-bottom: 20px; position: relative; z-index: 1; }
-        .category-title { font-size: 16px; color: var(--text-secondary); margin-bottom: 12px; padding-left: 5px; border-left: 3px solid var(--accent-tertiary); }
-        .page-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-        .page-link { padding: 12px 16px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-primary); text-decoration: none; text-align: center; font-size: 14px; transition: all 0.3s ease; }
-        .page-link:hover { background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%); border-color: var(--text-secondary); box-shadow: 0 4px 15px var(--accent-glow); color: var(--accent-tertiary); transform: translateY(-2px); }
+        .saved-pages {
+            font-size: 22px;
+            font-weight: 700;
+            min-height: var(--header-min-height);
+            padding: var(--header-padding-vertical) var(--header-padding-horizontal);
+            line-height: var(--header-line-height);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-radius: 12px;
+            width: 100%;
+            box-shadow: 0 6px 25px var(--accent-glow);
+            position: relative;
+            z-index: 1;
+            margin-bottom: 20px;
+        }
+
+        .page-category {
+            width: 100%;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .category-title {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            padding-left: 5px;
+            border-left: 3px solid var(--accent-tertiary);
+        }
+
+        .page-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .page-link {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            text-decoration: none;
+            text-align: center;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .page-link:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+            border-color: var(--text-secondary);
+            box-shadow: 0 4px 15px var(--accent-glow);
+            color: var(--accent-tertiary);
+            transform: translateY(-2px);
+        }
+
+        /* Truncated text with ellipsis */
+        .page-link .scroll-text {
+            display: inline-block;
+            white-space: nowrap;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* On hover, remove ellipsis and scroll */
+        .page-link.scrolling .scroll-text {
+            text-overflow: clip;
+            overflow: visible;
+            animation: scrollText var(--scroll-duration, 3s) linear infinite;
+        }
+
+        @keyframes scrollText {
+            0% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(0);
+            }
+
+            75% {
+                transform: translateX(var(--scroll-distance, -50%));
+            }
+
+            100% {
+                transform: translateX(var(--scroll-distance, -50%));
+            }
+        }
+
+        /* Pinned page highlight */
+        .page-link.pinned {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.35) 0%, rgba(118, 75, 162, 0.35) 100%);
+            border: 2px solid var(--accent-tertiary);
+            box-shadow: 0 2px 12px var(--accent-glow);
+        }
+
+        .page-link.pinned:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.5) 0%, rgba(118, 75, 162, 0.5) 100%);
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        /* Builder page - special gradient like SynthOS header */
+        .page-link.builder-page {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border: none;
+            box-shadow: 0 4px 20px var(--accent-glow);
+            font-weight: 600;
+        }
+
+        .page-link.builder-page:hover {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            filter: brightness(1.1);
+            box-shadow: 0 6px 25px var(--accent-glow);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Light mode pinned override */
+        .light-mode .page-link.pinned {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(192, 84, 212, 0.25) 100%);
+            border-color: var(--accent-secondary);
+        }
+
+        .light-mode .page-link.pinned:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.45) 0%, rgba(192, 84, 212, 0.4) 100%);
+        }
+
+        /* Filter bar */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: nowrap;
+        }
+
+        .filter-buttons-container {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .filter-btn {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-color: transparent;
+        }
+
+        /* More dropdown */
+        .more-dropdown {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .more-btn {
+            position: relative;
+        }
+
+        .more-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 4px;
+            min-width: 150px;
+            max-height: 250px;
+            overflow-y: auto;
+            border-radius: 8px;
+            padding: 4px 0;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            display: none;
+            border: 1px solid var(--border-color);
+            background: rgba(30, 30, 50, 0.95);
+            z-index: 100;
+        }
+
+        .more-menu.show {
+            display: block;
+        }
+
+        .more-menu-item {
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: background 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .more-menu-item:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+        }
+
+        .more-menu-item.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            color: var(--accent-tertiary);
+        }
+
+        .search-input {
+            margin-left: auto;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+            width: 180px;
+            min-width: 120px;
+            flex-shrink: 0;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-primary);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* Context menu */
+        .context-menu {
+            position: fixed;
+            z-index: 1000;
+            min-width: 180px;
+            border-radius: 8px;
+            padding: 4px 0;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            display: none;
+            border: 1px solid var(--border-color);
+            background: rgba(30, 30, 50, 0.95);
+        }
+
+        .context-menu-item {
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: background 0.15s ease;
+        }
+
+        .context-menu-item:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+        }
+
+        /* Light-mode overrides */
+        .light-mode .context-menu {
+            background: rgba(255, 255, 255, 0.97);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .light-mode .more-menu {
+            background: rgba(255, 255, 255, 0.97);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+    <style>
+        .advanced-options {
+            margin-top: 8px;
+        }
+
+        .advanced-toggle {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s ease;
+        }
+
+        .advanced-toggle:hover {
+            color: var(--accent-primary);
+        }
+
+        .toggle-icon {
+            font-size: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        .toggle-icon.open {
+            transform: rotate(90deg);
+        }
+
+        .advanced-content {
+            padding-left: 16px;
+            border-left: 2px solid var(--border-color);
+            margin-left: 4px;
+        }
+    </style>
+    <style>
+        /* Page Style */
+        .saved-pages {
+            font-size: 22px;
+            font-weight: 700;
+            min-height: var(--header-min-height);
+            padding: var(--header-padding-vertical) var(--header-padding-horizontal);
+            line-height: var(--header-line-height);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-radius: 12px;
+            width: 100%;
+            box-shadow: 0 6px 25px var(--accent-glow);
+            position: relative;
+            z-index: 1;
+            margin-bottom: 20px;
+        }
+
+        .page-category {
+            width: 100%;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .category-title {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            padding-left: 5px;
+            border-left: 3px solid var(--accent-tertiary);
+        }
+
+        .page-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .page-link {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            text-decoration: none;
+            text-align: center;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .page-link:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+            border-color: var(--text-secondary);
+            box-shadow: 0 4px 15px var(--accent-glow);
+            color: var(--accent-tertiary);
+            transform: translateY(-2px);
+        }
+
+        /* Truncated text with ellipsis */
+        .page-link .scroll-text {
+            display: inline-block;
+            white-space: nowrap;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* On hover, remove ellipsis and scroll */
+        .page-link.scrolling .scroll-text {
+            text-overflow: clip;
+            overflow: visible;
+            animation: scrollText var(--scroll-duration, 3s) linear infinite;
+        }
+
+        @keyframes scrollText {
+            0% {
+                transform: translateX(0);
+            }
+
+            30% {
+                transform: translateX(0);
+            }
+
+            70% {
+                transform: translateX(var(--scroll-distance, -50%));
+            }
+
+            100% {
+                transform: translateX(var(--scroll-distance, -50%));
+            }
+        }
+
+        /* Pinned page highlight */
+        .page-link.pinned {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.35) 0%, rgba(118, 75, 162, 0.35) 100%);
+            border: 2px solid var(--accent-tertiary);
+            box-shadow: 0 2px 12px var(--accent-glow);
+        }
+
+        .page-link.pinned:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.5) 0%, rgba(118, 75, 162, 0.5) 100%);
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        /* Builder page - special gradient like SynthOS header */
+        .page-link.builder-page {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border: none;
+            box-shadow: 0 4px 20px var(--accent-glow);
+            font-weight: 600;
+        }
+
+        .page-link.builder-page:hover {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            filter: brightness(1.1);
+            box-shadow: 0 6px 25px var(--accent-glow);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Light mode pinned override */
+        .light-mode .page-link.pinned {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(192, 84, 212, 0.25) 100%);
+            border-color: var(--accent-secondary);
+        }
+
+        .light-mode .page-link.pinned:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.45) 0%, rgba(192, 84, 212, 0.4) 100%);
+        }
+
+        /* Filter bar */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: nowrap;
+        }
+
+        .filter-buttons-container {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .filter-btn {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-color: transparent;
+        }
+
+        /* More dropdown */
+        .more-dropdown {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .more-btn {
+            position: relative;
+        }
+
+        .more-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 4px;
+            min-width: 150px;
+            max-height: 250px;
+            overflow-y: auto;
+            border-radius: 8px;
+            padding: 4px 0;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            display: none;
+            border: 1px solid var(--border-color);
+            background: rgba(30, 30, 50, 0.95);
+            z-index: 100;
+        }
+
+        .more-menu.show {
+            display: block;
+        }
+
+        .more-menu-item {
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: background 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .more-menu-item:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+        }
+
+        .more-menu-item.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            color: var(--accent-tertiary);
+        }
+
+        .search-input {
+            margin-left: auto;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+            width: 180px;
+            min-width: 120px;
+            flex-shrink: 0;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-primary);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* Context menu */
+        .context-menu {
+            position: fixed;
+            z-index: 1000;
+            min-width: 180px;
+            border-radius: 8px;
+            padding: 4px 0;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            display: none;
+            border: 1px solid var(--border-color);
+            background: rgba(30, 30, 50, 0.95);
+        }
+
+        .context-menu-item {
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: background 0.15s ease;
+        }
+
+        .context-menu-item:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+        }
+
+        /* Light-mode overrides */
+        .light-mode .context-menu {
+            background: rgba(255, 255, 255, 0.97);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .light-mode .more-menu {
+            background: rgba(255, 255, 255, 0.97);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+    <style>
+        .advanced-options {
+            margin-top: 8px;
+        }
+
+        .advanced-toggle {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s ease;
+        }
+
+        .advanced-toggle:hover {
+            color: var(--accent-primary);
+        }
+
+        .toggle-icon {
+            font-size: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        .toggle-icon.open {
+            transform: rotate(90deg);
+        }
+
+        .advanced-content {
+            padding-left: 16px;
+            border-left: 2px solid var(--border-color);
+            margin-left: 4px;
+        }
+    </style>
+    <style>
+        /* Page Style */
+        .saved-pages {
+            font-size: 22px;
+            font-weight: 700;
+            min-height: var(--header-min-height);
+            padding: var(--header-padding-vertical) var(--header-padding-horizontal);
+            line-height: var(--header-line-height);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-radius: 12px;
+            width: 100%;
+            box-shadow: 0 6px 25px var(--accent-glow);
+            position: relative;
+            z-index: 1;
+            margin-bottom: 20px;
+        }
+
+        .page-category {
+            width: 100%;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .category-title {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            padding-left: 5px;
+            border-left: 3px solid var(--accent-tertiary);
+        }
+
+        .page-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .page-link {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            text-decoration: none;
+            text-align: center;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .page-link:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+            border-color: var(--text-secondary);
+            box-shadow: 0 4px 15px var(--accent-glow);
+            color: var(--accent-tertiary);
+            transform: translateY(-2px);
+        }
+
+        /* Truncated text with ellipsis */
+        .page-link .scroll-text {
+            display: inline-block;
+            white-space: nowrap;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* On hover, remove ellipsis and scroll */
+        .page-link.scrolling .scroll-text {
+            text-overflow: clip;
+            overflow: visible;
+            animation: scrollText var(--scroll-duration, 3s) linear infinite;
+        }
+
+        @keyframes scrollText {
+            0% {
+                transform: translateX(0);
+            }
+
+            15% {
+                transform: translateX(0);
+            }
+
+            85% {
+                transform: translateX(var(--scroll-distance, -50%));
+            }
+
+            100% {
+                transform: translateX(var(--scroll-distance, -50%));
+            }
+        }
+
+        /* Pinned page highlight */
+        .page-link.pinned {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.35) 0%, rgba(118, 75, 162, 0.35) 100%);
+            border: 2px solid var(--accent-tertiary);
+            box-shadow: 0 2px 12px var(--accent-glow);
+        }
+
+        .page-link.pinned:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.5) 0%, rgba(118, 75, 162, 0.5) 100%);
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        /* Builder page - special gradient like SynthOS header */
+        .page-link.builder-page {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border: none;
+            box-shadow: 0 4px 20px var(--accent-glow);
+            font-weight: 600;
+        }
+
+        .page-link.builder-page:hover {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            filter: brightness(1.1);
+            box-shadow: 0 6px 25px var(--accent-glow);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Light mode pinned override */
+        .light-mode .page-link.pinned {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(192, 84, 212, 0.25) 100%);
+            border-color: var(--accent-secondary);
+        }
+
+        .light-mode .page-link.pinned:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.45) 0%, rgba(192, 84, 212, 0.4) 100%);
+        }
+
+        /* Filter bar */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: nowrap;
+        }
+
+        .filter-buttons-container {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .filter-btn {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-color: transparent;
+        }
+
+        /* More dropdown */
+        .more-dropdown {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .more-btn {
+            position: relative;
+        }
+
+        .more-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 4px;
+            min-width: 150px;
+            max-height: 250px;
+            overflow-y: auto;
+            border-radius: 8px;
+            padding: 4px 0;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            display: none;
+            border: 1px solid var(--border-color);
+            background: rgba(30, 30, 50, 0.95);
+            z-index: 100;
+        }
+
+        .more-menu.show {
+            display: block;
+        }
+
+        .more-menu-item {
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: background 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .more-menu-item:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+        }
+
+        .more-menu-item.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            color: var(--accent-tertiary);
+        }
+
+        .search-input {
+            margin-left: auto;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+            width: 180px;
+            min-width: 120px;
+            flex-shrink: 0;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-primary);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* Context menu */
+        .context-menu {
+            position: fixed;
+            z-index: 1000;
+            min-width: 180px;
+            border-radius: 8px;
+            padding: 4px 0;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            display: none;
+            border: 1px solid var(--border-color);
+            background: rgba(30, 30, 50, 0.95);
+        }
+
+        .context-menu-item {
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: background 0.15s ease;
+        }
+
+        .context-menu-item:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+        }
+
+        /* Light-mode overrides */
+        .light-mode .context-menu {
+            background: rgba(255, 255, 255, 0.97);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .light-mode .more-menu {
+            background: rgba(255, 255, 255, 0.97);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+    <style>
+        .advanced-options {
+            margin-top: 8px;
+        }
+
+        .advanced-toggle {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s ease;
+        }
+
+        .advanced-toggle:hover {
+            color: var(--accent-primary);
+        }
+
+        .toggle-icon {
+            font-size: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        .toggle-icon.open {
+            transform: rotate(90deg);
+        }
+
+        .advanced-content {
+            padding-left: 16px;
+            border-left: 2px solid var(--border-color);
+            margin-left: 4px;
+        }
+    </style>
+    <style>
+        /* Page Style */
+        .saved-pages {
+            font-size: 22px;
+            font-weight: 700;
+            min-height: var(--header-min-height);
+            padding: var(--header-padding-vertical) var(--header-padding-horizontal);
+            line-height: var(--header-line-height);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-radius: 12px;
+            width: 100%;
+            box-shadow: 0 6px 25px var(--accent-glow);
+            position: relative;
+            z-index: 1;
+            margin-bottom: 20px;
+        }
+
+        .page-category {
+            width: 100%;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .category-title {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            padding-left: 5px;
+            border-left: 3px solid var(--accent-tertiary);
+        }
+
+        .page-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .page-link {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            text-decoration: none;
+            text-align: center;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .page-link:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+            border-color: var(--text-secondary);
+            box-shadow: 0 4px 15px var(--accent-glow);
+            color: var(--accent-tertiary);
+            transform: translateY(-2px);
+        }
+
+        /* Truncated text with ellipsis */
+        .page-link .scroll-text {
+            display: inline-block;
+            white-space: nowrap;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* On hover, remove ellipsis and scroll */
+        .page-link.scrolling .scroll-text {
+            text-overflow: clip;
+            overflow: visible;
+            animation: scrollText var(--scroll-duration, 3s) linear infinite;
+        }
+
+        @keyframes scrollText {
+            0% {
+                transform: translateX(0);
+            }
+
+            10% {
+                transform: translateX(0);
+            }
+
+            90% {
+                transform: translateX(var(--scroll-distance, -50%));
+            }
+
+            100% {
+                transform: translateX(var(--scroll-distance, -50%));
+            }
+        }
+
+        /* Pinned page highlight */
+        .page-link.pinned {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.35) 0%, rgba(118, 75, 162, 0.35) 100%);
+            border: 2px solid var(--accent-tertiary);
+            box-shadow: 0 2px 12px var(--accent-glow);
+        }
+
+        .page-link.pinned:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.5) 0%, rgba(118, 75, 162, 0.5) 100%);
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        /* Builder page - special gradient like SynthOS header */
+        .page-link.builder-page {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border: none;
+            box-shadow: 0 4px 20px var(--accent-glow);
+            font-weight: 600;
+        }
+
+        .page-link.builder-page:hover {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            filter: brightness(1.1);
+            box-shadow: 0 6px 25px var(--accent-glow);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Light mode pinned override */
+        .light-mode .page-link.pinned {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(192, 84, 212, 0.25) 100%);
+            border-color: var(--accent-secondary);
+        }
+
+        .light-mode .page-link.pinned:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.45) 0%, rgba(192, 84, 212, 0.4) 100%);
+        }
+
+        /* Filter bar */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: nowrap;
+        }
+
+        .filter-buttons-container {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .filter-btn {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-color: transparent;
+        }
+
+        /* More dropdown */
+        .more-dropdown {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .more-btn {
+            position: relative;
+        }
+
+        .more-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 4px;
+            min-width: 150px;
+            max-height: 250px;
+            overflow-y: auto;
+            border-radius: 8px;
+            padding: 4px 0;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            display: none;
+            border: 1px solid var(--border-color);
+            background: rgba(30, 30, 50, 0.95);
+            z-index: 100;
+        }
+
+        .more-menu.show {
+            display: block;
+        }
+
+        .more-menu-item {
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: background 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .more-menu-item:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+        }
+
+        .more-menu-item.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            color: var(--accent-tertiary);
+        }
+
+        .search-input {
+            margin-left: auto;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+            width: 180px;
+            min-width: 120px;
+            flex-shrink: 0;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-primary);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* Context menu */
+        .context-menu {
+            position: fixed;
+            z-index: 1000;
+            min-width: 180px;
+            border-radius: 8px;
+            padding: 4px 0;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            display: none;
+            border: 1px solid var(--border-color);
+            background: rgba(30, 30, 50, 0.95);
+        }
+
+        .context-menu-item {
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: background 0.15s ease;
+        }
+
+        .context-menu-item:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+        }
+
+        /* Light-mode overrides */
+        .light-mode .context-menu {
+            background: rgba(255, 255, 255, 0.97);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .light-mode .more-menu {
+            background: rgba(255, 255, 255, 0.97);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.0/mermaid.min.js"></script>
+
+
 </head>
 
 <body>
@@ -23,7 +1327,8 @@
         <div class="chat-header">SynthOS</div>
         <div class="chat-messages" id="chatMessages">
             <div class="chat-message">
-                <p><strong>SynthOS:</strong> Here are all of the created pages.</p>
+                <p><strong>SynthOS:</strong> Here are all of the created pages. Right-click any page to pin it to
+                    favorites, edit its definition, or copy it to a new page.</p>
             </div>
         </div>
         <div class="link-group">
@@ -36,35 +1341,189 @@
             <button type="submit" class="chat-submit">Send</button>
         </form>
     </div>
-    <div class="viewer-panel" id="viewerPanel" style="justify-content: flex-start; align-items: stretch; padding: 20px;">
-        <div class="saved-pages" style="max-width: none;">Pages</div>
-        <div class="page-category" style="max-width: none;">
-            <h2 class="category-title">System Pages</h2>
-            <div class="page-grid">
-                <a href="/home" class="page-link">Home</a>
-                <a href="/pages" class="page-link">Pages</a>
-                <a href="/settings" class="page-link">Settings</a>
-                <a href="/apis" class="page-link">API Explorer</a>
-                <a href="/scripts" class="page-link">Script Editor</a>
+    <div class="viewer-panel" id="viewerPanel"
+        style="justify-content: flex-start; align-items: stretch; padding: 20px;">
+        <div class="saved-pages">Pages</div>
+
+        <!-- Favorites section (hidden when empty) -->
+        <div id="favoritesSection" class="page-category" style="display: none;">
+            <h2 class="category-title">Favorites</h2>
+            <div id="favoritesGrid" class="page-grid"></div>
+        </div>
+
+        <!-- All Pages section with filter bar -->
+        <div class="page-category">
+            <h2 class="category-title">Pages</h2>
+            <div id="filterBar" class="filter-bar">
+                <div class="filter-buttons-container">
+                    <button class="filter-btn active" data-category="All">All</button>
+                </div>
+                <div class="more-dropdown" id="moreDropdown" style="display: none;">
+                    <button class="filter-btn more-btn" id="moreBtn">More ▾</button>
+                    <div class="more-menu" id="moreMenu"></div>
+                </div>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search pages...">
+            </div>
+            <div id="pagesGrid" class="page-grid"></div>
+        </div>
+
+        <!-- Edit Page Modal -->
+        <div id="editPageModal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">Edit Page Definition</div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Display Title</label>
+                        <input type="text" id="editPageTitle" class="form-input" placeholder="Enter display title...">
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; opacity: 0.8;">Page
+                            name: <span id="editPageNameDisplay"></span></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Categories (comma-separated)</label>
+                        <input type="text" id="editPageCategories" class="form-input"
+                            placeholder="e.g. Tools, Games, Utilities">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label checkbox-label">
+                            <input type="checkbox" id="editPagePinned">
+                            <span>Pinned to Favorites</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label checkbox-label">
+                            <input type="checkbox" id="editPageLocked">
+                            <span>Locked</span>
+                        </label>
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; opacity: 0.8;">
+                            Locked pages are read-only and cannot be modified through chat.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="modal-btn modal-btn-danger" id="deletePageBtn">Delete Page</button>
+                    <div class="modal-footer-right">
+                        <button class="modal-btn modal-btn-secondary" id="editCancelBtn">Cancel</button>
+                        <button class="modal-btn modal-btn-primary" id="editSaveBtn">Save Changes</button>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="page-category" style="max-width: none;">
-            <h2 class="category-title">Custom Pages</h2>
-            <div id="customPagesList" class="page-grid">
-                <!-- Custom pages will be dynamically loaded here -->
+
+        <!-- Copy Page Modal -->
+        <div id="copyPageModal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">Copy to New Page</div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Display Title</label>
+                        <input type="text" id="copyPageTitle" class="form-input" placeholder="Enter display title...">
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; opacity: 0.8;">
+                            Source: <span id="copySourcePageDisplay"></span></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Categories (comma-separated)</label>
+                        <input type="text" id="copyPageCategories" class="form-input"
+                            placeholder="e.g. Tools, Games, Utilities">
+                    </div>
+                    <div class="advanced-options">
+                        <button type="button" class="advanced-toggle" id="advancedToggle">
+                            <span class="toggle-icon">▶</span> Advanced Options
+                        </button>
+                        <div class="advanced-content" id="advancedContent" style="display: none;">
+                            <div class="form-group" style="margin-top: 12px;">
+                                <label class="form-label">Custom Page ID</label>
+                                <input type="text" id="copyNewPageName" class="form-input"
+                                    placeholder="Auto-generated from title...">
+                                <div
+                                    style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; opacity: 0.8;">
+                                    Used in the URL. Leave blank to auto-generate from title.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="modal-footer-right">
+                        <button class="modal-btn modal-btn-secondary" id="copyCancelBtn">Cancel</button>
+                        <button class="modal-btn modal-btn-primary" id="copyConfirmBtn">Create Copy</button>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="page-category" style="max-width: none;">
-            <h2 class="category-title">Page Templates</h2>
-            <div id="templatesList" class="page-grid">
-                <!-- Templates will be dynamically loaded here -->
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteConfirmModal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">Confirm Delete</div>
+                <div class="modal-body">
+                    <p style="color: var(--text-primary); margin: 0;">Are you sure you want to delete "<span
+                            id="deletePageNameDisplay2"></span>"? This cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <div class="modal-footer-right">
+                        <button class="modal-btn modal-btn-secondary" id="deleteCancelBtn">Cancel</button>
+                        <button class="modal-btn modal-btn-danger" id="deleteConfirmBtn">Delete</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <div id="thoughts" style="display: none;">The user wanted the content to use the full width of the viewer panel. The elements had max-width: 800px constraints. I removed those by setting max-width: none on the saved-pages header and page-category divs. I also changed align-items from flex-start to stretch on the viewer panel to make child elements stretch to full width.</div>
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="spinner"></div>
+
+    <!-- Context menu -->
+    <div id="contextMenu" class="context-menu">
+        <div id="pinMenuItem" class="context-menu-item"></div>
+        <div id="editMenuItem" class="context-menu-item">Edit page definition</div>
+        <div id="copyMenuItem" class="context-menu-item">Copy to new page</div>
     </div>
+    <script>
+        // Override showContextMenu to handle builder page specially
+        const originalShowContextMenu = showContextMenu;
+        showContextMenu = function (e, page) {
+            contextTarget = page;
+            const isBuilder = page.name === BUILDER_PAGE;
+
+            // Show/hide menu items based on whether it's the builder
+            pinMenuItem.style.display = isBuilder ? 'none' : '';
+            editMenuItem.style.display = isBuilder ? 'none' : '';
+
+            if (!isBuilder) {
+                pinMenuItem.textContent = page.pinned ? 'Unpin from Favorites' : 'Pin to Favorites';
+            }
+
+            contextMenu.style.left = e.clientX + 'px';
+            contextMenu.style.top = e.clientY + 'px';
+            contextMenu.style.display = 'block';
+        };
+
+        // Update createPageLink to allow context menu on builder
+        function createPageLinkUpdated(page, isBuilder = false) {
+            const a = document.createElement('a');
+            a.href = '/' + page.name;
+            a.textContent = displayName(page);
+            let classes = 'page-link';
+            if (isBuilder) {
+                classes += ' builder-page';
+            } else if (page.pinned) {
+                classes += ' pinned';
+            }
+            a.className = classes;
+
+            // Allow context menu for builder (copy only) and other pages
+            a.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                showContextMenu(e, page);
+            });
+            return a;
+        }
+
+        // Override the original createPageLink
+        createPageLink = createPageLinkUpdated;
+
+        // Re-render to apply changes
+        if (allPages.length > 0) {
+            renderAll();
+        }
+    </script>
+
     <script>
         // Basic chat functionality
         document.getElementById("chatInput").focus();
@@ -83,35 +1542,1266 @@
         });
         window.onload = function () {
             const chatMessages = document.getElementById('chatMessages');
-            chatMessages.scrollTo({
-                top: chatMessages.scrollHeight,
-                behavior: 'smooth'
-            });
+            chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
         };
 
-        // Fetch custom pages and templates and display them
-        fetch('/api/pages')
-            .then(response => response.json())
-            .then(data => {
-                const customPagesList = document.getElementById('customPagesList');
-                const templatesList = document.getElementById('templatesList');
-                customPagesList.innerHTML = ''; // Clear existing content
-                templatesList.innerHTML = ''; // Clear existing content
-                const systemPages = ['home', 'pages', 'settings', 'apis', 'scripts'];
-                data.forEach(page => {
-                    const pageLink = document.createElement('a');
-                    pageLink.href = `/${page}`;
-                    pageLink.textContent = page;
-                    pageLink.className = 'page-link';
-                    if (page.startsWith('[') && page.endsWith(']')) {
-                        templatesList.appendChild(pageLink);
-                    } else if (!systemPages.includes(page.toLowerCase())) {
-                        customPagesList.appendChild(pageLink);
+        // ---- Page data & state ----
+        let allPages = [];
+        let activeCategory = 'All';
+        let searchTerm = '';
+        let contextTarget = null; // { name, pinned }
+        const BUILDER_PAGE = 'builder';
+
+        // ---- Render helpers ----
+        function displayName(page) {
+            return page.title || page.name;
+        }
+
+        function createPageLink(page, isBuilder = false) {
+            const a = document.createElement('a');
+            a.href = '/' + page.name;
+            a.textContent = displayName(page);
+            let classes = 'page-link';
+            if (isBuilder) {
+                classes += ' builder-page';
+            } else if (page.pinned) {
+                classes += ' pinned';
+            }
+            a.className = classes;
+
+            // No context menu for builder page
+            if (!isBuilder) {
+                a.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    showContextMenu(e, page);
+                });
+            }
+            return a;
+        }
+
+        function renderFavorites() {
+            const section = document.getElementById('favoritesSection');
+            const grid = document.getElementById('favoritesGrid');
+            grid.innerHTML = '';
+
+            // Always show builder first
+            const builderPage = allPages.find(p => p.name === BUILDER_PAGE);
+            if (builderPage) {
+                grid.appendChild(createPageLink(builderPage, true));
+            }
+
+            // Then other pinned pages (excluding builder), sorted alphabetically
+            const pinned = allPages
+                .filter(p => p.pinned && p.name !== BUILDER_PAGE)
+                .sort((a, b) => displayName(a).localeCompare(displayName(b)));
+
+            pinned.forEach(p => grid.appendChild(createPageLink(p)));
+
+            // Show section if builder exists or there are pinned pages
+            if (builderPage || pinned.length > 0) {
+                section.style.display = '';
+            } else {
+                section.style.display = 'none';
+            }
+        }
+
+        function renderFilterBar() {
+            const bar = document.getElementById('filterBar');
+            const searchInput = document.getElementById('searchInput');
+            bar.innerHTML = '';
+
+            // Collect unique categories (excluding builder page)
+            const cats = new Set();
+            allPages.filter(p => p.name !== BUILDER_PAGE).forEach(p => p.categories.forEach(c => cats.add(c)));
+            const sorted = Array.from(cats).sort();
+
+            // "All" button first
+            const allBtn = document.createElement('button');
+            allBtn.className = 'filter-btn' + (activeCategory === 'All' ? ' active' : '');
+            allBtn.textContent = 'All';
+            allBtn.dataset.category = 'All';
+            allBtn.addEventListener('click', () => setCategory('All'));
+            bar.appendChild(allBtn);
+
+            sorted.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-btn' + (activeCategory === cat ? ' active' : '');
+                btn.textContent = cat;
+                btn.dataset.category = cat;
+                btn.addEventListener('click', () => setCategory(cat));
+                bar.appendChild(btn);
+            });
+
+            bar.appendChild(searchInput);
+        }
+
+        function renderPages() {
+            const grid = document.getElementById('pagesGrid');
+            grid.innerHTML = '';
+            const term = searchTerm.toLowerCase();
+            allPages.forEach(p => {
+                // Exclude builder page from main list
+                if (p.name === BUILDER_PAGE) return;
+                // Category filter
+                if (activeCategory !== 'All' && !p.categories.includes(activeCategory)) return;
+                // Search filter (match name or title)
+                if (term && !p.name.toLowerCase().includes(term) && !displayName(p).toLowerCase().includes(term)) return;
+                grid.appendChild(createPageLink(p));
+            });
+        }
+
+        function setCategory(cat) {
+            activeCategory = cat;
+            renderFilterBar();
+            renderPages();
+        }
+
+        function renderAll() {
+            renderFavorites();
+            renderFilterBar();
+            renderPages();
+        }
+
+        // ---- Search ----
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchTerm = e.target.value;
+            renderPages();
+        });
+
+        // ---- Context menu ----
+        const contextMenu = document.getElementById('contextMenu');
+        const pinMenuItem = document.getElementById('pinMenuItem');
+
+        function showContextMenu(e, page) {
+            // Don't show context menu for builder page
+            if (page.name === BUILDER_PAGE) return;
+
+            contextTarget = page;
+            pinMenuItem.textContent = page.pinned ? 'Unpin from Favorites' : 'Pin to Favorites';
+            contextMenu.style.left = e.clientX + 'px';
+            contextMenu.style.top = e.clientY + 'px';
+            contextMenu.style.display = 'block';
+        }
+
+        function hideContextMenu() {
+            contextMenu.style.display = 'none';
+            contextTarget = null;
+        }
+
+        document.addEventListener('click', hideContextMenu);
+        contextMenu.addEventListener('click', (e) => e.stopPropagation());
+
+        pinMenuItem.addEventListener('click', async () => {
+            if (!contextTarget) return;
+            const pageName = contextTarget.name;
+            const newPinned = !contextTarget.pinned;
+            const categories = contextTarget.categories || [];
+            hideContextMenu();
+
+            try {
+                const res = await fetch('/api/pages/' + encodeURIComponent(pageName), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ categories: categories, pinned: newPinned })
+                });
+
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    throw new Error('Failed to update page metadata: ' + errorText);
+                }
+
+                // Update local state immediately for responsive UI
+                const pageIndex = allPages.findIndex(p => p.name === pageName);
+                if (pageIndex !== -1) {
+                    allPages[pageIndex].pinned = newPinned;
+                    renderAll();
+                }
+
+                // Also reload from server to ensure consistency
+                await loadPages();
+            } catch (err) {
+                console.error('Error toggling pin:', err);
+                alert('Failed to update pin status: ' + err.message);
+            }
+        });
+
+        // ---- Load pages from API ----
+        async function loadPages() {
+            try {
+                const res = await fetch('/api/pages');
+                if (!res.ok) throw new Error('Failed to fetch pages');
+                allPages = await res.json();
+                renderAll();
+            } catch (err) {
+                console.error('Error fetching pages:', err);
+            }
+        }
+
+        loadPages();
+    </script>
+
+    <div id="thoughts" style="display: none;">Updated the scroll animation keyframes to have 5 second pauses
+        (represented as 25% at start and 25% at end of the animation cycle). The animation now pauses at 0-25%, scrolls
+        through 25-75%, then pauses again at 75-100% before looping. This gives approximately 5 seconds of pause time at
+        each end when combined with the scroll duration.</div>
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+
+        <script>
+            // Consolidated copy confirm handler - removes old handlers and adds proper auto-formatting
+            (function () {
+                const copyConfirmBtn = document.getElementById('copyConfirmBtn');
+                const copyNewPageName = document.getElementById('copyNewPageName');
+                const copyPageTitle = document.getElementById('copyPageTitle');
+                const copyPageCategories = document.getElementById('copyPageCategories');
+                const copyPageModal = document.getElementById('copyPageModal');
+                const copySourcePageDisplay = document.getElementById('copySourcePageDisplay');
+
+                // Remove all existing click handlers by cloning
+                const newBtn = copyConfirmBtn.cloneNode(true);
+                copyConfirmBtn.parentNode.replaceChild(newBtn, copyConfirmBtn);
+
+                newBtn.addEventListener('click', async () => {
+                    if (!currentCopySource) return;
+                    const newTitle = copyPageTitle.value.trim();
+                    let newName = copyNewPageName.value.trim();
+
+                    // Derive page name from title if left blank
+                    if (!newName && newTitle) {
+                        newName = newTitle;
+                    }
+
+                    if (!newName) {
+                        alert('Please enter a title or page name.');
+                        copyPageTitle.focus();
+                        return;
+                    }
+
+                    // Auto-format: lowercase and replace spaces with underscores
+                    newName = newName.toLowerCase().replace(/\s+/g, '_');
+
+                    // Remove any remaining invalid characters
+                    newName = newName.replace(/[^a-z0-9_-]/g, '');
+
+                    if (!newName) {
+                        alert('Page name must contain at least one valid character (letters, numbers, hyphens, or underscores).');
+                        copyPageTitle.focus();
+                        return;
+                    }
+                    const newCategories = copyPageCategories.value
+                        .split(',')
+                        .map(c => c.trim())
+                        .filter(c => c.length > 0);
+
+                    try {
+                        const body = {
+                            name: newName,
+                            title: newTitle,
+                            categories: newCategories
+                        };
+                        const res = await fetch('/api/pages/' + encodeURIComponent(currentCopySource.name) + '/copy', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(body)
+                        });
+                        if (!res.ok) {
+                            const data = await res.json().catch(() => ({}));
+                            throw new Error(data.error || 'Failed to copy page');
+                        }
+                        copyPageModal.classList.remove('show');
+                        currentCopySource = null;
+                        // Navigate to the new page
+                        window.location.href = '/' + newName;
+                    } catch (err) {
+                        console.error('Error copying page:', err);
+                        alert('Failed to copy page: ' + err.message);
                     }
                 });
-            })
-            .catch(error => console.error('Error fetching pages:', error));
+            })();
+        </script>
+        <script>
+            // Enhanced page link creation with ellipsis and scroll effect for long titles
+            (function () {
+                createPageLink = function (page, isBuilder = false) {
+                    const a = document.createElement('a');
+                    a.href = '/' + page.name;
+
+                    const title = displayName(page);
+                    const span = document.createElement('span');
+                    span.className = 'scroll-text';
+                    span.textContent = title;
+                    a.appendChild(span);
+                    a.title = title; // Tooltip fallback
+
+                    let classes = 'page-link';
+                    if (isBuilder) {
+                        classes += ' builder-page';
+                    } else if (page.pinned) {
+                        classes += ' pinned';
+                    }
+                    a.className = classes;
+
+                    // Context menu handler
+                    a.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        showContextMenu(e, page);
+                    });
+
+                    // Hover scroll effect for long titles
+                    a.addEventListener('mouseenter', function () {
+                        const textWidth = span.scrollWidth;
+                        const containerWidth = a.clientWidth - 32; // Account for padding
+
+                        if (textWidth > containerWidth) {
+                            const scrollDistance = textWidth - containerWidth + 20;
+                            const duration = Math.max(2, scrollDistance / 30); // Speed based on length
+
+                            a.style.setProperty('--scroll-distance', `-${scrollDistance}px`);
+                            a.style.setProperty('--scroll-duration', `${duration}s`);
+                            a.classList.add('scrolling');
+                        }
+                    });
+
+                    a.addEventListener('mouseleave', function () {
+                        a.classList.remove('scrolling');
+                    });
+
+                    return a;
+                };
+
+                // Re-render if pages already loaded
+                if (typeof allPages !== 'undefined' && allPages && allPages.length > 0) {
+                    renderAll();
+                }
+            })();
+        </script>
+    </div>
+    <script>
+        // Consolidated copy confirm handler - removes old handlers and adds proper auto-formatting
+        (function () {
+            const copyConfirmBtn = document.getElementById('copyConfirmBtn');
+            const copyNewPageName = document.getElementById('copyNewPageName');
+            const copyPageTitle = document.getElementById('copyPageTitle');
+            const copyPageCategories = document.getElementById('copyPageCategories');
+            const copyPageModal = document.getElementById('copyPageModal');
+            const copySourcePageDisplay = document.getElementById('copySourcePageDisplay');
+
+            // Remove all existing click handlers by cloning
+            const newBtn = copyConfirmBtn.cloneNode(true);
+            copyConfirmBtn.parentNode.replaceChild(newBtn, copyConfirmBtn);
+
+            newBtn.addEventListener('click', async () => {
+                if (!currentCopySource) return;
+                const newTitle = copyPageTitle.value.trim();
+                let newName = copyNewPageName.value.trim();
+
+                // Derive page name from title if left blank
+                if (!newName && newTitle) {
+                    newName = newTitle;
+                }
+
+                if (!newName) {
+                    alert('Please enter a title or page name.');
+                    copyPageTitle.focus();
+                    return;
+                }
+
+                // Auto-format: lowercase and replace spaces with underscores
+                newName = newName.toLowerCase().replace(/\s+/g, '_');
+
+                // Remove any remaining invalid characters
+                newName = newName.replace(/[^a-z0-9_-]/g, '');
+
+                if (!newName) {
+                    alert('Page name must contain at least one valid character (letters, numbers, hyphens, or underscores).');
+                    copyPageTitle.focus();
+                    return;
+                }
+                const newCategories = copyPageCategories.value
+                    .split(',')
+                    .map(c => c.trim())
+                    .filter(c => c.length > 0);
+
+                try {
+                    const body = {
+                        name: newName,
+                        title: newTitle,
+                        categories: newCategories
+                    };
+                    const res = await fetch('/api/pages/' + encodeURIComponent(currentCopySource.name) + '/copy', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    if (!res.ok) {
+                        const data = await res.json().catch(() => ({}));
+                        throw new Error(data.error || 'Failed to copy page');
+                    }
+                    copyPageModal.classList.remove('show');
+                    currentCopySource = null;
+                    // Navigate to the new page
+                    window.location.href = '/' + newName;
+                } catch (err) {
+                    console.error('Error copying page:', err);
+                    alert('Failed to copy page: ' + err.message);
+                }
+            });
+        })();
+    </script>
+    <script>
+        // Basic chat functionality
+        document.getElementById("chatInput").focus();
+        document.getElementById("chatForm").addEventListener('submit', () => {
+            document.getElementById("loadingOverlay").style.display = 'flex';
+            document.getElementById("chatForm").action = window.location.pathname;
+        });
+        document.getElementById("saveLink").addEventListener("click", function () {
+            const pageName = prompt("Enter the name of the page to save as:");
+            if (pageName) {
+                window.location.href = `${window.location.pathname}/save?name=${encodeURIComponent(pageName)}`;
+            }
+        });
+        document.getElementById("resetLink").addEventListener("click", function () {
+            window.location.href = `${window.location.pathname}/reset`;
+        });
+        window.onload = function () {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+        };
+
+        // ---- Page data & state ----
+        let allPages = [];
+        let activeCategory = 'All';
+        let searchTerm = '';
+        let contextTarget = null;
+        const BUILDER_PAGE = 'builder';
+        let visibleCategories = [];
+        let overflowCategories = [];
+
+        // ---- Render helpers ----
+        function displayName(page) {
+            return page.title || page.name;
+        }
+
+        function createPageLink(page, isBuilder = false) {
+            const a = document.createElement('a');
+            a.href = '/' + page.name;
+            a.textContent = displayName(page);
+            let classes = 'page-link';
+            if (isBuilder) {
+                classes += ' builder-page';
+            } else if (page.pinned) {
+                classes += ' pinned';
+            }
+            a.className = classes;
+
+            if (!isBuilder) {
+                a.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    showContextMenu(e, page);
+                });
+            }
+            return a;
+        }
+
+        function renderFavorites() {
+            const section = document.getElementById('favoritesSection');
+            const grid = document.getElementById('favoritesGrid');
+            grid.innerHTML = '';
+
+            const builderPage = allPages.find(p => p.name === BUILDER_PAGE);
+            if (builderPage) {
+                grid.appendChild(createPageLink(builderPage, true));
+            }
+
+            const pinned = allPages
+                .filter(p => p.pinned && p.name !== BUILDER_PAGE)
+                .sort((a, b) => displayName(a).localeCompare(displayName(b)));
+
+            pinned.forEach(p => grid.appendChild(createPageLink(p)));
+
+            if (builderPage || pinned.length > 0) {
+                section.style.display = '';
+            } else {
+                section.style.display = 'none';
+            }
+        }
+
+        function getAllCategories() {
+            const cats = new Set();
+            allPages.filter(p => p.name !== BUILDER_PAGE).forEach(p => p.categories.forEach(c => cats.add(c)));
+            return Array.from(cats).sort();
+        }
+
+        function renderFilterBar() {
+            const container = document.querySelector('.filter-buttons-container');
+            const moreDropdown = document.getElementById('moreDropdown');
+            const moreMenu = document.getElementById('moreMenu');
+
+            container.innerHTML = '';
+            moreMenu.innerHTML = '';
+
+            // Always add "All" first
+            const allBtn = document.createElement('button');
+            allBtn.className = 'filter-btn' + (activeCategory === 'All' ? ' active' : '');
+            allBtn.textContent = 'All';
+            allBtn.dataset.category = 'All';
+            allBtn.addEventListener('click', () => setCategory('All'));
+            container.appendChild(allBtn);
+
+            // Add visible categories
+            visibleCategories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-btn' + (activeCategory === cat ? ' active' : '');
+                btn.textContent = cat;
+                btn.dataset.category = cat;
+                btn.addEventListener('click', () => setCategory(cat));
+                container.appendChild(btn);
+            });
+
+            // Handle overflow categories
+            if (overflowCategories.length > 0) {
+                moreDropdown.style.display = '';
+                const moreBtn = document.getElementById('moreBtn');
+                moreBtn.className = 'filter-btn more-btn' + (overflowCategories.includes(activeCategory) ? ' active' : '');
+
+                overflowCategories.forEach(cat => {
+                    const item = document.createElement('div');
+                    item.className = 'more-menu-item' + (activeCategory === cat ? ' active' : '');
+                    item.textContent = cat;
+                    item.addEventListener('click', () => {
+                        setCategory(cat);
+                        hideMoreMenu();
+                    });
+                    moreMenu.appendChild(item);
+                });
+            } else {
+                moreDropdown.style.display = 'none';
+            }
+        }
+
+        function calculateVisibleCategories() {
+            const allCats = getAllCategories();
+            const filterBar = document.getElementById('filterBar');
+            const searchInput = document.getElementById('searchInput');
+
+            if (!filterBar) return;
+
+            const barWidth = filterBar.offsetWidth;
+            const searchWidth = searchInput.offsetWidth + 8; // plus gap
+            const moreButtonWidth = 80; // approximate width of "More ▾" button
+            const allButtonWidth = 50; // approximate width of "All" button
+            const gap = 8;
+
+            let availableWidth = barWidth - searchWidth - allButtonWidth - gap * 2;
+
+            visibleCategories = [];
+            overflowCategories = [];
+
+            // Create temp element to measure button widths
+            const temp = document.createElement('button');
+            temp.className = 'filter-btn';
+            temp.style.visibility = 'hidden';
+            temp.style.position = 'absolute';
+            document.body.appendChild(temp);
+
+            let usedWidth = 0;
+            let needsOverflow = false;
+
+            for (let i = 0; i < allCats.length; i++) {
+                temp.textContent = allCats[i];
+                const btnWidth = temp.offsetWidth + gap;
+
+                // Check if we need to reserve space for "More" button
+                const remainingCats = allCats.length - i;
+                const spaceNeeded = needsOverflow ? 0 : (remainingCats > 1 ? moreButtonWidth + gap : 0);
+
+                if (usedWidth + btnWidth + spaceNeeded <= availableWidth && !needsOverflow) {
+                    visibleCategories.push(allCats[i]);
+                    usedWidth += btnWidth;
+                } else {
+                    needsOverflow = true;
+                    overflowCategories.push(allCats[i]);
+                }
+            }
+
+            // If only one category would overflow, try to fit it
+            if (overflowCategories.length === 1 && visibleCategories.length > 0) {
+                temp.textContent = overflowCategories[0];
+                const lastBtnWidth = temp.offsetWidth + gap;
+                if (usedWidth + lastBtnWidth <= availableWidth) {
+                    visibleCategories.push(overflowCategories.pop());
+                }
+            }
+
+            document.body.removeChild(temp);
+        }
+
+        function renderPages() {
+            const grid = document.getElementById('pagesGrid');
+            grid.innerHTML = '';
+            const term = searchTerm.toLowerCase();
+            allPages.forEach(p => {
+                if (p.name === BUILDER_PAGE) return;
+                if (activeCategory !== 'All' && !p.categories.includes(activeCategory)) return;
+                if (term && !p.name.toLowerCase().includes(term) && !displayName(p).toLowerCase().includes(term)) return;
+                grid.appendChild(createPageLink(p));
+            });
+        }
+
+        function setCategory(cat) {
+            activeCategory = cat;
+            renderFilterBar();
+            renderPages();
+        }
+
+        function renderAll() {
+            renderFavorites();
+            calculateVisibleCategories();
+            renderFilterBar();
+            renderPages();
+        }
+
+        // ---- Search ----
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchTerm = e.target.value;
+            renderPages();
+        });
+
+        // ---- More menu ----
+        const moreBtn = document.getElementById('moreBtn');
+        const moreMenu = document.getElementById('moreMenu');
+
+        moreBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            moreMenu.classList.toggle('show');
+        });
+
+        function hideMoreMenu() {
+            moreMenu.classList.remove('show');
+        }
+
+        // ---- Context menu ----
+        const contextMenu = document.getElementById('contextMenu');
+        const pinMenuItem = document.getElementById('pinMenuItem');
+
+        function showContextMenu(e, page) {
+            if (page.name === BUILDER_PAGE) return;
+
+            contextTarget = page;
+            pinMenuItem.textContent = page.pinned ? 'Unpin from Favorites' : 'Pin to Favorites';
+            contextMenu.style.left = e.clientX + 'px';
+            contextMenu.style.top = e.clientY + 'px';
+            contextMenu.style.display = 'block';
+        }
+
+        function hideContextMenu() {
+            contextMenu.style.display = 'none';
+            contextTarget = null;
+        }
+
+        document.addEventListener('click', () => {
+            hideContextMenu();
+            hideMoreMenu();
+        });
+        contextMenu.addEventListener('click', (e) => e.stopPropagation());
+
+        pinMenuItem.addEventListener('click', async () => {
+            if (!contextTarget) return;
+            const pageName = contextTarget.name;
+            const newPinned = !contextTarget.pinned;
+            const categories = contextTarget.categories || [];
+            hideContextMenu();
+
+            try {
+                const res = await fetch('/api/pages/' + encodeURIComponent(pageName), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ categories: categories, pinned: newPinned })
+                });
+
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    throw new Error('Failed to update page metadata: ' + errorText);
+                }
+
+                const pageIndex = allPages.findIndex(p => p.name === pageName);
+                if (pageIndex !== -1) {
+                    allPages[pageIndex].pinned = newPinned;
+                    renderAll();
+                }
+
+                await loadPages();
+            } catch (err) {
+                console.error('Error toggling pin:', err);
+                alert('Failed to update pin status: ' + err.message);
+            }
+        });
+
+        // ---- Resize observer ----
+        const resizeObserver = new ResizeObserver(() => {
+            calculateVisibleCategories();
+            renderFilterBar();
+        });
+        resizeObserver.observe(document.getElementById('filterBar'));
+
+        // ---- Load pages from API ----
+        async function loadPages() {
+            try {
+                const res = await fetch('/api/pages');
+                if (!res.ok) throw new Error('Failed to fetch pages');
+                allPages = await res.json();
+                renderAll();
+            } catch (err) {
+                console.error('Error fetching pages:', err);
+            }
+        }
+
+        loadPages();
+    </script>
+    <script>
+        // Basic chat functionality
+        document.getElementById("chatInput").focus();
+        document.getElementById("chatForm").addEventListener('submit', () => {
+            document.getElementById("loadingOverlay").style.display = 'flex';
+            document.getElementById("chatForm").action = window.location.pathname;
+        });
+        document.getElementById("saveLink").addEventListener("click", function () {
+            const pageName = prompt("Enter the name of the page to save as:");
+            if (pageName) {
+                window.location.href = `${window.location.pathname}/save?name=${encodeURIComponent(pageName)}`;
+            }
+        });
+        document.getElementById("resetLink").addEventListener("click", function () {
+            window.location.href = `${window.location.pathname}/reset`;
+        });
+        window.onload = function () {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+        };
+
+        // ---- Page data & state ----
+        let allPages = [];
+        let activeCategory = 'All';
+        let searchTerm = '';
+        let contextTarget = null; // { name, pinned }
+
+        // ---- Render helpers ----
+        function displayName(page) {
+            return page.title || page.name;
+        }
+
+        function createPageLink(page) {
+            const a = document.createElement('a');
+            a.href = '/' + page.name;
+            a.textContent = displayName(page);
+            a.className = 'page-link' + (page.pinned ? ' pinned' : '');
+            a.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                showContextMenu(e, page);
+            });
+            return a;
+        }
+
+        function renderFavorites() {
+            const pinned = allPages.filter(p => p.pinned);
+            const section = document.getElementById('favoritesSection');
+            const grid = document.getElementById('favoritesGrid');
+            grid.innerHTML = '';
+            if (pinned.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+            section.style.display = '';
+            pinned.forEach(p => grid.appendChild(createPageLink(p)));
+        }
+
+        function renderFilterBar() {
+            const bar = document.getElementById('filterBar');
+            // Remove old category buttons (keep the search input)
+            const searchInput = document.getElementById('searchInput');
+            bar.innerHTML = '';
+
+            // Collect unique categories
+            const cats = new Set();
+            allPages.forEach(p => p.categories.forEach(c => cats.add(c)));
+            const sorted = Array.from(cats).sort();
+
+            // "All" button first
+            const allBtn = document.createElement('button');
+            allBtn.className = 'filter-btn' + (activeCategory === 'All' ? ' active' : '');
+            allBtn.textContent = 'All';
+            allBtn.dataset.category = 'All';
+            allBtn.addEventListener('click', () => setCategory('All'));
+            bar.appendChild(allBtn);
+
+            sorted.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-btn' + (activeCategory === cat ? ' active' : '');
+                btn.textContent = cat;
+                btn.dataset.category = cat;
+                btn.addEventListener('click', () => setCategory(cat));
+                bar.appendChild(btn);
+            });
+
+            bar.appendChild(searchInput);
+        }
+
+        function renderPages() {
+            const grid = document.getElementById('pagesGrid');
+            grid.innerHTML = '';
+            const term = searchTerm.toLowerCase();
+            allPages.forEach(p => {
+                // Category filter
+                if (activeCategory !== 'All' && !p.categories.includes(activeCategory)) return;
+                // Search filter (match name or title)
+                if (term && !p.name.toLowerCase().includes(term) && !displayName(p).toLowerCase().includes(term)) return;
+                grid.appendChild(createPageLink(p));
+            });
+        }
+
+        function setCategory(cat) {
+            activeCategory = cat;
+            renderFilterBar();
+            renderPages();
+        }
+
+        function renderAll() {
+            renderFavorites();
+            renderFilterBar();
+            renderPages();
+        }
+
+        // ---- Search ----
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchTerm = e.target.value;
+            renderPages();
+        });
+
+        // ---- Context menu ----
+        const contextMenu = document.getElementById('contextMenu');
+        const pinMenuItem = document.getElementById('pinMenuItem');
+
+        function showContextMenu(e, page) {
+            contextTarget = page;
+            pinMenuItem.textContent = page.pinned ? 'Unpin from Favorites' : 'Pin to Favorites';
+            contextMenu.style.left = e.clientX + 'px';
+            contextMenu.style.top = e.clientY + 'px';
+            contextMenu.style.display = 'block';
+        }
+
+        function hideContextMenu() {
+            contextMenu.style.display = 'none';
+            contextTarget = null;
+        }
+
+        document.addEventListener('click', hideContextMenu);
+        contextMenu.addEventListener('click', (e) => e.stopPropagation());
+
+        pinMenuItem.addEventListener('click', async () => {
+            if (!contextTarget) return;
+            const pageName = contextTarget.name;
+            const newPinned = !contextTarget.pinned;
+            const categories = contextTarget.categories || [];
+            hideContextMenu();
+
+            try {
+                const res = await fetch('/api/pages/' + encodeURIComponent(pageName), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ categories: categories, pinned: newPinned })
+                });
+
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    throw new Error('Failed to update page metadata: ' + errorText);
+                }
+
+                // Update local state immediately for responsive UI
+                const pageIndex = allPages.findIndex(p => p.name === pageName);
+                if (pageIndex !== -1) {
+                    allPages[pageIndex].pinned = newPinned;
+                    renderAll();
+                }
+
+                // Also reload from server to ensure consistency
+                await loadPages();
+            } catch (err) {
+                console.error('Error toggling pin:', err);
+                alert('Failed to update pin status: ' + err.message);
+            }
+        });
+
+        // ---- Load pages from API ----
+        async function loadPages() {
+            try {
+                const res = await fetch('/api/pages');
+                if (!res.ok) throw new Error('Failed to fetch pages');
+                allPages = await res.json();
+                renderAll();
+            } catch (err) {
+                console.error('Error fetching pages:', err);
+            }
+        }
+
+        loadPages();
+    </script>
+    <script>
+        // Modal functionality
+        const editPageModal = document.getElementById('editPageModal');
+        const copyPageModal = document.getElementById('copyPageModal');
+        const editMenuItem = document.getElementById('editMenuItem');
+        const copyMenuItem = document.getElementById('copyMenuItem');
+
+        // Edit modal elements
+        const editPageName = document.getElementById('editPageName');
+        const editPageTitle = document.getElementById('editPageTitle');
+        const editPageCategories = document.getElementById('editPageCategories');
+        const editPagePinned = document.getElementById('editPagePinned');
+        const editCancelBtn = document.getElementById('editCancelBtn');
+        const editSaveBtn = document.getElementById('editSaveBtn');
+        const deletePageBtn = document.getElementById('deletePageBtn');
+
+        // Copy modal elements
+        const copySourcePage = document.getElementById('copySourcePage');
+        const copyNewPageName = document.getElementById('copyNewPageName');
+        const copyCancelBtn = document.getElementById('copyCancelBtn');
+        const copyConfirmBtn = document.getElementById('copyConfirmBtn');
+
+        let currentEditPage = null;
+
+        // Show edit modal
+        editMenuItem.addEventListener('click', () => {
+            if (!contextTarget) return;
+            currentEditPage = contextTarget;
+            editPageName.value = contextTarget.name;
+            editPageTitle.value = contextTarget.title || '';
+            editPageCategories.value = (contextTarget.categories || []).join(', ');
+            editPagePinned.checked = contextTarget.pinned || false;
+            hideContextMenu();
+            editPageModal.classList.add('show');
+        });
+
+        // Show copy modal
+        copyMenuItem.addEventListener('click', () => {
+            if (!contextTarget) return;
+            copySourcePage.value = displayName(contextTarget);
+            document.getElementById('copyPageTitle').value = '';
+            copyNewPageName.value = '';
+            hideContextMenu();
+            copyPageModal.classList.add('show');
+            document.getElementById('copyPageTitle').focus();
+        });
+
+        // Close modals
+        function closeEditModal() {
+            editPageModal.classList.remove('show');
+            currentEditPage = null;
+        }
+
+        function closeCopyModal() {
+            copyPageModal.classList.remove('show');
+        }
+
+        editCancelBtn.addEventListener('click', closeEditModal);
+        copyCancelBtn.addEventListener('click', closeCopyModal);
+
+        // Close on overlay click
+        editPageModal.addEventListener('click', (e) => {
+            if (e.target === editPageModal) closeEditModal();
+        });
+        copyPageModal.addEventListener('click', (e) => {
+            if (e.target === copyPageModal) closeCopyModal();
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeEditModal();
+                closeCopyModal();
+            }
+        });
+
+        // Save edit changes
+        editSaveBtn.addEventListener('click', async () => {
+            if (!currentEditPage) return;
+
+            const newTitle = editPageTitle.value.trim();
+            const newCategories = editPageCategories.value
+                .split(',')
+                .map(c => c.trim())
+                .filter(c => c.length > 0);
+            const newPinned = editPagePinned.checked;
+            const newMode = document.getElementById('editPageLocked').checked ? 'locked' : 'unlocked';
+
+            try {
+                const res = await fetch('/api/pages/' + encodeURIComponent(currentEditPage.name), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: newTitle || undefined,
+                        categories: newCategories,
+                        pinned: newPinned,
+                        mode: newMode
+                    })
+                });
+
+                if (!res.ok) throw new Error('Failed to update page');
+
+                closeEditModal();
+                await loadPages();
+            } catch (err) {
+                console.error('Error saving page:', err);
+                alert('Failed to save changes: ' + err.message);
+            }
+        });
+
+        // Delete page — show themed confirmation modal
+        const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+        const deletePageNameDisplay2 = document.getElementById('deletePageNameDisplay2');
+        const deleteCancelBtn = document.getElementById('deleteCancelBtn');
+        const deleteConfirmBtn = document.getElementById('deleteConfirmBtn');
+
+        let currentDeletePage = null;
+
+        function closeDeleteModal() {
+            deleteConfirmModal.classList.remove('show');
+            currentDeletePage = null;
+        }
+
+        deleteCancelBtn.addEventListener('click', closeDeleteModal);
+        deleteConfirmModal.addEventListener('click', (e) => {
+            if (e.target === deleteConfirmModal) closeDeleteModal();
+        });
+
+        deletePageBtn.addEventListener('click', () => {
+            if (!currentEditPage) return;
+            currentDeletePage = currentEditPage;
+            deletePageNameDisplay2.textContent = displayName(currentEditPage);
+            closeEditModal();
+            deleteConfirmModal.classList.add('show');
+        });
+
+        deleteConfirmBtn.addEventListener('click', async () => {
+            if (!currentDeletePage) return;
+            const pageName = currentDeletePage.name;
+            closeDeleteModal();
+            try {
+                const res = await fetch('/api/pages/' + encodeURIComponent(pageName), {
+                    method: 'DELETE'
+                });
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    throw new Error(data.error || 'Failed to delete page');
+                }
+                await loadPages();
+            } catch (err) {
+                console.error('Error deleting page:', err);
+                alert('Failed to delete page: ' + err.message);
+            }
+        });
+
+        // Also close delete modal on Escape (extend existing handler)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeDeleteModal();
+        });
+
+        // (copy confirm handler moved to re-bind block below)
+    </script>
+    <script>
+        // Update edit modal to use new page name display
+        const editPageNameDisplay = document.getElementById('editPageNameDisplay');
+
+        // Override the edit menu click handler
+        editMenuItem.removeEventListener('click', editMenuItem._handler);
+        editMenuItem._handler = () => {
+            if (!contextTarget) return;
+            currentEditPage = contextTarget;
+            editPageNameDisplay.textContent = contextTarget.name;
+            editPageTitle.value = contextTarget.title || '';
+            editPageCategories.value = (contextTarget.categories || []).join(', ');
+            editPagePinned.checked = contextTarget.pinned || false;
+            document.getElementById('editPageLocked').checked = (contextTarget.mode === 'locked');
+            hideContextMenu();
+            editPageModal.classList.add('show');
+        };
+        editMenuItem.addEventListener('click', editMenuItem._handler);
+    </script>
+    <script id="error"
+        type="application/json">{"message":"Something went wrong try again","details":"delete: node 53 not found"}</script>
+    <script>
+        // Re-bind copy modal elements after DOM update
+        const copySourcePageDisplay = document.getElementById('copySourcePageDisplay');
+        const copyPageCategories = document.getElementById('copyPageCategories');
+        const newCopyNewPageName = document.getElementById('copyNewPageName');
+        const newCopyCancelBtn = document.getElementById('copyCancelBtn');
+        const newCopyConfirmBtn = document.getElementById('copyConfirmBtn');
+        const newCopyPageModal = document.getElementById('copyPageModal');
+
+        let currentCopySource = null;
+
+        function closeCopyModalNew() {
+            newCopyPageModal.classList.remove('show');
+            currentCopySource = null;
+        }
+
+        newCopyCancelBtn.addEventListener('click', closeCopyModalNew);
+        newCopyPageModal.addEventListener('click', (e) => {
+            if (e.target === newCopyPageModal) closeCopyModalNew();
+        });
+
+        // Update copy menu item handler — save contextTarget before hideContextMenu nulls it
+        copyMenuItem.removeEventListener('click', copyMenuItem._handler);
+        copyMenuItem._handler = () => {
+            if (!contextTarget) return;
+            currentCopySource = contextTarget;
+            copySourcePageDisplay.textContent = displayName(contextTarget);
+            document.getElementById('copyPageTitle').value = '';
+            copyPageCategories.value = (contextTarget.categories || []).join(', ');
+            newCopyNewPageName.value = '';
+            hideContextMenu();
+            newCopyPageModal.classList.add('show');
+            document.getElementById('copyPageTitle').focus();
+        };
+        copyMenuItem.addEventListener('click', copyMenuItem._handler);
+
+        // (copy confirm handler handled by consolidated IIFE and override block)
     </script>
 
 
-</body></html>
+    <script>
+        // Override the copy confirm handler to auto-format page name
+        newCopyConfirmBtn.removeEventListener('click', newCopyConfirmBtn._handler);
+        newCopyConfirmBtn._handler = async () => {
+            if (!currentCopySource) return;
+            const newTitle = document.getElementById('copyPageTitle').value.trim();
+            let newName = newCopyNewPageName.value.trim();
+
+            // Derive page name from title if left blank
+            if (!newName && newTitle) {
+                newName = newTitle;
+            }
+
+            if (!newName) {
+                alert('Please enter a title or page name.');
+                document.getElementById('copyPageTitle').focus();
+                return;
+            }
+
+            // Auto-format: lowercase and replace spaces with underscores
+            newName = newName.toLowerCase().replace(/\s+/g, '_');
+
+            // Remove any remaining invalid characters
+            newName = newName.replace(/[^a-z0-9_-]/g, '');
+
+            if (!newName) {
+                alert('Page name must contain at least one valid character (letters, numbers, hyphens, or underscores).');
+                document.getElementById('copyPageTitle').focus();
+                return;
+            }
+            const newCategories = copyPageCategories.value
+                .split(',')
+                .map(c => c.trim())
+                .filter(c => c.length > 0);
+
+            try {
+                const body = {
+                    name: newName,
+                    title: newTitle,
+                    categories: newCategories
+                };
+                const res = await fetch('/api/pages/' + encodeURIComponent(currentCopySource.name) + '/copy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    throw new Error(data.error || 'Failed to copy page');
+                }
+                closeCopyModalNew();
+                // Navigate to the new page
+                window.location.href = '/' + newName;
+            } catch (err) {
+                console.error('Error copying page:', err);
+                alert('Failed to copy page: ' + err.message);
+            }
+        };
+        newCopyConfirmBtn.addEventListener('click', newCopyConfirmBtn._handler);
+    </script>
+    <script>
+        // Advanced options toggle
+        document.getElementById('advancedToggle').addEventListener('click', function () {
+            const content = document.getElementById('advancedContent');
+            const icon = this.querySelector('.toggle-icon');
+
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.classList.add('open');
+            } else {
+                content.style.display = 'none';
+                icon.classList.remove('open');
+            }
+        });
+    </script>
+    <script>
+        // Enhanced page link creation with scroll effect for long titles
+        (function () {
+            const originalCreatePageLink = createPageLink;
+
+            createPageLink = function (page, isBuilder = false) {
+                const a = document.createElement('a');
+                a.href = '/' + page.name;
+
+                const title = displayName(page);
+                const span = document.createElement('span');
+                span.className = 'scroll-text';
+                span.textContent = title;
+                a.appendChild(span);
+                a.title = title; // Tooltip fallback
+
+                let classes = 'page-link';
+                if (isBuilder) {
+                    classes += ' builder-page';
+                } else if (page.pinned) {
+                    classes += ' pinned';
+                }
+                a.className = classes;
+
+                // Context menu handler
+                a.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    showContextMenu(e, page);
+                });
+
+                // Hover scroll effect for long titles
+                a.addEventListener('mouseenter', function () {
+                    const textWidth = span.scrollWidth;
+                    const containerWidth = a.clientWidth - 32; // Account for padding
+
+                    if (textWidth > containerWidth) {
+                        const scrollDistance = textWidth - containerWidth + 20;
+                        const duration = Math.max(2, scrollDistance / 30); // Speed based on length
+
+                        a.style.setProperty('--scroll-distance', `-${scrollDistance}px`);
+                        a.style.setProperty('--scroll-duration', `${duration}s`);
+                        a.classList.add('scrolling');
+                    }
+                });
+
+                a.addEventListener('mouseleave', function () {
+                    a.classList.remove('scrolling');
+                });
+
+                return a;
+            };
+
+            // Re-render if pages already loaded
+            if (allPages && allPages.length > 0) {
+                renderAll();
+            }
+        })();
+    </script>
+</body>
+
+</html>

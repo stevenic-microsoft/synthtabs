@@ -17,6 +17,8 @@ export interface TransformPageArgs extends AgentArgs {
     modelInstructions?: string;
     /** Active theme metadata for theme-aware page generation. */
     themeInfo?: ThemeInfo;
+    /** Page mode. */
+    mode?: 'unlocked' | 'locked';
 }
 
 export type ChangeOp =
@@ -103,6 +105,7 @@ export async function transformPage(args: TransformPageArgs): Promise<AgentCompl
  */
 export function assignNodeIds(html: string): { html: string; nodeCount: number } {
     const $ = cheerio.load(html, { decodeEntities: false });
+
     let counter = 0;
     $('*').each(function (this: cheerio.Element) {
         const el = $(this);

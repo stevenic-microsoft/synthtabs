@@ -1,4 +1,4 @@
-import { loadPageState, normalizePageName, savePageState, updatePageState } from "../pages";
+import { loadPageMetadata, loadPageState, normalizePageName, savePageMetadata, savePageState, updatePageState } from "../pages";
 import { hasConfiguredSettings, loadSettings } from "../settings";
 import { Application } from 'express';
 import { transformPage } from "./transformPage";
@@ -9,8 +9,17 @@ import { completePrompt } from "agentm-core";
 import { green, red, dim, estimateTokens } from "./debugLog";
 import { loadThemeInfo } from "../themes";
 
-const HOME_PAGE_ROUTE = '/home';
+const HOME_PAGE_ROUTE = '/builder';
 const PAGE_NOT_FOUND = 'Page not found';
+
+function injectPageInfoScript(html: string, pageName: string): string {
+    const tag = `<script id="page-info" src="/api/page-info.js?page=${encodeURIComponent(pageName)}"></script>`;
+    const idx = html.indexOf('</head>');
+    if (idx !== -1) {
+        return html.slice(0, idx) + tag + '\n' + html.slice(idx);
+    }
+    return tag + '\n' + html;
+}
 
 export function usePageRoutes(config: SynthOSConfig, app: Application): void {
     // Redirect / to /home page
@@ -33,7 +42,7 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
             return;
         }
 
-        res.send(pageState);
+        res.send(injectPageInfoScript(pageState, page));
     });
 
     // Page reset
@@ -66,8 +75,9 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
             return;
         }
 
-        // Normalize and validate save-as parameter
-        const saveAs = normalizePageName(req.query['name'] as string);
+        // Capture raw name before normalization for use as title
+        const rawName = req.query['name'] as string;
+        const saveAs = normalizePageName(rawName);
         if (!saveAs) {
             res.status(400).send('Invalid or missing name parameter');
             return;
@@ -81,7 +91,7 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
         }
 
         // Save as new page and redirect to saved page
-        await savePageState(config.pagesFolder, saveAs, pageState);
+        await savePageState(config.pagesFolder, saveAs, pageState, rawName);
         res.redirect(`/${saveAs}`);
     });
 
@@ -152,6 +162,14 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
                     console.log(`  page: ${page} | message: ${message.length} chars | changes: ${changeCount} ops | ~${inTokens} in / ~${outTokens} out tokens`);
                 }
                 updatePageState(page, html);
+
+                // Update lastModified timestamp in page metadata
+                const metadata = await loadPageMetadata(pagesFolder, page);
+                if (metadata) {
+                    metadata.lastModified = new Date().toISOString();
+                    await savePageMetadata(pagesFolder, page, metadata);
+                }
+
                 res.send(html);
             } else {
                 throw result.error;

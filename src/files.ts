@@ -36,6 +36,13 @@ export async function listFiles(path: string): Promise<string[]> {
     return (await fs.readdir(path)).filter(file => !file.startsWith('.') && file.includes('.'));
 }
 
+export async function listFolders(dirPath: string): Promise<string[]> {
+    const entries = await fs.readdir(dirPath, { withFileTypes: true });
+    return entries
+        .filter(entry => entry.isDirectory() && !entry.name.startsWith('.'))
+        .map(entry => entry.name);
+}
+
 export async function loadFile(path: string): Promise<string> {
     return await fs.readFile(path, 'utf8');
 }
@@ -46,4 +53,8 @@ export async function saveFile(path: string, content: string): Promise<void> {
 
 export async function deleteFile(path: string): Promise<void> {
     await fs.unlink(path);
+}
+
+export async function deleteFolder(dirPath: string): Promise<void> {
+    await fs.rm(dirPath, { recursive: true });
 }

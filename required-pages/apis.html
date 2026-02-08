@@ -107,9 +107,67 @@
             <div class="api-section">
                 <div class="api-header" onclick="toggleSection(this)">GET /api/pages</div>
                 <div class="api-content">
-                    This operation retrieves a list of all available pages. The response is an array of page names.
+                    This operation retrieves a list of all available pages. The response is an array of page objects with name, title, categories, pinned, createdDate, lastModified, pageVersion, and mode.
                     <div class="api-input">
                         <button onclick="callApi(event, 'GET', '/api/pages')">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">GET /api/pages/:name</div>
+                <div class="api-content">
+                    This operation retrieves the metadata for a single page, including title, categories, pinned, createdDate, lastModified, pageVersion, and mode.
+                    <div class="api-input">
+                        <input type="text" placeholder="Page Name" />
+                        <button onclick="callPageApi(event, 'GET')">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">POST /api/pages/:name</div>
+                <div class="api-content">
+                    This operation merges metadata for a page. Send only the fields you want to update. Supported fields: title (string), categories (array of strings), pinned (boolean), mode ("unlocked" | "locked"). The lastModified timestamp is auto-set on each update. The createdDate and pageVersion fields are preserved and cannot be overridden.
+                    <div class="api-input">
+                        <input type="text" placeholder="Page Name" />
+                        <textarea placeholder='{ "title": "My Page", "categories": ["System"], "pinned": true, "mode": "unlocked" }'></textarea>
+                        <button onclick="callPageApi(event, 'POST')">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">POST /api/pages/:name/pin</div>
+                <div class="api-content">
+                    This operation toggles the pinned status for a page. The request body should include pinned (boolean).
+                    <div class="api-input">
+                        <input type="text" placeholder="Page Name" />
+                        <textarea placeholder='{ "pinned": true }'></textarea>
+                        <button onclick="callPageApi(event, 'POST', '/pin')">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">DELETE /api/pages/:name</div>
+                <div class="api-content">
+                    This operation deletes a user page. Required (system) pages cannot be deleted. Returns 400 if the page is a required page, or 404 if not found.
+                    <div class="api-input">
+                        <input type="text" placeholder="Page Name" />
+                        <button onclick="callPageApi(event, 'DELETE')">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">POST /api/pages/:name/copy</div>
+                <div class="api-content">
+                    This operation copies a page to a new name. The source page can be a user page or a required (system) page. The request body should include name (string, required), title (string, optional), and categories (array of strings, optional). Returns 409 if the target page already exists.
+                    <div class="api-input">
+                        <input type="text" placeholder="Page Name" />
+                        <textarea placeholder='{ "name": "new-page-name", "title": "My Copy", "categories": ["Tools"] }'></textarea>
+                        <button onclick="callPageApi(event, 'POST', '/copy')">Submit</button>
                     </div>
                     <div class="api-output"></div>
                 </div>
@@ -221,6 +279,43 @@
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
+                const outputBox = event.target.parentElement.nextElementSibling;
+                outputBox.textContent = JSON.stringify(data, null, 2);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('API call failed! Check console for details.');
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        // Function to call page API endpoints
+        function callPageApi(event, method, suffix) {
+            event.preventDefault();
+            const button = event.target;
+            button.disabled = true;
+            const inputs = event.target.parentElement.querySelectorAll('input, textarea');
+            let pageName = '';
+            let data = null;
+
+            inputs.forEach(input => {
+                if (input.placeholder === 'Page Name') {
+                    pageName = input.value;
+                } else if (input.tagName === 'TEXTAREA') {
+                    data = JSON.parse(input.value);
+                }
+            });
+
+            const url = '/api/pages/' + encodeURIComponent(pageName) + (suffix || '');
+            fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: method === 'POST' ? JSON.stringify(data) : null
+            })
+            .then(response => response.json())
+            .then(data => {
                 const outputBox = event.target.parentElement.nextElementSibling;
                 outputBox.textContent = JSON.stringify(data, null, 2);
             })

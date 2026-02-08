@@ -45,7 +45,7 @@ For Opus (recomended) you'll want to sign up for a developer account at [Anthrop
 
 ## Using SynthOS
 
-Once you've configured your model you will be then sent to the home page. You can then specify any thing you want to create and it will be rendered to the display port.
+Once you've configured your model you will be then sent to the builder page. You can then specify any thing you want to create and it will be rendered to the display port.
 
 <img width="1882" height="980" alt="image" src="https://github.com/user-attachments/assets/57cb01c7-f060-4dfc-8100-de85d850b104" />
 

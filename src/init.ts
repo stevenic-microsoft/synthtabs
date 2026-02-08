@@ -1,5 +1,7 @@
+import * as fs from 'fs/promises';
 import path from "path";
-import { checkIfExists, copyFile, copyFiles, ensureFolderExists, saveFile } from "./files";
+import { checkIfExists, copyFile, copyFiles, deleteFile, ensureFolderExists, listFiles, saveFile } from "./files";
+import { PAGE_VERSION } from "./pages";
 import { DefaultSettings } from "./settings";
 
 export interface SynthOSConfig {
@@ -72,7 +74,7 @@ export async function init(config: SynthOSConfig, includeDefaultPages: boolean =
     // Copy pages
     if (includeDefaultPages) {
         console.log(`Copying default pages to .synthos folder...`);
-        await copyFiles(config.defaultPagesFolder, config.pagesFolder);
+        await copyDefaultPages(config.defaultPagesFolder, config.pagesFolder);
     }
 
     return true;
@@ -108,5 +110,82 @@ async function repairMissingFolders(config: SynthOSConfig): Promise<void> {
         console.log(`Restoring default themes to .synthos folder...`);
         await ensureFolderExists(themesFolder);
         await copyFiles(config.defaultThemesFolder, themesFolder);
+    }
+
+    // Migrate or rebuild pages/ subfolder
+    const pagesSubdir = path.join(config.pagesFolder, 'pages');
+    if (!await checkIfExists(pagesSubdir)) {
+        // Check for legacy flat .html files in root .synthos/
+        const htmlFiles = (await listFiles(config.pagesFolder)).filter(f => f.endsWith('.html'));
+        if (htmlFiles.length > 0) {
+            // Migrate flat files to pages/<name>/page.html + page.json
+            console.log(`Migrating pages to .synthos/pages/ folder...`);
+            await ensureFolderExists(pagesSubdir);
+            const now = new Date().toISOString();
+            for (const file of htmlFiles) {
+                const pageName = file.replace(/\.html$/, '');
+                const category = pageName.startsWith('[') ? 'Builder' : 'Application';
+                const pageFolder = path.join(pagesSubdir, pageName);
+                await ensureFolderExists(pageFolder);
+                await fs.copyFile(
+                    path.join(config.pagesFolder, file),
+                    path.join(pageFolder, 'page.html')
+                );
+                await saveFile(
+                    path.join(pageFolder, 'page.json'),
+                    JSON.stringify({
+                        title: '',
+                        categories: [category],
+                        pinned: false,
+                        createdDate: now,
+                        lastModified: now,
+                        pageVersion: PAGE_VERSION,
+                        mode: 'unlocked',
+                    }, null, 4)
+                );
+                await deleteFile(path.join(config.pagesFolder, file));
+            }
+        } else {
+            // No pages at all — rebuild from defaults
+            console.log(`Restoring default pages to .synthos/pages/ folder...`);
+            await copyDefaultPages(config.defaultPagesFolder, config.pagesFolder);
+        }
+    }
+}
+
+async function copyDefaultPages(srcFolder: string, destFolder: string): Promise<void> {
+    const pagesDir = path.join(destFolder, 'pages');
+    await ensureFolderExists(pagesDir);
+    const files = await fs.readdir(srcFolder);
+    const now = new Date().toISOString();
+    for (const file of files) {
+        if (!file.endsWith('.html')) continue;
+        const pageName = file.replace(/\.html$/, '');
+        const pageFolder = path.join(pagesDir, pageName);
+        await ensureFolderExists(pageFolder);
+        await fs.copyFile(path.join(srcFolder, file), path.join(pageFolder, 'page.html'));
+
+        // Read companion .json metadata from source folder, fall back to defaults
+        let metadata: Record<string, unknown> = {};
+        const jsonPath = path.join(srcFolder, `${pageName}.json`);
+        if (await checkIfExists(jsonPath)) {
+            try {
+                const raw = await fs.readFile(jsonPath, 'utf-8');
+                metadata = JSON.parse(raw);
+            } catch {
+                // use defaults
+            }
+        }
+        const fullMetadata = {
+            title: typeof metadata.title === 'string' ? metadata.title : '',
+            categories: Array.isArray(metadata.categories) ? metadata.categories : [],
+            pinned: typeof metadata.pinned === 'boolean' ? metadata.pinned : false,
+            createdDate: now,
+            lastModified: now,
+            pageVersion: typeof metadata.pageVersion === 'number' ? metadata.pageVersion
+                : typeof metadata.uxVersion === 'number' ? metadata.uxVersion : PAGE_VERSION,
+            mode: metadata.mode === 'locked' ? 'locked' : 'unlocked',
+        };
+        await saveFile(path.join(pageFolder, 'page.json'), JSON.stringify(fullMetadata, null, 4));
     }
 }
