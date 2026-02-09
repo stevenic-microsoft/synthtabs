@@ -229,6 +229,7 @@ Append the users message and a brief response from the AI to the chat panel.
 Maintain the full conversation history in the chat panel unless asked to clear it.
 Any details or visualizations should be rendered to the viewer panel.
 The basic layout structure of the page needs to be maintained.
+NEVER modify, remove, or replace the chat panel form (#chatForm), the chat input (#chatInput), the send/submit button (.chat-submit), or the link-group containing Save (#saveLink), Pages, and Reset (#resetLink) links. These elements are critical infrastructure — leave them exactly as they are.
 You're free to write any additional CSS or JavaScript to enhance the page.
 Use the synthos.* helper functions (available globally) for all server API calls instead of raw fetch().
 Write an explication of your reasoning or any hidden thoughts to the thoughts div.
