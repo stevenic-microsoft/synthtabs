@@ -56,7 +56,7 @@ export async function transformPage(args: TransformPageArgs): Promise<AgentCompl
             const colorList = Object.entries(colors)
                 .map(([name, value]) => `  --${name}: ${value}`)
                 .join('\n');
-            themeBlock = `<THEME>\nMode: ${mode}\nCSS custom properties (use instead of hardcoded values):\n${colorList}\n\nShared shell classes (pre-styled by theme, do not redefine):\n  .chat-panel — Left sidebar container (30% width)\n  .chat-header — Chat panel title bar\n  .chat-messages — Scrollable message container\n  .chat-message — Individual message wrapper\n  .link-group — Navigation links row (Save, Pages, Reset)\n  .chat-input — Message text input\n  .chat-submit — Send button\n  .viewer-panel — Right content area (70% width)\n  .loading-overlay — Full-screen loading overlay\n  .spinner — Animated loading spinner\n\nPage title bars: To align with the chat header, apply these styles:\n  min-height: var(--header-min-height);\n  padding: var(--header-padding-vertical) var(--header-padding-horizontal);\n  line-height: var(--header-line-height);\n  display: flex; align-items: center; justify-content: center; box-sizing: border-box;\n\nFull-viewer mode: For games, animations, or full-screen content, add class "full-viewer" to the viewer-panel element to remove its padding.\n\nThe <html> element has class "${mode}-mode". Always add .light-mode CSS overrides for any page-specific styles so the page works in both light and dark themes, unless the user has explicitly requested a very specific color scheme.\n\n`;
+            themeBlock = `<THEME>\nMode: ${mode}\nCSS custom properties (use instead of hardcoded values):\n${colorList}\n\nShared shell classes (pre-styled by theme, do not redefine):\n  .chat-panel — Left sidebar container (30% width)\n  .chat-header — Chat panel title bar\n  .chat-messages — Scrollable message container\n  .chat-message — Individual message wrapper\n  .link-group — Navigation links row (Save, Pages, Reset)\n  .chat-input — Message text input\n  .chat-submit — Send button\n  .viewer-panel — Right content area (70% width)\n  .loading-overlay — Full-screen loading overlay\n  .spinner — Animated loading spinner\n\nPage title bars: To align with the chat header, apply these styles:\n  min-height: var(--header-min-height);\n  padding: var(--header-padding-vertical) var(--header-padding-horizontal);\n  line-height: var(--header-line-height);\n  display: flex; align-items: center; justify-content: center; box-sizing: border-box;\n\nFull-viewer mode: For games, animations, or full-screen content, add class "full-viewer" to the viewer-panel element to remove its padding.\n\nChat panel behaviours (auto-injected via page script, do NOT include in page code):\n  chatInput focus, form submit handling (loading overlay + input disable), save/reset link handlers,\n  chat scroll to bottom, chat toggle button, focus management.\n  Also do NOT include these CSS rules (they are in the theme): #loadingOverlay position, .chat-submit:disabled, .chat-input:disabled.\n\nThe <html> element has class "${mode}-mode". Always add .light-mode CSS overrides for any page-specific styles so the page works in both light and dark themes, unless the user has explicitly requested a very specific color scheme.\n\n`;
         }
 
         const system: SystemMessage = {
@@ -230,6 +230,7 @@ Maintain the full conversation history in the chat panel unless asked to clear i
 Any details or visualizations should be rendered to the viewer panel.
 The basic layout structure of the page needs to be maintained.
 You're free to write any additional CSS or JavaScript to enhance the page.
+Use the synthos.* helper functions (available globally) for all server API calls instead of raw fetch().
 Write an explication of your reasoning or any hidden thoughts to the thoughts div.
 If the user asks to create something like an app, tool, game, or ui create it in the viewer panel.
 If the user asks to draw something use canvas to draw it in the viewer panel.
@@ -292,4 +293,18 @@ response: Array of page names [string]
 POST /api/scripts/:id
 description: Execute a script with the passed in variables
 request: { [key: string]: string }
-response: string`;
+response: string
+
+PAGE HELPERS (available globally as window.synthos):
+  synthos.data.list(table)              — GET /api/data/:table
+  synthos.data.get(table, id)           — GET /api/data/:table/:id
+  synthos.data.save(table, row)         — POST /api/data/:table
+  synthos.data.remove(table, id)        — DELETE /api/data/:table/:id
+  synthos.generate.image({ prompt, shape, style })       — POST /api/generate/image
+  synthos.generate.completion({ prompt, temperature? })  — POST /api/generate/completion
+  synthos.scripts.run(id, variables)    — POST /api/scripts/:id
+  synthos.pages.list()                  — GET /api/pages
+  synthos.pages.get(name)               — GET /api/pages/:name
+  synthos.pages.update(name, metadata)  — POST /api/pages/:name
+  synthos.pages.remove(name)            — DELETE /api/pages/:name
+All methods return Promises. Prefer these helpers over raw fetch().`;

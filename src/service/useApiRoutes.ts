@@ -1,6 +1,6 @@
 import path from "path";
-import { listPages, loadPageMetadata, PageMetadata, savePageMetadata, REQUIRED_PAGES, deletePage, copyPage, loadPageState, savePageState } from "../pages";
-import { checkIfExists } from "../files";
+import { listPages, loadPageMetadata, PageMetadata, savePageMetadata, REQUIRED_PAGES, deletePage, copyPage, loadPageState, savePageState, PAGE_VERSION } from "../pages";
+import { checkIfExists, loadFile } from "../files";
 import {loadSettings, saveSettings } from "../settings";
 import { Application } from 'express';
 import { SynthOSConfig } from "../init";
@@ -10,6 +10,8 @@ import { chainOfThought } from "agentm-core";
 import { requiresSettings } from "./requiresSettings";
 import { executeScript } from "../scripts";
 import { listThemes, loadTheme, loadThemeInfo } from "../themes";
+import { migratePage } from "../migrations";
+import { loadPageWithFallback } from "./usePageRoutes";
 
 export function useApiRoutes(config: SynthOSConfig, app: Application): void {
     // List pages
@@ -336,7 +338,7 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
             }
             const metadata = await loadPageMetadata(config.pagesFolder, page, config.requiredPagesFolder);
             const mode = metadata?.mode ?? 'unlocked';
-            const info = JSON.stringify({ name: page, mode });
+            const info = JSON.stringify({ name: page, mode, latestPageVersion: PAGE_VERSION });
             const js = [
                 `window.pageInfo=${info};`,
                 `if(window.pageInfo.mode==="locked"){`,
@@ -385,6 +387,95 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
         } catch (err: unknown) {
             console.error(err);
             res.status(500).send((err as Error).message);
+        }
+    });
+
+    // Return a versioned page script
+    app.get('/api/page-script.js', async (req, res) => {
+        try {
+            const v = parseInt(req.query.v as string, 10);
+            if (isNaN(v) || v < 1) {
+                res.status(400).send('// Invalid version parameter');
+                return;
+            }
+            const scriptPath = path.join(config.pageScriptsFolder, `page-v${v}.js`);
+            if (!(await checkIfExists(scriptPath))) {
+                res.status(404).send(`// page-v${v}.js not found`);
+                return;
+            }
+            const js = await loadFile(scriptPath);
+            res.set('Content-Type', 'application/javascript');
+            res.set('Cache-Control', 'public, max-age=3600');
+            res.send(js);
+        } catch (err: unknown) {
+            console.error(err);
+            res.status(500).send(`// ${(err as Error).message}`);
+        }
+    });
+
+    // Return versioned page helpers
+    app.get('/api/page-helpers.js', async (req, res) => {
+        try {
+            const v = parseInt(req.query.v as string, 10);
+            if (isNaN(v) || v < 1) {
+                res.status(400).send('// Invalid version parameter');
+                return;
+            }
+            const scriptPath = path.join(config.pageScriptsFolder, `helpers-v${v}.js`);
+            if (!(await checkIfExists(scriptPath))) {
+                res.status(404).send(`// helpers-v${v}.js not found`);
+                return;
+            }
+            const js = await loadFile(scriptPath);
+            res.set('Content-Type', 'application/javascript');
+            res.set('Cache-Control', 'public, max-age=3600');
+            res.send(js);
+        } catch (err: unknown) {
+            console.error(err);
+            res.status(500).send(`// ${(err as Error).message}`);
+        }
+    });
+
+    // Upgrade a page to the latest version
+    app.post('/api/pages/:name/upgrade', async (req, res) => {
+        try {
+            const { name } = req.params;
+
+            // Load current metadata
+            const metadata = await loadPageMetadata(config.pagesFolder, name, config.requiredPagesFolder);
+            if (!metadata) {
+                res.status(404).json({ error: `Page "${name}" not found` });
+                return;
+            }
+
+            const currentVersion = metadata.pageVersion;
+            if (currentVersion >= PAGE_VERSION) {
+                res.json({ upgraded: false, currentVersion });
+                return;
+            }
+
+            // Load the page HTML
+            const html = await loadPageWithFallback(name, config, false);
+            if (!html) {
+                res.status(404).json({ error: `Page HTML for "${name}" not found` });
+                return;
+            }
+
+            // Run migration
+            const migratedHtml = migratePage(html, currentVersion, PAGE_VERSION);
+
+            // Save upgraded HTML
+            await savePageState(config.pagesFolder, name, migratedHtml);
+
+            // Update metadata
+            metadata.pageVersion = PAGE_VERSION;
+            metadata.lastModified = new Date().toISOString();
+            await savePageMetadata(config.pagesFolder, name, metadata);
+
+            res.json({ upgraded: true, fromVersion: currentVersion, toVersion: PAGE_VERSION });
+        } catch (err: unknown) {
+            console.error(err);
+            res.status(500).json({ error: (err as Error).message });
         }
     });
 }

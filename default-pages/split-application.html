@@ -19,9 +19,6 @@
         .splitter { height: 8px; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary)); cursor: row-resize; flex-shrink: 0; position: relative; transition: all 0.2s; }
         .splitter::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; }
         .splitter:hover { background: linear-gradient(90deg, var(--accent-tertiary), var(--accent-secondary), var(--accent-primary)); box-shadow: 0 0 15px var(--accent-glow); }
-        #loadingOverlay { position: absolute; }
-        .chat-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .chat-input:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -59,31 +56,6 @@
     </div>
     <div id="thoughts" style="display: none;">User requested styling the split application with the page's Nebula Dusk theme while keeping CSS compact. I've applied gradient backgrounds, glowing borders, themed scrollbars, and a visually appealing splitter with hover effects. The CSS is consolidated and uses the existing CSS variables for consistency.</div>
     <script>
-        document.getElementById("chatInput").focus();
-        document.getElementById("chatForm").addEventListener('submit', () => {
-            document.getElementById("loadingOverlay").style.display = 'flex';
-            document.getElementById("chatForm").action = window.location.pathname;
-            setTimeout(() => {
-                document.getElementById("chatInput").disabled = true;
-                document.querySelector(".chat-submit").disabled = true;
-                document.querySelectorAll(".link-group a").forEach(a => {
-                    a.style.pointerEvents = 'none';
-                    a.style.opacity = '0.5';
-                });
-            }, 50);
-        });
-        document.getElementById("saveLink").addEventListener("click", function() {
-            const pageName = prompt("Enter the name of the page to save as:");
-            if (pageName) window.location.href = `${window.location.pathname}/save?name=${encodeURIComponent(pageName)}`;
-        });
-        document.getElementById("resetLink").addEventListener("click", function() {
-            window.location.href = `${window.location.pathname}/reset`;
-        });
-        window.onload = function() {
-            const chatMessages = document.getElementById('chatMessages');
-            chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
-        };
-
         const splitter = document.getElementById('splitter');
         const topPanel = document.querySelector('.application-top');
         const bottomPanel = document.querySelector('.application-bottom');
@@ -97,57 +69,6 @@
             if (pct > 10 && pct < 90) { topPanel.style.flexBasis = `${pct}%`; bottomPanel.style.flexBasis = `${100-pct}%`; }
         });
         document.addEventListener('mouseup', () => { isDragging = false; document.body.style.cursor = 'default'; });
-
-        // Chat panel toggle
-        (function() {
-            const btn = document.createElement('button');
-            btn.className = 'chat-toggle';
-            btn.setAttribute('aria-label', 'Toggle chat panel');
-            const dots = document.createElement('span');
-            dots.className = 'chat-toggle-dots';
-            for (let i = 0; i < 3; i++) {
-                const dot = document.createElement('span');
-                dot.className = 'chat-toggle-dot';
-                dots.appendChild(dot);
-            }
-            btn.appendChild(dots);
-            document.body.appendChild(btn);
-
-            const STORAGE_KEY = 'synthos-chat-collapsed';
-
-            // Restore persisted state
-            if (localStorage.getItem(STORAGE_KEY) === 'true') {
-                document.body.classList.add('chat-collapsed');
-            }
-
-            btn.addEventListener('click', function() {
-                document.body.classList.toggle('chat-collapsed');
-                localStorage.setItem(STORAGE_KEY, document.body.classList.contains('chat-collapsed'));
-            });
-        })();
-
-        // Focus management — prevent viewer content from stealing keystrokes
-        (function() {
-            const chatInput = document.getElementById('chatInput');
-            const viewerPanel = document.getElementById('viewerPanel');
-
-            chatInput.addEventListener('mousedown', function(e) {
-                e.stopPropagation();
-            });
-
-            ['keydown', 'keyup', 'keypress'].forEach(type => {
-                document.addEventListener(type, function(e) {
-                    if (document.activeElement === chatInput) {
-                        e.stopImmediatePropagation();
-                    }
-                }, true);
-            });
-
-            viewerPanel.setAttribute('tabindex', '-1');
-            chatInput.addEventListener('blur', function() {
-                viewerPanel.focus();
-            });
-        })();
     </script>
 </body>
 </html>

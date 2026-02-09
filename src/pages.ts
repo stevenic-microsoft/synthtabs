@@ -6,7 +6,7 @@ const _pages: { [name: string]: string } = {};
 
 export const REQUIRED_PAGES = ['builder', 'pages', 'settings', 'apis', 'scripts'];
 
-export const PAGE_VERSION = 1;
+export const PAGE_VERSION = 2;
 
 export interface PageInfo {
     name: string;

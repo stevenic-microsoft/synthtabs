@@ -24,6 +24,7 @@ Users conversationally build apps, tools, games, visualizations — anything exp
 - **`default-pages/`** — starter HTML templates copied to `.synthos/` on first run
 - **`required-pages/`** — built-in pages always served (builder, settings, pages, scripts, apis)
 - **`default-scripts/`** — OS-specific shell script templates (one per OS)
+- **`page-scripts/`** — versioned page scripts (e.g. `page-v2.js`), served directly (not copied to `.synthos/`)
 
 ## API Surface
 - **Data** (`/api/data/:table`) — file-based JSON storage; folders under `.synthos/`, rows are UUID-named JSON files; full CRUD
@@ -34,11 +35,13 @@ Users conversationally build apps, tools, games, visualizations — anything exp
 - **Page Metadata** (`GET /api/pages/:name`) — returns full metadata (title, categories, pinned, createdDate, lastModified, pageVersion, mode)
 - **Page Metadata** (`POST /api/pages/:name`) — merge-updates page metadata; accepts title, categories, pinned, mode; auto-sets lastModified
 - **Pin Page** (`POST /api/pages/:name/pin`) — toggles pinned status for a page
+- **Page Upgrade** (`POST /api/pages/:name/upgrade`) — runs migration from current pageVersion to latest; updates HTML + metadata
+- **Page Script** (`GET /api/page-script.js?v=<number>`) — serves versioned page script JS from `page-scripts/`
 - **Settings** (`GET/POST /api/settings`) — API key, model, maxTokens, imageQuality, instructions, logCompletions
 
 ## Page System
 - Pages served from `.synthos/` (user local) with fallback to `required-pages/` (built-in)
-- Each page has a companion `page.json` metadata file with: `title` (display name, falls back to folder name), `categories`, `pinned`, `createdDate` (ISO 8601), `lastModified` (ISO 8601), `pageVersion` (integer, current = 1), `mode` (`"unlocked"` | `"locked"`)
+- Each page has a companion `page.json` metadata file with: `title` (display name, falls back to folder name), `categories`, `pinned`, `createdDate` (ISO 8601), `lastModified` (ISO 8601), `pageVersion` (integer, current = 2), `mode` (`"unlocked"` | `"locked"`)
 - `POST /api/pages/:name` uses merge semantics — send only the fields to update; `lastModified` is auto-set, `createdDate`/`pageVersion` are preserved
 - Pages can be saved-as, reset, and managed via the `pages.html` required page
 
@@ -64,17 +67,33 @@ Stored in `.synthos/settings.json`. Fields: `serviceApiKey`, `model`, `maxTokens
 - Three pages need no light-mode overrides: `builder.html`, `pages.html`, `split-application.html` (they use only accent-color CSS variables).
 - **Gotcha — inline styles on viewer-panel:** Some pages have inline `style=` on the `.viewer-panel` div (e.g. `pages.html`, `settings.html`, `json_tools.html`). Inline styles beat theme CSS. Never put `padding` in those inline styles or it will override the theme's viewer-panel padding.
 
-## Chat Panel Shell (shared across all pages)
-Every page (required + default) includes these shared behaviours injected via `<script>` blocks:
-1. **Chat toggle (open/close):** An IIFE creates a `.chat-toggle` button (24px wide), appends it to `<body>`, and persists collapsed state in `localStorage` under `synthos-chat-collapsed`. The theme CSS positions it at the chat/viewer border and handles the `.chat-collapsed` body class transitions.
-2. **Loading overlay + input disable:** On form submit, shows `#loadingOverlay` (positioned inside `.viewer-panel` with `position: absolute`), then after 50ms disables `.chat-input`, `.chat-submit`, and `.link-group a` links (pointer-events + opacity).
-3. **Focus management:** An IIFE prevents viewer content from stealing keyboard focus from `#chatInput` — uses `stopImmediatePropagation` on capture-phase key events, and blurs chat input back to `#viewerPanel` (given `tabindex="-1"`).
+## Chat Panel Shell — Versioned Page Scripts
+Shared chat panel behaviours are now served via **versioned page scripts** (`page-scripts/page-v<N>.js`), auto-injected by the server before `</body>` based on each page's `pageVersion` metadata.
+
+### How it works
+- `usePageRoutes.ts` reads `pageVersion` from metadata and injects `<script id="page-script" src="/api/page-script.js?v=<N>">` before `</body>` for pages with version >= 2.
+- `page-v2.js` is a guarded IIFE (`window.__synthOSChatPanel` flag prevents double-execution) containing: chatInput focus, form submit overlay + disable, save/reset link handlers, chat scroll to bottom, chat toggle button (localStorage persistence), focus management (stopImmediatePropagation).
+- v1 pages (legacy) still have inline shared code and receive no script injection.
+- `/api/page-info.js` now also returns `latestPageVersion` so client-side JS can detect outdated pages.
+- Three CSS rules (`#loadingOverlay { position: absolute }`, `.chat-submit:disabled`, `.chat-input:disabled`) moved from inline page styles to theme CSS files.
+
+### Migration system (`src/migrations.ts`)
+- `migratePage(html, fromVersion, toVersion)` applies sequential transforms (v1→v2→...→latest).
+- `migrateV1toV2` strips inline shared JS (form submit, save/reset, chat scroll, toggle IIFE, focus IIFE) and CSS rules using cheerio + regex. Preserves page-specific code (e.g. markdown rendering in `window.onload`).
+- `POST /api/pages/:name/upgrade` — endpoint that runs migration, saves cleaned HTML, bumps `pageVersion`.
+- `pages.html` shows a "Update available" badge on outdated page tiles and an "Update page" context menu action.
 
 ## Page Info System
-- `/api/page-info.js?page=<name>` — returns a self-executing JS script that sets `window.pageInfo = { name, mode }` synchronously
+- `/api/page-info.js?page=<name>` — returns a self-executing JS script that sets `window.pageInfo = { name, mode, latestPageVersion }` synchronously
 - Server-side injection: `usePageRoutes.ts` injects `<script id="page-info" src="/api/page-info.js?page=<name>">` before `</head>` on every `GET /:page` response — works automatically for all pages including user-created ones
 - **Locked mode** (required/system pages): hides `#chatForm`, changes `#saveLink` text to "Copy" (save-as flow preserved), replaces `#resetLink` with "Reload" (navigates to same pathname)
 - **Unlocked mode** (default pages, user pages): no DOM changes, standard Save/Reset behavior
+
+## Client-Side API Helpers (`window.synthos`)
+- `page-scripts/helpers-v2.js` — ES5 IIFE exposing `window.synthos` with sub-objects: `data`, `generate`, `scripts`, `pages`.
+- Served via `GET /api/page-helpers.js?v=N` (same versioning pattern as page-script).
+- Auto-injected by `usePageRoutes.ts` before `</body>`, appearing before `page-script` in the DOM.
+- LLM prompt (`transformPage.ts`) lists all `synthos.*` methods and instructs the model to prefer them over raw `fetch()`.
 
 ## Models Supported
 Claude (Opus/Sonnet/Haiku) and GPT (5.2/5 mini/5 nano). Model prefix `claude-` routes to Anthropic, `gpt-` routes to OpenAI. All models use a single `transformPage` pipeline that returns delta-based JSON change operations. Provider-specific prompt tuning is handled by `getModelInstructions()` in `src/service/modelInstructions.ts`.

@@ -10,6 +10,7 @@ export interface SynthOSConfig {
     defaultPagesFolder: string;
     defaultScriptsFolder: string;
     defaultThemesFolder: string;
+    pageScriptsFolder: string;
     debug: boolean;
     debugPageUpdates: boolean;
 }
@@ -21,6 +22,7 @@ export function createConfig(pagesFolder = '.synthos', options?: { debug?: boole
         defaultPagesFolder: path.join(__dirname, '../default-pages'),
         defaultScriptsFolder: path.join(__dirname, '../default-scripts'),
         defaultThemesFolder: path.join(__dirname, '../default-themes'),
+        pageScriptsFolder: path.join(__dirname, '../page-scripts'),
         debug: options?.debug ?? false,
         debugPageUpdates: options?.debugPageUpdates ?? false
     };

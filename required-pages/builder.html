@@ -17,9 +17,6 @@
         .orbit-ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 200px; height: 200px; border: 1px solid rgba(102,126,234,0.1); border-radius: 50%; animation: orbit-rotate 20s linear infinite; }
         .orbit-ring::after { content: ''; position: absolute; top: -3px; left: 50%; transform: translateX(-50%); width: 6px; height: 6px; background: rgba(240,147,251,0.5); border-radius: 50%; box-shadow: 0 0 10px rgba(240,147,251,0.3); }
         @keyframes orbit-rotate { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(360deg); } }
-        #loadingOverlay { position: absolute; }
-        .chat-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .chat-input:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
@@ -50,37 +47,6 @@
     </div>
     <div id="thoughts" style="display: none;">Simplified the idle animation dramatically. Removed all the busy elements (scanning lines, particles, data streams, corner brackets, multiple pulse rings, status text). Now it's just two elements: 1) A breathing orb in the center that gently expands and contracts with a soft glow, and 2) A single thin orbital ring that rotates very slowly (20 seconds per rotation) with a small accent dot. This creates an elegant, minimal presence that suggests the system is alive without being distracting. The animation is much more refined and Star Trek computer-appropriate - subtle ambient awareness rather than flashy effects.</div>
     <script>
-        document.getElementById("chatInput").focus();
-        document.getElementById("chatForm").addEventListener('submit', () => {
-            document.getElementById("loadingOverlay").style.display = 'flex';
-            document.getElementById("chatForm").action = window.location.pathname;
-            // Delay disable so the browser finishes collecting form data first
-            setTimeout(() => {
-                document.getElementById("chatInput").disabled = true;
-                document.querySelector(".chat-submit").disabled = true;
-                document.querySelectorAll(".link-group a").forEach(a => {
-                    a.style.pointerEvents = 'none';
-                    a.style.opacity = '0.5';
-                });
-            }, 50);
-        });
-        document.getElementById("saveLink").addEventListener("click", function() {
-            const pageName = prompt("Enter the name of the page to save as:");
-            if (pageName) {
-                window.location.href = `${window.location.pathname}/save?name=${encodeURIComponent(pageName)}`;
-            }
-        });
-        document.getElementById("resetLink").addEventListener("click", function() {
-            window.location.href = `${window.location.pathname}/reset`;
-        });
-        window.onload = function() {
-            const chatMessages = document.getElementById('chatMessages');
-            chatMessages.scrollTo({
-                top: chatMessages.scrollHeight,
-                behavior: 'smooth'
-            });
-        };
-
         // Function to hide the idle animation when content is rendered
         function hideIdleAnimation() {
             const idleContainer = document.getElementById('idleAnimation');
@@ -102,60 +68,6 @@
                 }, 10);
             }
         }
-
-        // Chat panel toggle
-        (function() {
-            const btn = document.createElement('button');
-            btn.className = 'chat-toggle';
-            btn.setAttribute('aria-label', 'Toggle chat panel');
-            const dots = document.createElement('span');
-            dots.className = 'chat-toggle-dots';
-            for (let i = 0; i < 3; i++) {
-                const dot = document.createElement('span');
-                dot.className = 'chat-toggle-dot';
-                dots.appendChild(dot);
-            }
-            btn.appendChild(dots);
-            document.body.appendChild(btn);
-
-            const STORAGE_KEY = 'synthos-chat-collapsed';
-
-            // Restore persisted state
-            if (localStorage.getItem(STORAGE_KEY) === 'true') {
-                document.body.classList.add('chat-collapsed');
-            }
-
-            btn.addEventListener('click', function() {
-                document.body.classList.toggle('chat-collapsed');
-                localStorage.setItem(STORAGE_KEY, document.body.classList.contains('chat-collapsed'));
-            });
-        })();
-
-        // Focus management — prevent viewer content from stealing keystrokes
-        (function() {
-            const chatInput = document.getElementById('chatInput');
-            const viewerPanel = document.getElementById('viewerPanel');
-
-            // Ensure click on chat input actually focuses it (even if viewer tries to steal)
-            chatInput.addEventListener('mousedown', function(e) {
-                e.stopPropagation();
-            });
-
-            // Block keyboard events from reaching viewer content when typing in chat
-            ['keydown', 'keyup', 'keypress'].forEach(type => {
-                document.addEventListener(type, function(e) {
-                    if (document.activeElement === chatInput) {
-                        e.stopImmediatePropagation();
-                    }
-                }, true); // capture phase
-            });
-
-            // When chat input loses focus, give focus back to the viewer panel
-            viewerPanel.setAttribute('tabindex', '-1');
-            chatInput.addEventListener('blur', function() {
-                viewerPanel.focus();
-            });
-        })();
     </script>
 </body>
 </html>

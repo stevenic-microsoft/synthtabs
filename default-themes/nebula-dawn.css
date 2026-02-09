@@ -455,3 +455,8 @@ body.chat-collapsed .chat-toggle {
     background: #c82333;
     box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
 }
+
+/* ---- Shared page rules ---- */
+#loadingOverlay { position: absolute; }
+.chat-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.chat-input:disabled { opacity: 0.5; cursor: not-allowed; }

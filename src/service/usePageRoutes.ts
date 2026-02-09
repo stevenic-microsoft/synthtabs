@@ -21,6 +21,26 @@ function injectPageInfoScript(html: string, pageName: string): string {
     return tag + '\n' + html;
 }
 
+function injectPageHelpers(html: string, pageVersion: number): string {
+    if (pageVersion < 2) return html;
+    const tag = `<script id="page-helpers" src="/api/page-helpers.js?v=${pageVersion}"></script>`;
+    const idx = html.indexOf('</body>');
+    if (idx !== -1) {
+        return html.slice(0, idx) + tag + '\n' + html.slice(idx);
+    }
+    return html + '\n' + tag;
+}
+
+function injectPageScript(html: string, pageVersion: number): string {
+    if (pageVersion < 2) return html;
+    const tag = `<script id="page-script" src="/api/page-script.js?v=${pageVersion}"></script>`;
+    const idx = html.indexOf('</body>');
+    if (idx !== -1) {
+        return html.slice(0, idx) + tag + '\n' + html.slice(idx);
+    }
+    return html + '\n' + tag;
+}
+
 export function usePageRoutes(config: SynthOSConfig, app: Application): void {
     // Redirect / to /home page
     app.get('/', (req, res) => res.redirect(HOME_PAGE_ROUTE));
@@ -42,7 +62,14 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
             return;
         }
 
-        res.send(injectPageInfoScript(pageState, page));
+        // Load page metadata for version-based script injection
+        const metadata = await loadPageMetadata(config.pagesFolder, page, config.requiredPagesFolder);
+        const pageVersion = metadata?.pageVersion ?? 0;
+
+        let html = injectPageInfoScript(pageState, page);
+        html = injectPageHelpers(html, pageVersion);
+        html = injectPageScript(html, pageVersion);
+        res.send(html);
     });
 
     // Page reset

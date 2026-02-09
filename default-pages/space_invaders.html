@@ -76,9 +76,6 @@
         }
         /* Light-mode overrides */
         .light-mode .game-instructions { color: rgba(107, 79, 138, 0.7); }
-        #loadingOverlay { position: absolute; }
-        .chat-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .chat-input:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -117,36 +114,6 @@
     </div>
     <div id="thoughts" style="display: none;">Created a visually stunning Space Invaders game with a neon/cyberpunk aesthetic that matches the Nebula Dusk theme. Features include: glowing aliens with different colors per row, a sleek player ship with gradient effects, particle explosions when enemies are destroyed, smooth animations, level progression with increasing difficulty, lives system, and responsive controls. The game uses canvas for rendering with requestAnimationFrame for smooth 60fps gameplay. Added visual effects like glow shadows, star field background, and pulsing animations to make it feel modern while keeping the classic gameplay.</div>
     <script>
-        document.getElementById("chatInput").focus();
-        document.getElementById("chatForm").addEventListener('submit', () => {
-            document.getElementById("loadingOverlay").style.display = 'flex';
-            document.getElementById("chatForm").action = window.location.pathname;
-            setTimeout(() => {
-                document.getElementById("chatInput").disabled = true;
-                document.querySelector(".chat-submit").disabled = true;
-                document.querySelectorAll(".link-group a").forEach(a => {
-                    a.style.pointerEvents = 'none';
-                    a.style.opacity = '0.5';
-                });
-            }, 50);
-        });
-        document.getElementById("saveLink").addEventListener("click", function() {
-            const pageName = prompt("Enter the name of the page to save as:");
-            if (pageName) {
-                window.location.href = `${window.location.pathname}/save?name=${encodeURIComponent(pageName)}`;
-            }
-        });
-        document.getElementById("resetLink").addEventListener("click", function() {
-            window.location.href = `${window.location.pathname}/reset`;
-        });
-        window.onload = function() {
-            const chatMessages = document.getElementById('chatMessages');
-            chatMessages.scrollTo({
-                top: chatMessages.scrollHeight,
-                behavior: 'smooth'
-            });
-        };
-
         // Space Invaders Game
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -594,57 +561,6 @@
         // Initialize and start
         initAliens();
         gameLoop();
-
-        // Chat panel toggle
-        (function() {
-            const btn = document.createElement('button');
-            btn.className = 'chat-toggle';
-            btn.setAttribute('aria-label', 'Toggle chat panel');
-            const dots = document.createElement('span');
-            dots.className = 'chat-toggle-dots';
-            for (let i = 0; i < 3; i++) {
-                const dot = document.createElement('span');
-                dot.className = 'chat-toggle-dot';
-                dots.appendChild(dot);
-            }
-            btn.appendChild(dots);
-            document.body.appendChild(btn);
-
-            const STORAGE_KEY = 'synthos-chat-collapsed';
-
-            // Restore persisted state
-            if (localStorage.getItem(STORAGE_KEY) === 'true') {
-                document.body.classList.add('chat-collapsed');
-            }
-
-            btn.addEventListener('click', function() {
-                document.body.classList.toggle('chat-collapsed');
-                localStorage.setItem(STORAGE_KEY, document.body.classList.contains('chat-collapsed'));
-            });
-        })();
-
-        // Focus management — prevent viewer content from stealing keystrokes
-        (function() {
-            const chatInput = document.getElementById('chatInput');
-            const viewerPanel = document.getElementById('viewerPanel');
-
-            chatInput.addEventListener('mousedown', function(e) {
-                e.stopPropagation();
-            });
-
-            ['keydown', 'keyup', 'keypress'].forEach(type => {
-                document.addEventListener(type, function(e) {
-                    if (document.activeElement === chatInput) {
-                        e.stopImmediatePropagation();
-                    }
-                }, true);
-            });
-
-            viewerPanel.setAttribute('tabindex', '-1');
-            chatInput.addEventListener('blur', function() {
-                viewerPanel.focus();
-            });
-        })();
     </script>
 </body>
 </html>
