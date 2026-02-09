@@ -55,13 +55,20 @@ Users conversationally build apps, tools, games, visualizations — anything exp
 Stored in `.synthos/settings.json`. Fields: `serviceApiKey`, `model`, `maxTokens`, `imageQuality`, `instructions`, `logCompletions`
 
 ## Theme System
-- Themes live in `themes/` as folders (e.g. `themes/nebula-dusk/`, `themes/nebula-dawn/`).
-- Each theme folder contains a `theme.json` (metadata, CSS variable values, mode) and a `theme.css` (compiled stylesheet).
+- Source themes live in `default-themes/` as flat files (e.g. `nebula-dusk.css`, `nebula-dusk.json`).
+- On `init`, themes are **copied** from `default-themes/` into `.synthos/themes/`. The `loadTheme()` function in `src/themes.ts` checks `.synthos/themes/` **first**, then falls back to `default-themes/`. This means local copies shadow source files — after editing `default-themes/`, you must delete `.synthos/themes/` (or the whole `.synthos/` folder) and re-run to pick up changes.
 - `theme.json` declares `mode: "dark"` or `mode: "light"`, plus color values for CSS custom properties (`--accent-primary`, `--accent-secondary`, `--text-primary`, `--text-secondary`, `--border-color`, `--accent-glow`, etc.).
 - `theme-info.js` (served at `/api/theme-info.js`) runs at page load: sets `window.themeInfo` with the active theme's metadata/colors and adds a `light-mode` or `dark-mode` class to `<html>`.
 - `theme.css` (served at `/api/theme.css`) handles shared shell elements (chat panel, viewer panel, scrollbar, buttons, loading overlay, modal dialogs, form elements).
 - **Page-specific light-mode support:** Each page's `<style>` block contains its own dark-mode defaults. Pages that need light-mode adaptation have `.light-mode` CSS overrides appended at the end of their `<style>` block. Canvas-based scenes (solar_system, space_invaders) keep their canvas dark; only UI chrome adapts.
 - Three pages need no light-mode overrides: `builder.html`, `pages.html`, `split-application.html` (they use only accent-color CSS variables).
+- **Gotcha — inline styles on viewer-panel:** Some pages have inline `style=` on the `.viewer-panel` div (e.g. `pages.html`, `settings.html`, `json_tools.html`). Inline styles beat theme CSS. Never put `padding` in those inline styles or it will override the theme's viewer-panel padding.
+
+## Chat Panel Shell (shared across all pages)
+Every page (required + default) includes these shared behaviours injected via `<script>` blocks:
+1. **Chat toggle (open/close):** An IIFE creates a `.chat-toggle` button (24px wide), appends it to `<body>`, and persists collapsed state in `localStorage` under `synthos-chat-collapsed`. The theme CSS positions it at the chat/viewer border and handles the `.chat-collapsed` body class transitions.
+2. **Loading overlay + input disable:** On form submit, shows `#loadingOverlay` (positioned inside `.viewer-panel` with `position: absolute`), then after 50ms disables `.chat-input`, `.chat-submit`, and `.link-group a` links (pointer-events + opacity).
+3. **Focus management:** An IIFE prevents viewer content from stealing keyboard focus from `#chatInput` — uses `stopImmediatePropagation` on capture-phase key events, and blurs chat input back to `#viewerPanel` (given `tabindex="-1"`).
 
 ## Page Info System
 - `/api/page-info.js?page=<name>` — returns a self-executing JS script that sets `window.pageInfo = { name, mode }` synchronously
