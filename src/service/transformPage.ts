@@ -233,6 +233,7 @@ You're free to write any additional CSS or JavaScript to enhance the page.
 Write an explication of your reasoning or any hidden thoughts to the thoughts div.
 If the user asks to create something like an app, tool, game, or ui create it in the viewer panel.
 If the user asks to draw something use canvas to draw it in the viewer panel.
+The viewer panel can be resized by the user, so for animations, games, and presentations always add the "full-viewer" class to the viewer-panel element and ensure content stays centered and uses the maximum available space (use 100% width/height, flexbox centering, or viewport-relative sizing as appropriate).
 
 IMPORTANT: Each element in the CURRENT_PAGE has a data-node-id attribute.
 Return a JSON array of change operations to apply to the page. Do NOT return the full HTML page.

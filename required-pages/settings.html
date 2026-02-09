@@ -64,6 +64,9 @@
             color: rgba(107, 79, 138, 0.7);
             background: rgba(255, 255, 255, 0.4);
         }
+        #loadingOverlay { position: absolute; }
+        .chat-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .chat-input:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
@@ -128,15 +131,23 @@
                 <button class="update-btn" id="updateBtn">Update</button>
             </div>
         </div>
+        <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     </div>
     <div id="thoughts" style="display: none;">Added border-radius: 12px 12px 0 0 to the settings title to round only the top-left and top-right corners, maintaining the flat bottom edge that connects with the settings container.</div>
-    <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     <script>
         // Basic chat functionality
         document.getElementById("chatInput").focus();
         document.getElementById("chatForm").addEventListener('submit', (event) => {
             document.getElementById("loadingOverlay").style.display = 'flex';
             document.getElementById("chatForm").action = window.location.pathname;
+            setTimeout(() => {
+                document.getElementById("chatInput").disabled = true;
+                document.querySelector(".chat-submit").disabled = true;
+                document.querySelectorAll(".link-group a").forEach(a => {
+                    a.style.pointerEvents = 'none';
+                    a.style.opacity = '0.5';
+                });
+            }, 50);
         });
         document.getElementById("saveLink").addEventListener("click", function() {
             const pageName = prompt("Enter the name of the page to save as:");
@@ -225,6 +236,57 @@
                 alert('Failed to save settings. Please try again.');
             });
         });
+
+        // Chat panel toggle
+        (function() {
+            const btn = document.createElement('button');
+            btn.className = 'chat-toggle';
+            btn.setAttribute('aria-label', 'Toggle chat panel');
+            const dots = document.createElement('span');
+            dots.className = 'chat-toggle-dots';
+            for (let i = 0; i < 3; i++) {
+                const dot = document.createElement('span');
+                dot.className = 'chat-toggle-dot';
+                dots.appendChild(dot);
+            }
+            btn.appendChild(dots);
+            document.body.appendChild(btn);
+
+            const STORAGE_KEY = 'synthos-chat-collapsed';
+
+            // Restore persisted state
+            if (localStorage.getItem(STORAGE_KEY) === 'true') {
+                document.body.classList.add('chat-collapsed');
+            }
+
+            btn.addEventListener('click', function() {
+                document.body.classList.toggle('chat-collapsed');
+                localStorage.setItem(STORAGE_KEY, document.body.classList.contains('chat-collapsed'));
+            });
+        })();
+
+        // Focus management — prevent viewer content from stealing keystrokes
+        (function() {
+            const chatInput = document.getElementById('chatInput');
+            const viewerPanel = document.getElementById('viewerPanel');
+
+            chatInput.addEventListener('mousedown', function(e) {
+                e.stopPropagation();
+            });
+
+            ['keydown', 'keyup', 'keypress'].forEach(type => {
+                document.addEventListener(type, function(e) {
+                    if (document.activeElement === chatInput) {
+                        e.stopImmediatePropagation();
+                    }
+                }, true);
+            });
+
+            viewerPanel.setAttribute('tabindex', '-1');
+            chatInput.addEventListener('blur', function() {
+                viewerPanel.focus();
+            });
+        })();
     </script>
 
 

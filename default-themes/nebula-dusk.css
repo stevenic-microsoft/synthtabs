@@ -37,6 +37,8 @@ body {
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--border-color);
+    position: relative;
+    transition: margin-left 0.3s ease, border-right-color 0.3s ease;
 }
 
 .chat-header {
@@ -181,8 +183,9 @@ form {
 }
 
 .viewer-panel {
-    width: 70%;
-    padding: 20px;
+    flex: 1;
+    min-width: 0;
+    padding: 20px 20px 20px 44px;
     background: linear-gradient(135deg, rgba(22,33,62,0.9) 0%, rgba(15,15,35,0.95) 100%);
     display: flex;
     flex-direction: column;
@@ -269,6 +272,59 @@ form {
 * {
     scrollbar-width: thin;
     scrollbar-color: var(--accent-secondary) rgba(15,15,35,0.6);
+}
+
+/* ---- Chat Toggle ---- */
+.chat-toggle {
+    position: fixed;
+    left: 30%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 80px;
+    background: rgba(22,33,62,0.95);
+    border: none;
+    border-left: 1px solid var(--border-color);
+    border-radius: 0 12px 12px 0;
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: left 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chat-toggle:hover {
+    background: rgba(30,42,72,1);
+    box-shadow: 0 0 20px var(--accent-glow), inset 0 0 15px rgba(138,43,226,0.15);
+}
+
+.chat-toggle-dots {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.chat-toggle-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    transition: transform 0.3s ease;
+}
+
+.chat-toggle:hover .chat-toggle-dot {
+    transform: scale(1.4);
+}
+
+body.chat-collapsed .chat-panel {
+    margin-left: -30%;
+    border-right-color: transparent;
+}
+
+body.chat-collapsed .chat-toggle {
+    left: 0;
 }
 
 /* ---- Modal ---- */
