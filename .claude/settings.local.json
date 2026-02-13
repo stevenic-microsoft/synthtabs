@@ -4,7 +4,29 @@
       "Bash(code:*)",
       "Bash(npm run build:*)",
       "Bash(npx tsc:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "WebFetch(domain:api.search.brave.com)",
+      "WebSearch",
+      "Bash(node --version:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File:*)",
+      "Bash(del \"C:\\\\source\\\\synthos\\\\fix-card-renderer.ps1\")",
+      "Bash(gh api:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:unpkg.com)",
+      "WebFetch(domain:cdn.jsdelivr.net)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:app.unpkg.com)",
+      "WebFetch(domain:adaptivecards.microsoft.com)",
+      "Bash(gh search code:*)",
+      "Bash(where:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(find:*)",
+      "Bash(npx npm-run-all:*)",
+      "Bash(npm test:*)",
+      "Bash(npx nyc ts-mocha:*)",
+      "Bash(grep:*)",
+      "Bash(dir:*)"
     ]
   }
 }

@@ -54,20 +54,23 @@
         });
     }
 
-    // 6. Chat toggle button — create, persist in localStorage
+    // 6. Chat toggle button — create (if not already in markup), persist in localStorage
     (function() {
-        var btn = document.createElement('button');
-        btn.className = 'chat-toggle';
-        btn.setAttribute('aria-label', 'Toggle chat panel');
-        var dots = document.createElement('span');
-        dots.className = 'chat-toggle-dots';
-        for (var i = 0; i < 3; i++) {
-            var dot = document.createElement('span');
-            dot.className = 'chat-toggle-dot';
-            dots.appendChild(dot);
+        var btn = document.querySelector('.chat-toggle');
+        if (!btn) {
+            btn = document.createElement('button');
+            btn.className = 'chat-toggle';
+            btn.setAttribute('aria-label', 'Toggle chat panel');
+            var dots = document.createElement('span');
+            dots.className = 'chat-toggle-dots';
+            for (var i = 0; i < 3; i++) {
+                var dot = document.createElement('span');
+                dot.className = 'chat-toggle-dot';
+                dots.appendChild(dot);
+            }
+            btn.appendChild(dots);
+            document.body.appendChild(btn);
         }
-        btn.appendChild(dots);
-        document.body.appendChild(btn);
 
         var STORAGE_KEY = 'synthos-chat-collapsed';
 
@@ -102,6 +105,237 @@
         vp.setAttribute('tabindex', '-1');
         ci.addEventListener('blur', function() {
             vp.focus();
+        });
+    })();
+
+    // 8. Brainstorm — dynamic brainstorming UI (available on every v2 page)
+    (function() {
+        var chatInput = document.getElementById('chatInput');
+        if (!chatInput) return;
+
+        // --- Wrap chatInput in .chat-input-wrapper if not already wrapped ---
+        if (!chatInput.parentElement || !chatInput.parentElement.classList.contains('chat-input-wrapper')) {
+            var wrapper = document.createElement('div');
+            wrapper.className = 'chat-input-wrapper';
+            chatInput.parentNode.insertBefore(wrapper, chatInput);
+            wrapper.appendChild(chatInput);
+        }
+
+        // --- Create brainstorm icon button ---
+        var brainstormBtn = document.createElement('button');
+        brainstormBtn.type = 'button';
+        brainstormBtn.className = 'brainstorm-icon-btn';
+        brainstormBtn.title = 'Brainstorm ideas';
+        brainstormBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<circle cx="12" cy="12" r="3"></circle>' +
+            '<path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>' +
+            '</svg>';
+        chatInput.parentElement.appendChild(brainstormBtn);
+
+        // --- Create brainstorm modal ---
+        var modal = document.createElement('div');
+        modal.id = 'brainstormModal';
+        modal.className = 'modal-overlay brainstorm-modal';
+        modal.innerHTML =
+            '<div class="modal-content">' +
+                '<div class="modal-header">' +
+                    '<span>Brainstorm</span>' +
+                    '<button type="button" class="brainstorm-close-btn" id="brainstormCloseBtn">&times;</button>' +
+                '</div>' +
+                '<div class="brainstorm-messages" id="brainstormMessages"></div>' +
+                '<div class="brainstorm-input-row">' +
+                    '<input type="text" class="brainstorm-input" id="brainstormInput" placeholder="What\'s on your mind...">' +
+                    '<button type="button" class="brainstorm-send-btn" id="brainstormSendBtn">Send</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(modal);
+
+        // --- State ---
+        var brainstormHistory = [];
+
+        // --- Helpers ---
+        function openBrainstorm() {
+            modal.classList.add('show');
+            // Grab text from chat input as initial topic
+            var topic = chatInput.value.trim();
+            if (topic) {
+                chatInput.value = '';
+                sendBrainstormText(topic, true);
+            } else {
+                // No topic — send context-only opener so LLM starts the brainstorm
+                sendBrainstormText('', true);
+            }
+        }
+
+        function closeBrainstorm() {
+            modal.classList.remove('show');
+            brainstormHistory = [];
+            document.getElementById('brainstormMessages').innerHTML = '';
+        }
+
+        function scrollBrainstormToBottom() {
+            var el = document.getElementById('brainstormMessages');
+            el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+        }
+
+        function escapeHtml(str) {
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+        function appendBrainstormMessage(role, text, prompt, suggestions, isOpener) {
+            var div = document.createElement('div');
+            div.className = 'brainstorm-message ' + (role === 'user' ? 'brainstorm-user' : 'brainstorm-assistant');
+            if (role === 'assistant') {
+                var html;
+                if (typeof marked !== 'undefined') {
+                    html = marked.parse(text);
+                } else {
+                    html = escapeHtml(text);
+                }
+                div.innerHTML = '<strong>SynthOS:</strong> ' + html;
+                // Clickable suggestion chips
+                if (suggestions && suggestions.length > 0) {
+                    var chips = document.createElement('div');
+                    chips.className = 'brainstorm-suggestions';
+                    suggestions.forEach(function(s) {
+                        var chip = document.createElement('button');
+                        chip.type = 'button';
+                        chip.className = 'brainstorm-suggestion-chip';
+                        chip.textContent = s;
+                        chip.addEventListener('click', function() {
+                            submitSuggestion(s);
+                        });
+                        chips.appendChild(chip);
+                    });
+                    div.appendChild(chips);
+                }
+                // "Build It" button — skip on the opener response
+                if (prompt && !isOpener) {
+                    var btnRow = document.createElement('div');
+                    btnRow.className = 'brainstorm-build-row';
+                    var buildBtn = document.createElement('button');
+                    buildBtn.type = 'button';
+                    buildBtn.className = 'brainstorm-build-btn';
+                    buildBtn.textContent = 'Build It';
+                    buildBtn.setAttribute('data-prompt', prompt);
+                    buildBtn.addEventListener('click', function() {
+                        chatInput.value = this.getAttribute('data-prompt');
+                        closeBrainstorm();
+                        chatInput.focus();
+                    });
+                    btnRow.appendChild(buildBtn);
+                    div.appendChild(btnRow);
+                }
+            } else {
+                div.textContent = text;
+            }
+            document.getElementById('brainstormMessages').appendChild(div);
+            scrollBrainstormToBottom();
+        }
+
+        function submitSuggestion(text) {
+            // Disable old suggestion chips so they can't be double-clicked
+            var oldChips = document.querySelectorAll('#brainstormMessages .brainstorm-suggestion-chip');
+            for (var i = 0; i < oldChips.length; i++) {
+                oldChips[i].disabled = true;
+            }
+            sendBrainstormText(text, false);
+        }
+
+        function getBrainstormContext() {
+            var chatEl = document.getElementById('chatMessages');
+            var chatHistory = chatEl ? chatEl.innerText : '';
+            return '<CHAT_HISTORY>\n' + chatHistory;
+        }
+
+        // Send from the input field
+        function sendBrainstormMessage() {
+            var input = document.getElementById('brainstormInput');
+            var text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+            sendBrainstormText(text, false);
+        }
+
+        // Core fetch — isOpener=true means this is the initial call when brainstorm opens
+        function sendBrainstormText(text, isOpener) {
+            var input = document.getElementById('brainstormInput');
+            var userMsg = text || (isOpener ? 'Look at the conversation so far and suggest what we could build or improve.' : '');
+            if (!userMsg) return;
+
+            // Show user message in chat (skip for auto-generated opener)
+            if (text) {
+                appendBrainstormMessage('user', text);
+            }
+            brainstormHistory.push({ role: 'user', content: userMsg });
+
+            var thinking = document.createElement('div');
+            thinking.className = 'brainstorm-thinking';
+            thinking.id = 'brainstormThinking';
+            thinking.textContent = 'Thinking...';
+            document.getElementById('brainstormMessages').appendChild(thinking);
+            scrollBrainstormToBottom();
+
+            input.disabled = true;
+            document.getElementById('brainstormSendBtn').disabled = true;
+
+            fetch('/api/brainstorm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    context: getBrainstormContext(),
+                    messages: brainstormHistory
+                })
+            })
+            .then(function(res) {
+                if (!res.ok) throw new Error('Brainstorm request failed');
+                return res.json();
+            })
+            .then(function(data) {
+                var thinkingEl = document.getElementById('brainstormThinking');
+                if (thinkingEl) thinkingEl.remove();
+
+                var response = data.response || 'Sorry, I didn\'t get a response.';
+                var prompt = data.prompt || '';
+                var suggestions = Array.isArray(data.suggestions) ? data.suggestions : [];
+                appendBrainstormMessage('assistant', response, prompt, suggestions, isOpener);
+                brainstormHistory.push({
+                    role: 'assistant',
+                    content: response + '\n\n[Suggested prompt: ' + prompt + ']'
+                });
+            })
+            .catch(function(err) {
+                var thinkingEl = document.getElementById('brainstormThinking');
+                if (thinkingEl) thinkingEl.remove();
+                appendBrainstormMessage('assistant', 'Something went wrong: ' + err.message);
+            })
+            .finally(function() {
+                input.disabled = false;
+                document.getElementById('brainstormSendBtn').disabled = false;
+                input.focus();
+            });
+        }
+
+        // --- Event listeners ---
+        brainstormBtn.addEventListener('click', openBrainstorm);
+        document.getElementById('brainstormCloseBtn').addEventListener('click', closeBrainstorm);
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeBrainstorm();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.classList.contains('show')) closeBrainstorm();
+        });
+
+        document.getElementById('brainstormSendBtn').addEventListener('click', sendBrainstormMessage);
+        document.getElementById('brainstormInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendBrainstormMessage();
+            }
         });
     })();
 })();

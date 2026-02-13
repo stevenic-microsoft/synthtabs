@@ -20,6 +20,8 @@
         .splitter::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; }
         .splitter:hover { background: linear-gradient(90deg, var(--accent-tertiary), var(--accent-secondary), var(--accent-primary)); box-shadow: 0 0 15px var(--accent-glow); }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
+    <script id="page-info" src="/api/page-info.js?page=split-application"></script>
 </head>
 <body>
     <div class="chat-panel">
@@ -70,5 +72,7 @@
         });
         document.addEventListener('mouseup', () => { isDragging = false; document.body.style.cursor = 'default'; });
     </script>
+<script id="page-helpers" src="/api/page-helpers.js?v=2"></script>
+<script id="page-script" src="/api/page-script.js?v=2"></script>
 </body>
 </html>

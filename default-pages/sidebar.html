@@ -26,6 +26,8 @@
         .light-mode .sidebar-content p { color: rgba(45, 38, 64, 0.9); }
         .light-mode .sidebar-list li { color: rgba(45, 38, 64, 0.85); }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
+    <script id="page-info" src="/api/page-info.js?page=sidebar"></script>
 </head>
 <body>
     <div class="chat-panel">
@@ -62,5 +64,7 @@
         <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     </div>
     <div id="thoughts" style="display: none;">Restyled the sidebar to match the markdown content styles - using gradient text for titles, the same border/glow effects, blockquote styling, and list formatting. Kept CSS compact by reusing variables and combining selectors where possible.</div>
+<script id="page-helpers" src="/api/page-helpers.js?v=2"></script>
+<script id="page-script" src="/api/page-script.js?v=2"></script>
 </body>
 </html>

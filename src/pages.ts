@@ -51,7 +51,7 @@ export async function loadPageMetadata(pagesFolder: string, name: string, fallba
     return undefined;
 }
 
-function parseMetadata(parsed: Record<string, unknown>): PageMetadata {
+export function parseMetadata(parsed: Record<string, unknown>): PageMetadata {
     return {
         title: typeof parsed.title === 'string' ? parsed.title : '',
         categories: Array.isArray(parsed.categories) ? parsed.categories : [],
@@ -98,14 +98,28 @@ export async function listPages(pagesFolder: string, fallbackPagesFolder: string
         }
     }
 
-    // Legacy flat .html files in root (backward compat)
+    // Legacy flat .html files in root (v1 pages)
     const flatFiles = (await listFiles(pagesFolder)).filter(file => file.endsWith('.html'));
     for (const file of flatFiles) {
         const name = file.replace(/\.html$/, '');
         if (!pageMap.has(name)) {
+            // Derive title: strip brackets, replace underscores with spaces, title-case
+            const stripped = name.replace(/^\[/, '').replace(/\]$/, '');
+            const title = stripped
+                .replace(/_/g, ' ')
+                .replace(/\b\w/g, c => c.toUpperCase());
+            // Assign category: bracketed names → "Builder", otherwise → "Page"
+            const hasBrackets = name.startsWith('[') && name.endsWith(']');
+            const categories = hasBrackets ? ['Builder'] : ['Page'];
             pageMap.set(name, {
                 name,
-                ...DEFAULT_METADATA,
+                title,
+                categories,
+                pinned: false,
+                createdDate: '',
+                lastModified: '',
+                pageVersion: 1,
+                mode: 'unlocked',
             });
         }
     }

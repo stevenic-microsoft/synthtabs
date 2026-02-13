@@ -45,8 +45,8 @@
         "build": "tsc -b",
         "clean": "rimraf dist tsconfig.tsbuildinfo node_modules",
         "start": "node ./bin/synthos.js",
-        "test": "npm-run-all build test:mocha",
-        "test:mocha": "nyc mocha tests"
+        "test": "npm run build && npm run test:mocha",
+        "test:mocha": "nyc ts-mocha tests/**/*.spec.ts"
     },
     "files": [
         "dist",

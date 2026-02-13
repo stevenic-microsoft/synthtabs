@@ -114,44 +114,63 @@ async function repairMissingFolders(config: SynthOSConfig): Promise<void> {
         await copyFiles(config.defaultThemesFolder, themesFolder);
     }
 
-    // Migrate or rebuild pages/ subfolder
+    // Ensure pages/ subfolder exists
     const pagesSubdir = path.join(config.pagesFolder, 'pages');
     if (!await checkIfExists(pagesSubdir)) {
-        // Check for legacy flat .html files in root .synthos/
+        // No pages folder and no flat files — rebuild from defaults
         const htmlFiles = (await listFiles(config.pagesFolder)).filter(f => f.endsWith('.html'));
-        if (htmlFiles.length > 0) {
-            // Migrate flat files to pages/<name>/page.html + page.json
-            console.log(`Migrating pages to .synthos/pages/ folder...`);
-            await ensureFolderExists(pagesSubdir);
-            const now = new Date().toISOString();
-            for (const file of htmlFiles) {
-                const pageName = file.replace(/\.html$/, '');
-                const category = pageName.startsWith('[') ? 'Builder' : 'Application';
-                const pageFolder = path.join(pagesSubdir, pageName);
-                await ensureFolderExists(pageFolder);
-                await fs.copyFile(
-                    path.join(config.pagesFolder, file),
-                    path.join(pageFolder, 'page.html')
-                );
-                await saveFile(
-                    path.join(pageFolder, 'page.json'),
-                    JSON.stringify({
-                        title: '',
-                        categories: [category],
-                        pinned: false,
-                        createdDate: now,
-                        lastModified: now,
-                        pageVersion: PAGE_VERSION,
-                        mode: 'unlocked',
-                    }, null, 4)
-                );
-                await deleteFile(path.join(config.pagesFolder, file));
-            }
-        } else {
-            // No pages at all — rebuild from defaults
+        if (htmlFiles.length === 0) {
             console.log(`Restoring default pages to .synthos/pages/ folder...`);
             await copyDefaultPages(config.defaultPagesFolder, config.pagesFolder);
+        } else {
+            await ensureFolderExists(pagesSubdir);
         }
+    }
+
+    // Migrate any stray flat .html files from root into pages/<name>/
+    await migrateFlatPages(config.pagesFolder);
+}
+
+function toTitleCase(name: string): string {
+    // Strip brackets, replace underscores/hyphens with spaces, then Title Case each word
+    return name
+        .replace(/[\[\]]/g, '')
+        .replace(/[_-]/g, ' ')
+        .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+async function migrateFlatPages(pagesFolder: string): Promise<void> {
+    const pagesSubdir = path.join(pagesFolder, 'pages');
+    const htmlFiles = (await listFiles(pagesFolder)).filter(f => f.endsWith('.html'));
+    if (htmlFiles.length === 0) return;
+
+    console.log(`Migrating ${htmlFiles.length} page(s) to .synthos/pages/ folder...`);
+    await ensureFolderExists(pagesSubdir);
+    const now = new Date().toISOString();
+
+    for (const file of htmlFiles) {
+        const pageName = file.replace(/\.html$/, '');
+        const category = pageName.startsWith('[') ? 'Builder' : 'Pages';
+        const title = toTitleCase(pageName);
+        const pageFolder = path.join(pagesSubdir, pageName);
+        await ensureFolderExists(pageFolder);
+        await fs.copyFile(
+            path.join(pagesFolder, file),
+            path.join(pageFolder, 'page.html')
+        );
+        await saveFile(
+            path.join(pageFolder, 'page.json'),
+            JSON.stringify({
+                title,
+                categories: [category],
+                pinned: false,
+                createdDate: now,
+                lastModified: now,
+                pageVersion: 1,
+                mode: 'unlocked',
+            }, null, 4)
+        );
+        await deleteFile(path.join(pagesFolder, file));
     }
 }
 

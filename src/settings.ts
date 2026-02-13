@@ -3,6 +3,13 @@ import path from 'path';
 
 let _settings: Partial<Settings>|undefined;
 
+export interface ServiceConfig {
+    apiKey: string;
+    enabled: boolean;
+}
+
+export type ServicesConfig = { [serviceId: string]: ServiceConfig };
+
 export interface Settings {
     serviceApiKey: string;
     model: string;
@@ -11,6 +18,7 @@ export interface Settings {
     instructions?: string;
     logCompletions?: boolean;
     theme?: string;
+    services?: ServicesConfig;
 }
 
 export const DefaultSettings: Settings = {
@@ -20,7 +28,8 @@ export const DefaultSettings: Settings = {
     imageQuality: 'standard',
     instructions: '',
     logCompletions: false,
-    theme: 'nebula-dusk'
+    theme: 'nebula-dusk',
+    services: {}
 };
 
 export async function hasConfiguredSettings(folder: string): Promise<boolean> {

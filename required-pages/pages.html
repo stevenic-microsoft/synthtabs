@@ -1321,12 +1321,75 @@
             margin-top: 4px;
             opacity: 0.8;
         }
+
+        /* Needs-upgrade page tile */
+        .page-link.needs-upgrade {
+            border: 1px dashed var(--accent-tertiary);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+            animation: upgradeGlow 3s ease-in-out infinite;
+            overflow: visible;
+        }
+
+        .page-link.needs-upgrade:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            border-color: var(--accent-primary);
+        }
+
+        @keyframes upgradeGlow {
+            0%, 100% { box-shadow: 0 0 0 transparent; }
+            50% { box-shadow: 0 0 12px var(--accent-glow); }
+        }
+
+        .upgrade-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            font-size: 9px;
+            color: white;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            padding: 2px 7px;
+            border-radius: 10px;
+            line-height: 1.3;
+            box-shadow: 0 2px 8px var(--accent-glow);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .page-link.needs-upgrade {
+            z-index: 2;
+        }
+
+        .light-mode .page-link.needs-upgrade {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.06) 0%, rgba(192, 84, 212, 0.06) 100%);
+        }
+
+        /* Upgrade toast notification */
+        .upgrade-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-radius: 8px;
+            font-size: 13px;
+            box-shadow: 0 4px 15px var(--accent-glow);
+            z-index: 2000;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .upgrade-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.0/mermaid.min.js"></script>
-
-
+    <script id="page-info" src="/api/page-info.js?page=pages"></script>
 </head>
 
 <body>
@@ -2695,35 +2758,57 @@
         });
     </script>
     <script>
-        // Update page handler
+        // Update page handler (context menu)
         document.getElementById('updateMenuItem').addEventListener('click', async function () {
             if (!contextTarget) return;
-            document.getElementById('contextMenu').style.display = 'none';
+            var pageName = contextTarget.name;
+            hideContextMenu();
+            await upgradePage(pageName);
+        });
+    </script>
+    <!-- Toast container -->
+    <div id="upgradeToast" class="upgrade-toast"></div>
+    <script>
+        // Show a brief toast notification
+        function showUpgradeToast(message) {
+            var toast = document.getElementById('upgradeToast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(function () { toast.classList.remove('show'); }, 3000);
+        }
+
+        // Upgrade a page via the API, returns true on success
+        async function upgradePage(pageName) {
+            var overlay = document.getElementById('loadingOverlay');
+            overlay.style.display = 'flex';
             try {
-                var res = await fetch('/api/pages/' + encodeURIComponent(contextTarget.name) + '/upgrade', {
+                var res = await fetch('/api/pages/' + encodeURIComponent(pageName) + '/upgrade', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
                 var data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Upgrade failed');
                 if (data.upgraded) {
-                    var pagesRes = await fetch('/api/pages');
-                    if (pagesRes.ok) {
-                        allPages = await pagesRes.json();
-                        renderAll();
-                    }
+                    await loadPages();
+                    showUpgradeToast('Page upgraded successfully');
+                    return true;
                 }
+                return false;
             } catch (err) {
                 console.error('Error upgrading page:', err);
                 alert('Failed to upgrade page: ' + err.message);
+                return false;
+            } finally {
+                overlay.style.display = 'none';
             }
-        });
-    </script>
-    <script>
+        }
+
         // Enhanced page link creation with scroll effect for long titles
         (function () {
-            const originalCreatePageLink = createPageLink;
-
             createPageLink = function (page, isBuilder = false) {
+                var latestVersion = window.pageInfo ? window.pageInfo.latestPageVersion : 0;
+                var needsUpgrade = !isBuilder && page.pageVersion < latestVersion;
+
                 const a = document.createElement('a');
                 a.href = '/' + page.name;
 
@@ -2737,18 +2822,27 @@
                 let classes = 'page-link';
                 if (isBuilder) {
                     classes += ' builder-page';
+                } else if (needsUpgrade) {
+                    classes += ' needs-upgrade';
                 } else if (page.pinned) {
                     classes += ' pinned';
                 }
                 a.className = classes;
 
-                // Version badge for outdated pages
-                var latestVersion = window.pageInfo ? window.pageInfo.latestPageVersion : 0;
-                if (!isBuilder && page.pageVersion < latestVersion) {
+                // Upgrade badge for outdated pages
+                if (needsUpgrade) {
                     var badge = document.createElement('span');
-                    badge.className = 'version-badge';
-                    badge.textContent = 'Update available';
+                    badge.className = 'upgrade-badge';
+                    badge.textContent = 'Update';
                     a.appendChild(badge);
+                }
+
+                // Click intercept for outdated pages — trigger upgrade instead of navigating
+                if (needsUpgrade) {
+                    a.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        upgradePage(page.name);
+                    });
                 }
 
                 // Context menu handler
@@ -2786,6 +2880,8 @@
         })();
 
     </script>
+<script id="page-helpers" src="/api/page-helpers.js?v=2"></script>
+<script id="page-script" src="/api/page-script.js?v=2"></script>
 </body>
 
 </html>

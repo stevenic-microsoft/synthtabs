@@ -21,6 +21,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.0/mermaid.min.js"></script>
+    <script id="page-info" src="/api/page-info.js?page=builder"></script>
 </head>
 <body>
     <div class="chat-panel">
@@ -68,6 +69,16 @@
                 }, 10);
             }
         }
+
     </script>
+    <button class="chat-toggle" aria-label="Toggle chat panel">
+        <span class="chat-toggle-dots">
+            <span class="chat-toggle-dot"></span>
+            <span class="chat-toggle-dot"></span>
+            <span class="chat-toggle-dot"></span>
+        </span>
+    </button>
+<script id="page-helpers" src="/api/page-helpers.js?v=2"></script>
+<script id="page-script" src="/api/page-script.js?v=2"></script>
 </body>
 </html>

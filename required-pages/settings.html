@@ -40,6 +40,33 @@
         .info-text a { color: var(--accent-tertiary); text-decoration: none; transition: all 0.3s; font-weight: 500; }
         .info-text a:hover { color: var(--text-secondary); text-shadow: 0 0 10px var(--accent-glow); }
 
+        /* Filter bar (Services tab) */
+        .filter-bar { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+        .filter-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0; }
+        .filter-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+        .filter-btn.active { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; border-color: transparent; }
+
+        /* Services grid */
+        .services-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        .service-card { border-radius: 12px; border: 1px solid var(--border-color); background: rgba(15, 15, 35, 0.5); padding: 18px; transition: all 0.3s ease; }
+        .service-card:hover { border-color: rgba(138, 43, 226, 0.3); }
+        .service-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .service-card-name { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+        .service-card-category { font-size: 11px; color: var(--text-secondary); background: rgba(138, 43, 226, 0.15); padding: 2px 8px; border-radius: 10px; }
+        .service-card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px; }
+        .service-card-fields { display: flex; flex-direction: column; gap: 8px; }
+        .service-card-fields input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(15, 15, 35, 0.8); color: var(--text-primary); font-size: 13px; transition: all 0.3s ease; box-shadow: inset 0 2px 8px rgba(0,0,0,0.2); }
+        .service-card-fields input:focus { outline: none; border-color: rgba(183, 148, 246, 0.6); box-shadow: inset 0 2px 8px rgba(0,0,0,0.2), 0 0 15px var(--accent-glow); }
+        .service-card-fields input::placeholder { color: rgba(183, 148, 246, 0.5); }
+
+        /* Toggle switch */
+        .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: rgba(100, 100, 100, 0.4); border-radius: 24px; transition: 0.3s; }
+        .toggle-slider:before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
+        .toggle-switch input:checked + .toggle-slider { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); }
+        .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+
         /* Light-mode overrides */
         .light-mode .settings-container {
             background: rgba(255, 255, 255, 0.8);
@@ -64,10 +91,15 @@
             color: rgba(107, 79, 138, 0.7);
             background: rgba(255, 255, 255, 0.4);
         }
+        .light-mode .service-card { background: rgba(255, 255, 255, 0.5); }
+        .light-mode .service-card-fields input { background: rgba(255, 255, 255, 0.8); box-shadow: inset 0 2px 8px rgba(118, 75, 162, 0.05); }
+        .light-mode .service-card-fields input:focus { box-shadow: inset 0 2px 8px rgba(118, 75, 162, 0.05), 0 0 15px var(--accent-glow); }
+        .light-mode .service-card-fields input::placeholder { color: rgba(107, 79, 138, 0.5); }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.0/mermaid.min.js"></script>
+    <script id="page-info" src="/api/page-info.js?page=settings"></script>
 </head>
 <body>
     <div class="chat-panel">
@@ -94,6 +126,7 @@
             <div class="tab-bar">
                 <button class="tab-btn active" data-tab="models">Models</button>
                 <button class="tab-btn" data-tab="preferences">Preferences</button>
+                <button class="tab-btn" data-tab="services">Services</button>
             </div>
             <div class="tab-content active" id="tab-models">
                 <div class="form-group">
@@ -124,6 +157,10 @@
                     </select>
                 </div>
             </div>
+            <div class="tab-content" id="tab-services">
+                <div class="filter-bar" id="serviceFilterBar"></div>
+                <div class="services-grid" id="servicesGrid"></div>
+            </div>
             <div class="button-row">
                 <button class="update-btn" id="updateBtn">Update</button>
             </div>
@@ -142,12 +179,119 @@
             });
         });
 
+        // --- Services tab state ---
+        var serviceRegistry = [];
+        var serviceConfigs = {};
+        var activeServiceCategory = 'All';
+
+        function renderServiceFilterBar() {
+            var bar = document.getElementById('serviceFilterBar');
+            bar.innerHTML = '';
+            var cats = new Set();
+            serviceRegistry.forEach(function(s) { cats.add(s.category); });
+            var sorted = Array.from(cats).sort();
+            var allArr = ['All'].concat(sorted);
+            allArr.forEach(function(cat) {
+                var btn = document.createElement('button');
+                btn.className = 'filter-btn' + (activeServiceCategory === cat ? ' active' : '');
+                btn.textContent = cat;
+                btn.addEventListener('click', function() {
+                    activeServiceCategory = cat;
+                    renderServiceFilterBar();
+                    renderServiceCards();
+                });
+                bar.appendChild(btn);
+            });
+        }
+
+        function renderServiceCards() {
+            var grid = document.getElementById('servicesGrid');
+            grid.innerHTML = '';
+            var filtered = serviceRegistry.filter(function(s) {
+                return activeServiceCategory === 'All' || s.category === activeServiceCategory;
+            });
+            filtered.forEach(function(def) {
+                var cfg = serviceConfigs[def.id] || {};
+                var card = document.createElement('div');
+                card.className = 'service-card';
+                card.dataset.serviceId = def.id;
+
+                var header = document.createElement('div');
+                header.className = 'service-card-header';
+
+                var nameRow = document.createElement('div');
+                nameRow.style.display = 'flex';
+                nameRow.style.alignItems = 'center';
+                nameRow.style.gap = '8px';
+                var nameEl = document.createElement('span');
+                nameEl.className = 'service-card-name';
+                nameEl.textContent = def.name;
+                var catEl = document.createElement('span');
+                catEl.className = 'service-card-category';
+                catEl.textContent = def.category;
+                nameRow.appendChild(nameEl);
+                nameRow.appendChild(catEl);
+
+                var toggle = document.createElement('label');
+                toggle.className = 'toggle-switch';
+                var checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = !!cfg.enabled;
+                checkbox.dataset.serviceId = def.id;
+                checkbox.dataset.field = 'enabled';
+                var slider = document.createElement('span');
+                slider.className = 'toggle-slider';
+                toggle.appendChild(checkbox);
+                toggle.appendChild(slider);
+
+                header.appendChild(nameRow);
+                header.appendChild(toggle);
+                card.appendChild(header);
+
+                var desc = document.createElement('div');
+                desc.className = 'service-card-desc';
+                desc.textContent = def.description;
+                card.appendChild(desc);
+
+                var fields = document.createElement('div');
+                fields.className = 'service-card-fields';
+                def.fields.forEach(function(f) {
+                    var input = document.createElement('input');
+                    input.type = f.type;
+                    input.placeholder = cfg.hasKey ? '(key saved — leave blank to keep)' : f.label;
+                    input.dataset.serviceId = def.id;
+                    input.dataset.field = f.name;
+                    fields.appendChild(input);
+                });
+                card.appendChild(fields);
+                grid.appendChild(card);
+            });
+        }
+
+        function collectServicesConfig() {
+            var config = {};
+            serviceRegistry.forEach(function(def) {
+                var card = document.querySelector('.service-card[data-service-id="' + def.id + '"]');
+                if (!card) return;
+                var enabled = card.querySelector('input[data-field="enabled"]');
+                var entry = { apiKey: '', enabled: enabled ? enabled.checked : false };
+                def.fields.forEach(function(f) {
+                    var input = card.querySelector('input[data-field="' + f.name + '"]');
+                    if (input) entry[f.name] = input.value;
+                });
+                config[def.id] = entry;
+            });
+            return config;
+        }
+
         // Fetch settings and themes in parallel, then populate form
         let isConfigured = false;
         Promise.all([
             fetch('/api/settings').then(r => r.json()),
-            fetch('/api/themes').then(r => r.json())
-        ]).then(([data, themes]) => {
+            fetch('/api/themes').then(r => r.json()),
+            fetch('/api/services/registry').then(r => r.json()),
+            fetch('/api/services').then(r => r.json())
+        ]).then(([data, themes, registry, configs]) => {
             // Populate Models tab
             const serviceApiKey = data.serviceApiKey || '';
             const model = data.model || '';
@@ -163,6 +307,12 @@
             const currentTheme = data.theme || 'nebula-dusk';
             document.getElementById('theme').innerHTML = themes.map(t => `<option value="${t}">${t}</option>`).join('');
             document.getElementById('theme').value = currentTheme;
+
+            // Populate Services tab
+            serviceRegistry = registry;
+            serviceConfigs = configs;
+            renderServiceFilterBar();
+            renderServiceCards();
 
             // Disable chat input if not configured
             if (!isConfigured) {
@@ -190,12 +340,21 @@
                 theme: document.getElementById('theme').value
             };
 
-            fetch('/api/settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            }).then(res => {
-                if (res.ok || res.redirected) {
+            var servicesBody = collectServicesConfig();
+
+            Promise.all([
+                fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                }),
+                fetch('/api/services', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(servicesBody)
+                })
+            ]).then(function(responses) {
+                if (responses.every(function(r) { return r.ok || r.redirected; })) {
                     window.location.reload();
                 } else {
                     alert('Failed to save settings. Please try again.');
@@ -209,4 +368,6 @@
     </script>
 
 
+<script id="page-helpers" src="/api/page-helpers.js?v=2"></script>
+<script id="page-script" src="/api/page-script.js?v=2"></script>
 </body></html>

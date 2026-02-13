@@ -1,4 +1,4 @@
-import { loadPageMetadata, loadPageState, normalizePageName, savePageMetadata, savePageState, updatePageState } from "../pages";
+import { loadPageMetadata, loadPageState, normalizePageName, PAGE_VERSION, REQUIRED_PAGES, savePageMetadata, savePageState, updatePageState } from "../pages";
 import { hasConfiguredSettings, loadSettings } from "../settings";
 import { Application } from 'express';
 import { transformPage } from "./transformPage";
@@ -8,11 +8,36 @@ import { createCompletePrompt } from "./createCompletePrompt";
 import { completePrompt } from "agentm-core";
 import { green, red, dim, estimateTokens } from "./debugLog";
 import { loadThemeInfo } from "../themes";
+import * as cheerio from 'cheerio';
+
+/**
+ * Required CDN imports that must be present on every v2 page.
+ * Each entry maps a detection selector to the script tag src to inject.
+ */
+const REQUIRED_IMPORTS: { selector: string; src: string }[] = [
+    { selector: 'script[src*="marked"]', src: 'https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js' },
+];
+
+/**
+ * Uses cheerio to ensure every required import is present in the page's <head>.
+ * Skips imports that already exist (detected via selector).
+ */
+function ensureRequiredImports(html: string, pageVersion: number): string {
+    if (pageVersion < 2) return html;
+    const $ = cheerio.load(html);
+    for (const imp of REQUIRED_IMPORTS) {
+        if ($(imp.selector).length === 0) {
+            $('head').append(`<script src="${imp.src}"></script>\n`);
+        }
+    }
+    return $.html();
+}
 
 const HOME_PAGE_ROUTE = '/builder';
 const PAGE_NOT_FOUND = 'Page not found';
 
 function injectPageInfoScript(html: string, pageName: string): string {
+    if (html.includes('id="page-info"')) return html;
     const tag = `<script id="page-info" src="/api/page-info.js?page=${encodeURIComponent(pageName)}"></script>`;
     const idx = html.indexOf('</head>');
     if (idx !== -1) {
@@ -23,6 +48,7 @@ function injectPageInfoScript(html: string, pageName: string): string {
 
 function injectPageHelpers(html: string, pageVersion: number): string {
     if (pageVersion < 2) return html;
+    if (html.includes('id="page-helpers"')) return html;
     const tag = `<script id="page-helpers" src="/api/page-helpers.js?v=${pageVersion}"></script>`;
     const idx = html.indexOf('</body>');
     if (idx !== -1) {
@@ -33,6 +59,7 @@ function injectPageHelpers(html: string, pageVersion: number): string {
 
 function injectPageScript(html: string, pageVersion: number): string {
     if (pageVersion < 2) return html;
+    if (html.includes('id="page-script"')) return html;
     const tag = `<script id="page-script" src="/api/page-script.js?v=${pageVersion}"></script>`;
     const idx = html.indexOf('</body>');
     if (idx !== -1) {
@@ -66,7 +93,14 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
         const metadata = await loadPageMetadata(config.pagesFolder, page, config.requiredPagesFolder);
         const pageVersion = metadata?.pageVersion ?? 0;
 
-        let html = injectPageInfoScript(pageState, page);
+        // Block outdated pages (redirect to /pages so user sees upgrade UI)
+        if (pageVersion < PAGE_VERSION && !REQUIRED_PAGES.includes(page)) {
+            res.redirect('/pages');
+            return;
+        }
+
+        let html = ensureRequiredImports(pageState, pageVersion);
+        html = injectPageInfoScript(html, page);
         html = injectPageHelpers(html, pageVersion);
         html = injectPageScript(html, pageVersion);
         res.send(html);
@@ -191,13 +225,19 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
                 updatePageState(page, html);
 
                 // Update lastModified timestamp in page metadata
-                const metadata = await loadPageMetadata(pagesFolder, page);
+                const metadata = await loadPageMetadata(pagesFolder, page, config.requiredPagesFolder);
                 if (metadata) {
                     metadata.lastModified = new Date().toISOString();
                     await savePageMetadata(pagesFolder, page, metadata);
                 }
 
-                res.send(html);
+                // Inject required imports and page scripts (same as GET)
+                const pv = metadata?.pageVersion ?? 0;
+                let out = ensureRequiredImports(html, pv);
+                out = injectPageInfoScript(out, page);
+                out = injectPageHelpers(out, pv);
+                out = injectPageScript(out, pv);
+                res.send(out);
             } else {
                 throw result.error;
             }

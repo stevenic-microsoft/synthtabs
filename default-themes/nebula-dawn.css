@@ -456,6 +456,226 @@ body.chat-collapsed .chat-toggle {
     box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
 }
 
+/* ---- Brainstorm icon button (inside input) ---- */
+.chat-input-wrapper {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.chat-input-wrapper .chat-input {
+    width: 100%;
+    padding-right: 36px;
+}
+
+.brainstorm-icon-btn {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, background 0.2s;
+}
+
+.brainstorm-icon-btn:hover {
+    color: var(--accent-primary);
+    background: var(--accent-glow);
+}
+
+.light-mode .brainstorm-icon-btn {
+    color: var(--text-secondary);
+}
+
+.light-mode .brainstorm-icon-btn:hover {
+    color: var(--accent-primary);
+}
+
+/* ---- Brainstorm modal (full-window variant) ---- */
+.brainstorm-modal .modal-content {
+    max-width: none;
+    width: calc(100% - 80px);
+    height: calc(100% - 80px);
+    display: flex;
+    flex-direction: column;
+}
+
+.brainstorm-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.brainstorm-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.brainstorm-close-btn:hover { opacity: 1; }
+
+.brainstorm-messages {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.brainstorm-message {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 85%;
+    word-wrap: break-word;
+}
+
+.brainstorm-user {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    align-self: flex-end;
+}
+
+.brainstorm-assistant {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    align-self: flex-start;
+}
+
+.brainstorm-input-row {
+    display: flex;
+    gap: 8px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.brainstorm-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.brainstorm-input:focus { border-color: var(--accent-primary); }
+.brainstorm-input::placeholder { color: var(--text-secondary); opacity: 0.7; }
+
+.brainstorm-send-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.brainstorm-send-btn:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.brainstorm-send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.brainstorm-assistant p { margin: 4px 0; }
+.brainstorm-assistant pre { background: var(--bg-tertiary); padding: 10px; border-radius: 6px; overflow-x: auto; margin: 8px 0; }
+.brainstorm-assistant code { font-size: 13px; }
+.brainstorm-assistant ul, .brainstorm-assistant ol { margin: 4px 0; padding-left: 20px; }
+
+.brainstorm-build-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.brainstorm-build-btn {
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.brainstorm-build-btn:hover {
+    filter: brightness(1.15);
+    box-shadow: 0 2px 10px var(--accent-glow);
+}
+
+.brainstorm-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.brainstorm-suggestion-chip {
+    padding: 5px 12px;
+    font-size: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1.4;
+}
+
+.brainstorm-suggestion-chip:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    background: var(--accent-glow);
+}
+
+.brainstorm-suggestion-chip:disabled {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+}
+
+.brainstorm-thinking {
+    align-self: flex-start;
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-style: italic;
+}
+
 /* ---- Shared page rules ---- */
 #loadingOverlay { position: absolute; }
 .chat-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }

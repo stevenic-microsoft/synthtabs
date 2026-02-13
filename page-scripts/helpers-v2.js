@@ -68,6 +68,18 @@
             remove: function(name) {
                 return _json('DELETE', '/api/pages/' + encodeURIComponent(name));
             }
+        },
+
+        search: {
+            web: function(query, opts) {
+                var body = { query: query };
+                if (opts) {
+                    if (opts.count) body.count = opts.count;
+                    if (opts.country) body.country = opts.country;
+                    if (opts.freshness) body.freshness = opts.freshness;
+                }
+                return _json('POST', '/api/search/web', body);
+            }
         }
     };
 })();

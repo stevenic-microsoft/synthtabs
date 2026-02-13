@@ -36,6 +36,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.0/mermaid.min.js"></script>
+    <script id="page-info" src="/api/page-info.js?page=apis"></script>
 </head>
 <body>
     <div class="chat-panel">
@@ -168,6 +169,18 @@
                         <input type="text" placeholder="Page Name" />
                         <textarea placeholder='{ "name": "new-page-name", "title": "My Copy", "categories": ["Tools"] }'></textarea>
                         <button onclick="callPageApi(event, 'POST', '/copy')">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">POST /api/search/web</div>
+                <div class="api-content">
+                    This operation searches the web using Brave Search and returns a list of results. Requires Brave Search to be enabled in Settings &gt; Services.
+                    <div class="api-input">
+                        <input type="text" placeholder="Search query" id="webSearchQuery" />
+                        <input type="number" placeholder="Count (optional, 1-20)" id="webSearchCount" min="1" max="20" />
+                        <button onclick="webSearch(event)">Search</button>
                     </div>
                     <div class="api-output"></div>
                 </div>
@@ -373,6 +386,35 @@
             });
         }
 
+        // Function to search the web
+        function webSearch(event) {
+            event.preventDefault();
+            var button = event.target;
+            button.disabled = true;
+            var query = document.getElementById('webSearchQuery').value;
+            var count = document.getElementById('webSearchCount').value;
+            var outputBox = event.target.parentElement.nextElementSibling;
+            var body = { query: query };
+            if (count) body.count = parseInt(count, 10);
+
+            fetch('/api/search/web', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                outputBox.textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+                alert('Web search failed! Check console for details.');
+            })
+            .finally(function() {
+                button.disabled = false;
+            });
+        }
+
         // Function to execute script
         function executeScript(event) {
             event.preventDefault();
@@ -403,5 +445,7 @@
             });
         }
     </script>
+<script id="page-helpers" src="/api/page-helpers.js?v=2"></script>
+<script id="page-script" src="/api/page-script.js?v=2"></script>
 </body>
 </html>

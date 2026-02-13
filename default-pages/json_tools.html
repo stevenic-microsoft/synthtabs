@@ -181,6 +181,8 @@
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
+  <script id="page-info" src="/api/page-info.js?page=json_tools"></script>
 </head>
 
 <body>
@@ -283,7 +285,8 @@ settings:
     });
     document.getElementById("resetButton").addEventListener("click", function () { document.getElementById("userInput").value = ""; document.getElementById("resultPanel").innerText = ""; document.getElementById("copyButton").disabled = true });
   </script>
-
+<script id="page-helpers" src="/api/page-helpers.js?v=2"></script>
+<script id="page-script" src="/api/page-script.js?v=2"></script>
 </body>
 
 </html>
