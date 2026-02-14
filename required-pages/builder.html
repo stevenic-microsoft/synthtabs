@@ -47,7 +47,7 @@
         <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     </div>
     <div id="thoughts" style="display: none;">Simplified the idle animation dramatically. Removed all the busy elements (scanning lines, particles, data streams, corner brackets, multiple pulse rings, status text). Now it's just two elements: 1) A breathing orb in the center that gently expands and contracts with a soft glow, and 2) A single thin orbital ring that rotates very slowly (20 seconds per rotation) with a small accent dot. This creates an elegant, minimal presence that suggests the system is alive without being distracting. The animation is much more refined and Star Trek computer-appropriate - subtle ambient awareness rather than flashy effects.</div>
-    <script>
+    <script id="idle-animation">
         // Function to hide the idle animation when content is rendered
         function hideIdleAnimation() {
             const idleContainer = document.getElementById('idleAnimation');

@@ -58,10 +58,11 @@
         <div class="dialog-title">API Explorer</div>
         <div class="dialog-content">
             <div class="api-section">
-                <div class="api-header" onclick="toggleSection(this)">GET /api/data/:table</div>
+                <div class="api-header" onclick="toggleSection(this)">GET /api/data/:page/:table</div>
                 <div class="api-content">
-                    This operation retrieves all rows from the specified table. The response is an array of JSON objects, each representing a row in the table.
+                    This operation retrieves all rows from the specified page-scoped table. The response is an array of JSON objects, each representing a row in the table.
                     <div class="api-input">
+                        <input type="text" placeholder="Page Name" />
                         <input type="text" placeholder="Table Name" />
                         <button onclick="callApi(event, 'GET', '/api/data/')">Submit</button>
                     </div>
@@ -69,10 +70,26 @@
                 </div>
             </div>
             <div class="api-section">
-                <div class="api-header" onclick="toggleSection(this)">GET /api/data/:table/:id</div>
+                <div class="api-header" onclick="toggleSection(this)">GET /api/data/:page/:table?limit=N&amp;offset=N</div>
                 <div class="api-content">
-                    This operation retrieves a single row from the specified table using the provided ID. The response is a JSON object representing the row.
+                    Paginated variant. Returns a page of rows from the table. The response includes the items, total count, and whether more rows are available.
+                    Response: { items: [...], total: number, offset: number, limit: number, hasMore: boolean }
                     <div class="api-input">
+                        <input type="text" placeholder="Page Name" />
+                        <input type="text" placeholder="Table Name" />
+                        <input type="text" placeholder="Limit" />
+                        <input type="text" placeholder="Offset (optional)" />
+                        <button onclick="callPaginatedApi(event)">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">GET /api/data/:page/:table/:id</div>
+                <div class="api-content">
+                    This operation retrieves a single row from the specified page-scoped table using the provided ID. The response is a JSON object representing the row.
+                    <div class="api-input">
+                        <input type="text" placeholder="Page Name" />
                         <input type="text" placeholder="Table Name" />
                         <input type="text" placeholder="ID" />
                         <button onclick="callApi(event, 'GET', '/api/data/')">Submit</button>
@@ -81,12 +98,12 @@
                 </div>
             </div>
             <div class="api-section">
-                <div class="api-header" onclick="toggleSection(this)">POST /api/data/:table/:id</div>
+                <div class="api-header" onclick="toggleSection(this)">POST /api/data/:page/:table</div>
                 <div class="api-content">
-                    This operation saves a single row to the specified table. The request should include a JSON object representing the row. The response indicates success.
+                    This operation saves a single row to the specified page-scoped table. The request should include a JSON object representing the row. The response indicates success.
                     <div class="api-input">
+                        <input type="text" placeholder="Page Name" />
                         <input type="text" placeholder="Table Name" />
-                        <input type="text" placeholder="ID" />
                         <textarea placeholder="JSON Data"></textarea>
                         <button onclick="callApi(event, 'POST', '/api/data/')">Submit</button>
                     </div>
@@ -94,10 +111,11 @@
                 </div>
             </div>
             <div class="api-section">
-                <div class="api-header" onclick="toggleSection(this)">DELETE /api/data/:table/:id</div>
+                <div class="api-header" onclick="toggleSection(this)">DELETE /api/data/:page/:table/:id</div>
                 <div class="api-content">
-                    This operation deletes a single row from the specified table using the provided ID. The response indicates success.
+                    This operation deletes a single row from the specified page-scoped table using the provided ID. The response indicates success.
                     <div class="api-input">
+                        <input type="text" placeholder="Page Name" />
                         <input type="text" placeholder="Table Name" />
                         <input type="text" placeholder="ID" />
                         <button onclick="callApi(event, 'DELETE', '/api/data/')">Submit</button>
@@ -233,7 +251,7 @@
         <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     </div>
     <div id="thoughts" style="display: none;">I've shown the user a list of available API's.</div>
-    <script>
+    <script id="api-explorer">
         // Toggle functionality for API sections
         function toggleSection(header) {
             const content = header.nextElementSibling;
@@ -250,8 +268,10 @@
             let data = {};
 
             inputs.forEach(input => {
-                if (input.placeholder === 'Table Name') {
+                if (input.placeholder === 'Page Name') {
                     url += input.value;
+                } else if (input.placeholder === 'Table Name') {
+                    url += '/' + input.value;
                 } else if (input.placeholder === 'ID') {
                     url += '/' + input.value;
                 } else if (input.placeholder === 'JSON Data') {
@@ -269,6 +289,35 @@
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
+                const outputBox = event.target.parentElement.nextElementSibling;
+                outputBox.textContent = JSON.stringify(data, null, 2);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('API call failed! Check console for details.');
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        function callPaginatedApi(event) {
+            event.preventDefault();
+            const button = event.target;
+            button.disabled = true;
+            const inputs = event.target.parentElement.querySelectorAll('input');
+            let page = '', table = '', limit = '', offset = '';
+            inputs.forEach(input => {
+                if (input.placeholder === 'Page Name') page = input.value;
+                else if (input.placeholder === 'Table Name') table = input.value;
+                else if (input.placeholder === 'Limit') limit = input.value;
+                else if (input.placeholder === 'Offset (optional)') offset = input.value;
+            });
+            let url = '/api/data/' + encodeURIComponent(page) + '/' + encodeURIComponent(table) + '?limit=' + encodeURIComponent(limit);
+            if (offset) url += '&offset=' + encodeURIComponent(offset);
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
                 const outputBox = event.target.parentElement.nextElementSibling;
                 outputBox.textContent = JSON.stringify(data, null, 2);
             })

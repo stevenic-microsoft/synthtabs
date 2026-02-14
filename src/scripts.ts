@@ -17,7 +17,7 @@ export interface ExecuteScriptResponse {
 export async function listScripts(pagesFolder: string): Promise<string> {
     if (!scriptsList) {
         let list: string[] = [];
-        const folder = path.join(pagesFolder, 'scripts');
+        const folder = path.join(pagesFolder, 'pages', 'scripts', 'scripts');
         if (await checkIfExists(folder)) {
             const files = (await listFiles(folder)).filter(f => f.endsWith('.json'));
             for (const file of files) {
@@ -52,7 +52,7 @@ export async function executeScript(args: ExecuteScriptArgs): Promise<AgentCompl
     const { pagesFolder, scriptId, variables } = args;
 
     // Load the script
-    const script = await loadFile(path.join(pagesFolder, `scripts`, `${scriptId}.json`));
+    const script = await loadFile(path.join(pagesFolder, 'pages', 'scripts', 'scripts', `${scriptId}.json`));
     if (!script) {
         return { completed: false, error: new Error(`Script not found: ${scriptId}`) };
     }

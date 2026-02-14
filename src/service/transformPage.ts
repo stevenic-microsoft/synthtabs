@@ -66,7 +66,7 @@ export async function transformPage(args: TransformPageArgs): Promise<AgentCompl
             const colorList = Object.entries(colors)
                 .map(([name, value]) => `  --${name}: ${value}`)
                 .join('\n');
-            themeBlock = `<THEME>\nMode: ${mode}\nCSS custom properties (use instead of hardcoded values):\n${colorList}\n\nShared shell classes (pre-styled by theme, do not redefine):\n  .chat-panel — Left sidebar container (30% width)\n  .chat-header — Chat panel title bar\n  .chat-messages — Scrollable message container\n  .chat-message — Individual message wrapper\n  .link-group — Navigation links row (Save, Pages, Reset)\n  .chat-input — Message text input\n  .chat-submit — Send button\n  .viewer-panel — Right content area (70% width)\n  .loading-overlay — Full-screen loading overlay\n  .spinner — Animated loading spinner\n\nPage title bars: To align with the chat header, apply these styles:\n  min-height: var(--header-min-height);\n  padding: var(--header-padding-vertical) var(--header-padding-horizontal);\n  line-height: var(--header-line-height);\n  display: flex; align-items: center; justify-content: center; box-sizing: border-box;\n\nFull-viewer mode: For games, animations, or full-screen content, add class "full-viewer" to the viewer-panel element to remove its padding.\n\nChat panel behaviours (auto-injected via page script — do NOT recreate in page code):\n  The server injects page-v2.js after transformation. It provides:\n  - Form submit handler: sets action to window.location.pathname, shows #loadingOverlay, disables inputs\n  - Save/Reset link handlers (#saveLink, #resetLink)\n  - Chat scroll to bottom (#chatMessages)\n  - Chat toggle button (.chat-toggle) — created dynamically if not in markup\n  - .chat-input-wrapper — wraps #chatInput with a brainstorm icon button\n  - Brainstorm modal (#brainstormModal) — LLM-powered brainstorm UI, created dynamically\n  - Focus management — keeps keyboard input directed to #chatInput\n\n  Do NOT:\n  - Create your own form submit handler, toggle button, or input wrapper\n  - Modify or replace .chat-panel, .chat-header, .link-group, #chatForm, or .chat-toggle\n  - Modify or remove any existing <script> elements (you may INSERT new ones)\n  - Set the form action attribute (page-v2.js sets it dynamically)\n  - Include these CSS rules (in the theme): #loadingOverlay position, .chat-submit:disabled, .chat-input:disabled\n\n  To add chat messages: use insert with parentId of #chatMessages and position "append".\n  #chatMessages is the only unlocked element inside .chat-panel.\n\nThe <html> element has class "${mode}-mode". Always add .light-mode CSS overrides for any page-specific styles so the page works in both light and dark themes, unless the user has explicitly requested a very specific color scheme.\n\n`;
+            themeBlock = `<THEME>\nMode: ${mode}\nCSS custom properties (use instead of hardcoded values):\n${colorList}\n\nShared shell classes (pre-styled by theme, do not redefine):\n  .chat-panel — Left sidebar container (30% width)\n  .chat-header — Chat panel title bar\n  .chat-messages — Scrollable message container\n  .chat-message — Individual message wrapper\n  .link-group — Navigation links row (Save, Pages, Reset)\n  .chat-input — Message text input\n  .chat-submit — Send button\n  .viewer-panel — Right content area (70% width)\n  .loading-overlay — Full-screen loading overlay\n  .spinner — Animated loading spinner\n\nPage title bars: To align with the chat header, apply these styles:\n  min-height: var(--header-min-height);\n  padding: var(--header-padding-vertical) var(--header-padding-horizontal);\n  line-height: var(--header-line-height);\n  display: flex; align-items: center; justify-content: center; box-sizing: border-box;\n\nFull-viewer mode: For games, animations, or full-screen content, add class "full-viewer" to the viewer-panel element to remove its padding.\n\nChat panel behaviours (auto-injected via page script — do NOT recreate in page code):\n  The server injects page-v2.js after transformation. It provides:\n  - Form submit handler: sets action to window.location.pathname, shows #loadingOverlay, disables inputs\n  - Save/Reset link handlers (#saveLink, #resetLink)\n  - Chat scroll to bottom (#chatMessages)\n  - Chat toggle button (.chat-toggle) — created dynamically if not in markup\n  - .chat-input-wrapper — wraps #chatInput with a brainstorm icon button\n  - Brainstorm modal (#brainstormModal) — LLM-powered brainstorm UI, created dynamically\n  - Focus management — keeps keyboard input directed to #chatInput\n\n  Do NOT:\n  - Create your own form submit handler, toggle button, or input wrapper\n  - Modify or replace .chat-panel, .chat-header, .link-group, #chatForm, or .chat-toggle\n  - INSERT new <script> blocks that duplicate existing ones — when fixing JavaScript, UPDATE or REPLACE the existing script's nodeId instead. Always give inline scripts a unique id attribute.\n  - Set the form action attribute (page-v2.js sets it dynamically)\n  - Include these CSS rules (in the theme): #loadingOverlay position, .chat-submit:disabled, .chat-input:disabled\n\n  To add chat messages: use insert with parentId of #chatMessages and position "append".\n  #chatMessages is the only unlocked element inside .chat-panel.\n\nThe <html> element has class "${mode}-mode". Always add .light-mode CSS overrides for any page-specific styles so the page works in both light and dark themes, unless the user has explicitly requested a very specific color scheme.\n\n`;
         }
 
         const system: SystemMessage = {
@@ -146,7 +146,10 @@ export async function transformPage(args: TransformPageArgs): Promise<AgentCompl
         // 7. Strip data-node-id attributes
         const cleanHtml = stripNodeIds(finalHtml);
 
-        return { completed: true, value: { html: cleanHtml, changeCount: successCount } };
+        // 8. Remove duplicate inline scripts (LLM may insert instead of update)
+        const dedupedHtml = deduplicateInlineScripts(cleanHtml);
+
+        return { completed: true, value: { html: dedupedHtml, changeCount: successCount } };
     } catch (err: unknown) {
         // On any error: return original page with error block injected
         const cleanOriginal = stripNodeIds(annotatedHtml);
@@ -182,6 +185,111 @@ export function assignNodeIds(html: string): { html: string; nodeCount: number }
 export function stripNodeIds(html: string): string {
     const $ = cheerio.load(html, { decodeEntities: false });
     $('[data-node-id]').removeAttr('data-node-id');
+    return $.html();
+}
+
+/**
+ * Remove duplicate inline `<script>` blocks using a two-pass approach.
+ *
+ * **Pass 1 — ID-based dedup (deterministic):**
+ * Groups inline scripts by their `id` attribute (skipping system IDs:
+ * page-info, page-helpers, page-script, error and scripts with `src`).
+ * If any group has 2+ scripts with the same id, all but the **last** are removed.
+ *
+ * **Pass 2 — Declaration-overlap dedup (heuristic fallback):**
+ * For scripts with no `id`, no `src`, and no `type="application/json"`,
+ * compares top-level declaration names. When overlap >= 60% of the smaller
+ * set (minimum 2 declarations each), the **first** script is removed.
+ */
+export function deduplicateInlineScripts(html: string): string {
+    const $ = cheerio.load(html, { decodeEntities: false });
+
+    const SYSTEM_IDS = new Set(['page-info', 'page-helpers', 'page-script', 'error']);
+
+    // ── Pass 1: ID-based dedup ──────────────────────────────────────────
+    const idGroups = new Map<string, cheerio.Cheerio[]>();
+    $('script').each(function (_, rawEl) {
+        const el = $(rawEl);
+        if (el.attr('src')) return;
+        const id = el.attr('id');
+        if (!id || SYSTEM_IDS.has(id)) return;
+
+        if (!idGroups.has(id)) {
+            idGroups.set(id, []);
+        }
+        idGroups.get(id)!.push(el);
+    });
+
+    for (const [id, group] of idGroups) {
+        if (group.length < 2) continue;
+        for (let i = 0; i < group.length - 1; i++) {
+            console.log(`deduplicateInlineScripts: removing duplicate script id="${id}" (keeping last of ${group.length})`);
+            group[i].remove();
+        }
+    }
+
+    // ── Pass 2: Declaration-overlap dedup (fallback for id-less scripts) ─
+    interface ScriptInfo {
+        el: cheerio.Cheerio;
+        declarations: Set<string>;
+    }
+
+    const declPattern = /(?:^|;|\n)\s*(?:let|const|var|function|class)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
+
+    const scripts: ScriptInfo[] = [];
+    $('script').each(function (_, rawEl) {
+        const el = $(rawEl);
+        if (el.attr('src')) return;
+        if (el.attr('id')) return;
+        if ((el.attr('type') ?? '').toLowerCase() === 'application/json') return;
+
+        const code = (el.html() ?? '').trim();
+        if (!code) return;
+
+        const declarations = new Set<string>();
+        let m: RegExpExecArray | null;
+        declPattern.lastIndex = 0;
+        while ((m = declPattern.exec(code)) !== null) {
+            declarations.add(m[1]);
+        }
+
+        scripts.push({ el, declarations });
+    });
+
+    // Compare each pair; mark earlier script for removal when overlap is high
+    const toRemove = new Set<number>();
+    for (let i = 0; i < scripts.length; i++) {
+        if (toRemove.has(i)) continue;
+        for (let j = i + 1; j < scripts.length; j++) {
+            if (toRemove.has(j)) continue;
+
+            const a = scripts[i].declarations;
+            const b = scripts[j].declarations;
+
+            // Both must have at least 2 declarations
+            if (a.size < 2 || b.size < 2) continue;
+
+            // Count overlap
+            let overlap = 0;
+            for (const name of a) {
+                if (b.has(name)) overlap++;
+            }
+
+            const smallerSize = Math.min(a.size, b.size);
+            if (overlap / smallerSize >= 0.6) {
+                // Remove the first (older) script, keep the last (LLM fix)
+                console.log(`deduplicateInlineScripts: removing duplicate script (${overlap}/${smallerSize} declaration overlap)`);
+                toRemove.add(i);
+                break; // script i is already marked, move on
+            }
+        }
+    }
+
+    // Remove marked scripts
+    for (const idx of toRemove) {
+        scripts[idx].el.remove();
+    }
+
     return $.html();
 }
 
@@ -370,6 +478,8 @@ The following selectors identify protected infrastructure elements — do NOT up
   .chat-panel, .chat-header, .link-group, #chatForm, #chatInput, .chat-submit, .chat-toggle, #thoughts
 You may still insert new elements as siblings near protected elements.
 You're free to write any additional CSS or JavaScript to enhance the page.
+When fixing bugs in existing <script> blocks, UPDATE or REPLACE the script element — do NOT insert a duplicate. Duplicate scripts cause declaration errors.
+Always assign a unique, descriptive id attribute to every <script> block you create or update (e.g. id="note-logic", id="chart-renderer"). Reserved system IDs you must NOT use: page-info, page-helpers, page-script, error.
 Use the synthos.* helper functions (available globally) for all server API calls instead of raw fetch().
 Write an explication of your reasoning or any hidden thoughts to the thoughts div.
 If the user asks to create something like an app, tool, game, or ui create it in the viewer panel.
@@ -399,21 +509,23 @@ Return ONLY the JSON array. Example:
 ]`;
 
 const serverAPIs =
-`GET /api/data/:table
-description: Retrieve all rows from a table
-response: Array of JSON rows [{ id: string, ... }]
+`GET /api/data/:page/:table
+description: Retrieve all rows from a page-scoped table (tables are stored per-page). Supports pagination via query params.
+query params: limit (number, optional) — max rows to return; offset (number, optional, default 0) — rows to skip
+response (without limit): Array of JSON rows [{ id: string, ... }]
+response (with limit): { items: [{ id: string, ... }], total: number, offset: number, limit: number, hasMore: boolean }
 
-GET /api/data/:table/:id
-description: Retrieve a single row from a table
+GET /api/data/:page/:table/:id
+description: Retrieve a single row from a page-scoped table
 response: JSON row { id: string, ... }
 
-POST /api/data/:table
-description: Replaces or adds a single row to a table and returns the row
+POST /api/data/:page/:table
+description: Replaces or adds a single row to a page-scoped table and returns the row
 request: JSON row { id?: string, ... }
 response: { id: string, ... }
 
-DELETE /api/data/:table/:id
-description: Delete a single row from a table
+DELETE /api/data/:page/:table/:id
+description: Delete a single row from a page-scoped table
 response: { success: true }
 
 POST /api/generate/image
@@ -454,10 +566,10 @@ request: { query: string, count?: number, country?: string, freshness?: string }
 response: { results: [{ title: string, url: string, description: string }] }
 
 PAGE HELPERS (available globally as window.synthos):
-  synthos.data.list(table)              — GET /api/data/:table
-  synthos.data.get(table, id)           — GET /api/data/:table/:id
-  synthos.data.save(table, row)         — POST /api/data/:table
-  synthos.data.remove(table, id)        — DELETE /api/data/:table/:id
+  synthos.data.list(table, opts?)       — GET /api/data/:page/:table  (auto-scoped to current page; opts: { limit?, offset? } — when limit is set, returns { items, total, offset, limit, hasMore })
+  synthos.data.get(table, id)           — GET /api/data/:page/:table/:id  (auto-scoped to current page)
+  synthos.data.save(table, row)         — POST /api/data/:page/:table  (auto-scoped to current page)
+  synthos.data.remove(table, id)        — DELETE /api/data/:page/:table/:id  (auto-scoped to current page)
   synthos.generate.image({ prompt, shape, style })       — POST /api/generate/image
   synthos.generate.completion({ prompt, temperature? })  — POST /api/generate/completion
   synthos.scripts.run(id, variables)    — POST /api/scripts/:id

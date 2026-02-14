@@ -73,7 +73,7 @@
         <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     </div>
     <div id="thoughts" style="display: none;">I've prompted the user for the document to write.</div>
-    <script>
+    <script id="markdown-renderer">
         window.onload = function() {
             // Render markdown using marked library with custom renderer
             const renderer = new marked.Renderer();

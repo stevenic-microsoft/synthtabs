@@ -5,6 +5,7 @@ import {
     applyChangeList,
     parseChangeList,
     injectError,
+    deduplicateInlineScripts,
     ChangeList,
 } from '../src/service/transformPage';
 
@@ -216,5 +217,120 @@ describe('injectError', () => {
         const html = '<div>No body</div>';
         const result = injectError(html, 'Err', 'det');
         assert.ok(result.includes('<script id="error"'));
+    });
+});
+
+// ---------------------------------------------------------------------------
+// deduplicateInlineScripts
+// ---------------------------------------------------------------------------
+
+describe('deduplicateInlineScripts', () => {
+    it('removes the first of two exact-duplicate inline scripts', () => {
+        const script = `let count = 0;\nlet name = "test";\nfunction init() {}\nfunction render() {}`;
+        const html = `<html><head></head><body><script>${script}</script><script>${script}</script></body></html>`;
+        const result = deduplicateInlineScripts(html);
+        // Should keep exactly one script
+        const matches = result.match(/<script>/g);
+        assert.strictEqual(matches?.length, 1);
+        assert.ok(result.includes('function render'));
+    });
+
+    it('removes the first script when declarations overlap >= 60%', () => {
+        const scriptOld = `let count = 0;\nlet name = "old";\nfunction init() {}\nfunction render() {}\nfunction oldHelper() {}`;
+        const scriptNew = `let count = 0;\nlet name = "new";\nfunction init() {}\nfunction render() {}\nfunction newHelper() {}`;
+        const html = `<html><head></head><body><script>${scriptOld}</script><script>${scriptNew}</script></body></html>`;
+        const result = deduplicateInlineScripts(html);
+        const matches = result.match(/<script>/g);
+        assert.strictEqual(matches?.length, 1);
+        // Should keep the second (newer) script
+        assert.ok(result.includes('newHelper'));
+        assert.ok(!result.includes('oldHelper'));
+    });
+
+    it('preserves both scripts when declarations do not overlap', () => {
+        const scriptA = `let alpha = 1;\nlet beta = 2;\nfunction doA() {}`;
+        const scriptB = `let gamma = 3;\nlet delta = 4;\nfunction doB() {}`;
+        const html = `<html><head></head><body><script>${scriptA}</script><script>${scriptB}</script></body></html>`;
+        const result = deduplicateInlineScripts(html);
+        const matches = result.match(/<script>/g);
+        assert.strictEqual(matches?.length, 2);
+    });
+
+    it('never touches scripts with id attribute', () => {
+        const script = `let count = 0;\nlet name = "test";\nfunction init() {}\nfunction render() {}`;
+        const html = `<html><head></head><body><script id="app">${script}</script><script>${script}</script></body></html>`;
+        const result = deduplicateInlineScripts(html);
+        // Both should be preserved — the id-script is exempt from dedup
+        assert.ok(result.includes('id="app"'));
+        const scriptTags = result.match(/<script/g);
+        assert.strictEqual(scriptTags?.length, 2);
+    });
+
+    it('never touches scripts with src attribute', () => {
+        const html = `<html><head></head><body><script src="/app.js"></script><script src="/app.js"></script></body></html>`;
+        const result = deduplicateInlineScripts(html);
+        const matches = result.match(/<script/g);
+        assert.strictEqual(matches?.length, 2);
+    });
+
+    it('never touches scripts with type="application/json"', () => {
+        const json = `{"key": "value"}`;
+        const html = `<html><head></head><body><script type="application/json">${json}</script><script type="application/json">${json}</script></body></html>`;
+        const result = deduplicateInlineScripts(html);
+        const matches = result.match(/<script/g);
+        assert.strictEqual(matches?.length, 2);
+    });
+
+    it('does not remove scripts with fewer than 2 declarations', () => {
+        const scriptA = `let onlyOne = 1;`;
+        const scriptB = `let onlyOne = 1;`;
+        const html = `<html><head></head><body><script>${scriptA}</script><script>${scriptB}</script></body></html>`;
+        const result = deduplicateInlineScripts(html);
+        const matches = result.match(/<script>/g);
+        assert.strictEqual(matches?.length, 2);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// deduplicateInlineScripts — ID-based dedup (Pass 1)
+// ---------------------------------------------------------------------------
+
+describe('deduplicateInlineScripts — ID-based dedup', () => {
+    it('removes the first of two scripts with the same id', () => {
+        const html = `<html><head></head><body><script id="app">let x = 1;</script><script id="app">let x = 2;</script></body></html>`;
+        const result = deduplicateInlineScripts(html);
+        const matches = result.match(/id="app"/g);
+        assert.strictEqual(matches?.length, 1);
+        assert.ok(result.includes('let x = 2'));
+        assert.ok(!result.includes('let x = 1'));
+    });
+
+    it('keeps only the last of three scripts with the same id', () => {
+        const html = `<html><head></head><body><script id="logic">let v = 1;</script><script id="logic">let v = 2;</script><script id="logic">let v = 3;</script></body></html>`;
+        const result = deduplicateInlineScripts(html);
+        const matches = result.match(/id="logic"/g);
+        assert.strictEqual(matches?.length, 1);
+        assert.ok(result.includes('let v = 3'));
+        assert.ok(!result.includes('let v = 1'));
+        assert.ok(!result.includes('let v = 2'));
+    });
+
+    it('preserves scripts with different ids', () => {
+        const html = `<html><head></head><body><script id="alpha">let a = 1;</script><script id="beta">let b = 2;</script></body></html>`;
+        const result = deduplicateInlineScripts(html);
+        assert.ok(result.includes('id="alpha"'));
+        assert.ok(result.includes('id="beta"'));
+        assert.ok(result.includes('let a = 1'));
+        assert.ok(result.includes('let b = 2'));
+    });
+
+    it('never removes scripts with system ids even if duplicated', () => {
+        const systemIds = ['page-info', 'page-helpers', 'page-script', 'error'];
+        for (const sysId of systemIds) {
+            const html = `<html><head></head><body><script id="${sysId}">content1</script><script id="${sysId}">content2</script></body></html>`;
+            const result = deduplicateInlineScripts(html);
+            const matches = result.match(new RegExp(`id="${sysId}"`, 'g'));
+            assert.strictEqual(matches?.length, 2, `Expected 2 scripts with id="${sysId}" to be preserved`);
+        }
     });
 });

@@ -1,7 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
+<!DOCTYPE html><html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SynthOS - Pages</title>
@@ -1411,8 +1408,7 @@
             <button type="submit" class="chat-submit">Send</button>
         </form>
     </div>
-    <div class="viewer-panel" id="viewerPanel"
-        style="justify-content: flex-start; align-items: stretch;">
+    <div class="viewer-panel" id="viewerPanel" style="justify-content: flex-start; align-items: stretch;">
         <div class="saved-pages">Pages</div>
 
         <!-- Favorites section (hidden when empty) -->
@@ -1450,8 +1446,7 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Categories (comma-separated)</label>
-                        <input type="text" id="editPageCategories" class="form-input"
-                            placeholder="e.g. Tools, Games, Utilities">
+                        <input type="text" id="editPageCategories" class="form-input" placeholder="e.g. Tools, Games, Utilities">
                     </div>
                     <div class="form-group">
                         <label class="form-label checkbox-label">
@@ -1492,8 +1487,7 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Categories (comma-separated)</label>
-                        <input type="text" id="copyPageCategories" class="form-input"
-                            placeholder="e.g. Tools, Games, Utilities">
+                        <input type="text" id="copyPageCategories" class="form-input" placeholder="e.g. Tools, Games, Utilities">
                     </div>
                     <div class="advanced-options">
                         <button type="button" class="advanced-toggle" id="advancedToggle">
@@ -1502,10 +1496,8 @@
                         <div class="advanced-content" id="advancedContent" style="display: none;">
                             <div class="form-group" style="margin-top: 12px;">
                                 <label class="form-label">Custom Page ID</label>
-                                <input type="text" id="copyNewPageName" class="form-input"
-                                    placeholder="Auto-generated from title...">
-                                <div
-                                    style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; opacity: 0.8;">
+                                <input type="text" id="copyNewPageName" class="form-input" placeholder="Auto-generated from title...">
+                                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; opacity: 0.8;">
                                     Used in the URL. Leave blank to auto-generate from title.</div>
                             </div>
                         </div>
@@ -1525,8 +1517,7 @@
             <div class="modal-content">
                 <div class="modal-header">Confirm Delete</div>
                 <div class="modal-body">
-                    <p style="color: var(--text-primary); margin: 0;">Are you sure you want to delete "<span
-                            id="deletePageNameDisplay2"></span>"? This cannot be undone.</p>
+                    <p style="color: var(--text-primary); margin: 0;">Are you sure you want to delete "<span id="deletePageNameDisplay2"></span>"? This cannot be undone.</p>
                 </div>
                 <div class="modal-footer">
                     <div class="modal-footer-right">
@@ -1546,462 +1537,18 @@
         <div id="copyMenuItem" class="context-menu-item">Copy to new page</div>
         <div id="updateMenuItem" class="context-menu-item">Update page</div>
     </div>
-    <script>
-        // Override showContextMenu to handle builder page specially
-        const originalShowContextMenu = showContextMenu;
-        showContextMenu = function (e, page) {
-            contextTarget = page;
-            const isBuilder = page.name === BUILDER_PAGE;
+    
 
-            // Show/hide menu items based on whether it's the builder
-            pinMenuItem.style.display = isBuilder ? 'none' : '';
-            editMenuItem.style.display = isBuilder ? 'none' : '';
-
-            if (!isBuilder) {
-                pinMenuItem.textContent = page.pinned ? 'Unpin from Favorites' : 'Pin to Favorites';
-            }
-
-            // Show/hide update menu item based on page version
-            var updateItem = document.getElementById('updateMenuItem');
-            var latestVersion = window.pageInfo ? window.pageInfo.latestPageVersion : 0;
-            updateItem.style.display = (page.pageVersion < latestVersion) ? '' : 'none';
-
-            contextMenu.style.left = e.clientX + 'px';
-            contextMenu.style.top = e.clientY + 'px';
-            contextMenu.style.display = 'block';
-        };
-
-        // Update createPageLink to allow context menu on builder
-        function createPageLinkUpdated(page, isBuilder = false) {
-            const a = document.createElement('a');
-            a.href = '/' + page.name;
-            a.textContent = displayName(page);
-            let classes = 'page-link';
-            if (isBuilder) {
-                classes += ' builder-page';
-            } else if (page.pinned) {
-                classes += ' pinned';
-            }
-            a.className = classes;
-
-            // Allow context menu for builder (copy only) and other pages
-            a.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                showContextMenu(e, page);
-            });
-            return a;
-        }
-
-        // Override the original createPageLink
-        createPageLink = createPageLinkUpdated;
-
-        // Re-render to apply changes
-        if (allPages.length > 0) {
-            renderAll();
-        }
-    </script>
-
-    <script>
-        // ---- Page data & state ----
-        let allPages = [];
-        let activeCategory = 'All';
-        let searchTerm = '';
-        let contextTarget = null; // { name, pinned }
-        const BUILDER_PAGE = 'builder';
-
-        // ---- Render helpers ----
-        function displayName(page) {
-            return page.title || page.name;
-        }
-
-        function createPageLink(page, isBuilder = false) {
-            const a = document.createElement('a');
-            a.href = '/' + page.name;
-            a.textContent = displayName(page);
-            let classes = 'page-link';
-            if (isBuilder) {
-                classes += ' builder-page';
-            } else if (page.pinned) {
-                classes += ' pinned';
-            }
-            a.className = classes;
-
-            // No context menu for builder page
-            if (!isBuilder) {
-                a.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                    showContextMenu(e, page);
-                });
-            }
-            return a;
-        }
-
-        function renderFavorites() {
-            const section = document.getElementById('favoritesSection');
-            const grid = document.getElementById('favoritesGrid');
-            grid.innerHTML = '';
-
-            // Always show builder first
-            const builderPage = allPages.find(p => p.name === BUILDER_PAGE);
-            if (builderPage) {
-                grid.appendChild(createPageLink(builderPage, true));
-            }
-
-            // Then other pinned pages (excluding builder), sorted alphabetically
-            const pinned = allPages
-                .filter(p => p.pinned && p.name !== BUILDER_PAGE)
-                .sort((a, b) => displayName(a).localeCompare(displayName(b)));
-
-            pinned.forEach(p => grid.appendChild(createPageLink(p)));
-
-            // Show section if builder exists or there are pinned pages
-            if (builderPage || pinned.length > 0) {
-                section.style.display = '';
-            } else {
-                section.style.display = 'none';
-            }
-        }
-
-        function renderFilterBar() {
-            const bar = document.getElementById('filterBar');
-            const searchInput = document.getElementById('searchInput');
-            bar.innerHTML = '';
-
-            // Collect unique categories (excluding builder page)
-            const cats = new Set();
-            allPages.filter(p => p.name !== BUILDER_PAGE).forEach(p => p.categories.forEach(c => cats.add(c)));
-            const sorted = Array.from(cats).sort();
-
-            // "All" button first
-            const allBtn = document.createElement('button');
-            allBtn.className = 'filter-btn' + (activeCategory === 'All' ? ' active' : '');
-            allBtn.textContent = 'All';
-            allBtn.dataset.category = 'All';
-            allBtn.addEventListener('click', () => setCategory('All'));
-            bar.appendChild(allBtn);
-
-            sorted.forEach(cat => {
-                const btn = document.createElement('button');
-                btn.className = 'filter-btn' + (activeCategory === cat ? ' active' : '');
-                btn.textContent = cat;
-                btn.dataset.category = cat;
-                btn.addEventListener('click', () => setCategory(cat));
-                bar.appendChild(btn);
-            });
-
-            bar.appendChild(searchInput);
-        }
-
-        function renderPages() {
-            const grid = document.getElementById('pagesGrid');
-            grid.innerHTML = '';
-            const term = searchTerm.toLowerCase();
-            allPages.forEach(p => {
-                // Exclude builder page from main list
-                if (p.name === BUILDER_PAGE) return;
-                // Category filter
-                if (activeCategory !== 'All' && !p.categories.includes(activeCategory)) return;
-                // Search filter (match name or title)
-                if (term && !p.name.toLowerCase().includes(term) && !displayName(p).toLowerCase().includes(term)) return;
-                grid.appendChild(createPageLink(p));
-            });
-        }
-
-        function setCategory(cat) {
-            activeCategory = cat;
-            renderFilterBar();
-            renderPages();
-        }
-
-        function renderAll() {
-            renderFavorites();
-            renderFilterBar();
-            renderPages();
-        }
-
-        // ---- Search ----
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            searchTerm = e.target.value;
-            renderPages();
-        });
-
-        // ---- Context menu ----
-        const contextMenu = document.getElementById('contextMenu');
-        const pinMenuItem = document.getElementById('pinMenuItem');
-
-        function showContextMenu(e, page) {
-            // Don't show context menu for builder page
-            if (page.name === BUILDER_PAGE) return;
-
-            contextTarget = page;
-            pinMenuItem.textContent = page.pinned ? 'Unpin from Favorites' : 'Pin to Favorites';
-            contextMenu.style.left = e.clientX + 'px';
-            contextMenu.style.top = e.clientY + 'px';
-            contextMenu.style.display = 'block';
-        }
-
-        function hideContextMenu() {
-            contextMenu.style.display = 'none';
-            contextTarget = null;
-        }
-
-        document.addEventListener('click', hideContextMenu);
-        contextMenu.addEventListener('click', (e) => e.stopPropagation());
-
-        pinMenuItem.addEventListener('click', async () => {
-            if (!contextTarget) return;
-            const pageName = contextTarget.name;
-            const newPinned = !contextTarget.pinned;
-            const categories = contextTarget.categories || [];
-            hideContextMenu();
-
-            try {
-                const res = await fetch('/api/pages/' + encodeURIComponent(pageName), {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ categories: categories, pinned: newPinned })
-                });
-
-                if (!res.ok) {
-                    const errorText = await res.text();
-                    throw new Error('Failed to update page metadata: ' + errorText);
-                }
-
-                // Update local state immediately for responsive UI
-                const pageIndex = allPages.findIndex(p => p.name === pageName);
-                if (pageIndex !== -1) {
-                    allPages[pageIndex].pinned = newPinned;
-                    renderAll();
-                }
-
-                // Also reload from server to ensure consistency
-                await loadPages();
-            } catch (err) {
-                console.error('Error toggling pin:', err);
-                alert('Failed to update pin status: ' + err.message);
-            }
-        });
-
-        // ---- Load pages from API ----
-        async function loadPages() {
-            try {
-                const res = await fetch('/api/pages');
-                if (!res.ok) throw new Error('Failed to fetch pages');
-                allPages = await res.json();
-                renderAll();
-            } catch (err) {
-                console.error('Error fetching pages:', err);
-            }
-        }
-
-        loadPages();
-    </script>
+    
 
     <div id="thoughts" style="display: none;">Updated the scroll animation keyframes to have 5 second pauses
         (represented as 25% at start and 25% at end of the animation cycle). The animation now pauses at 0-25%, scrolls
         through 25-75%, then pauses again at 75-100% before looping. This gives approximately 5 seconds of pause time at
         each end when combined with the scroll duration.</div>
-        <script>
-            // Consolidated copy confirm handler - removes old handlers and adds proper auto-formatting
-            (function () {
-                const copyConfirmBtn = document.getElementById('copyConfirmBtn');
-                const copyNewPageName = document.getElementById('copyNewPageName');
-                const copyPageTitle = document.getElementById('copyPageTitle');
-                const copyPageCategories = document.getElementById('copyPageCategories');
-                const copyPageModal = document.getElementById('copyPageModal');
-                const copySourcePageDisplay = document.getElementById('copySourcePageDisplay');
-
-                // Remove all existing click handlers by cloning
-                const newBtn = copyConfirmBtn.cloneNode(true);
-                copyConfirmBtn.parentNode.replaceChild(newBtn, copyConfirmBtn);
-
-                newBtn.addEventListener('click', async () => {
-                    if (!currentCopySource) return;
-                    const newTitle = copyPageTitle.value.trim();
-                    let newName = copyNewPageName.value.trim();
-
-                    // Derive page name from title if left blank
-                    if (!newName && newTitle) {
-                        newName = newTitle;
-                    }
-
-                    if (!newName) {
-                        alert('Please enter a title or page name.');
-                        copyPageTitle.focus();
-                        return;
-                    }
-
-                    // Auto-format: lowercase and replace spaces with underscores
-                    newName = newName.toLowerCase().replace(/\s+/g, '_');
-
-                    // Remove any remaining invalid characters
-                    newName = newName.replace(/[^a-z0-9_-]/g, '');
-
-                    if (!newName) {
-                        alert('Page name must contain at least one valid character (letters, numbers, hyphens, or underscores).');
-                        copyPageTitle.focus();
-                        return;
-                    }
-                    const newCategories = copyPageCategories.value
-                        .split(',')
-                        .map(c => c.trim())
-                        .filter(c => c.length > 0);
-
-                    try {
-                        const body = {
-                            name: newName,
-                            title: newTitle,
-                            categories: newCategories
-                        };
-                        const res = await fetch('/api/pages/' + encodeURIComponent(currentCopySource.name) + '/copy', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(body)
-                        });
-                        if (!res.ok) {
-                            const data = await res.json().catch(() => ({}));
-                            throw new Error(data.error || 'Failed to copy page');
-                        }
-                        copyPageModal.classList.remove('show');
-                        currentCopySource = null;
-                        // Navigate to the new page
-                        window.location.href = '/' + newName;
-                    } catch (err) {
-                        console.error('Error copying page:', err);
-                        alert('Failed to copy page: ' + err.message);
-                    }
-                });
-            })();
-        </script>
-        <script>
-            // Enhanced page link creation with ellipsis and scroll effect for long titles
-            (function () {
-                createPageLink = function (page, isBuilder = false) {
-                    const a = document.createElement('a');
-                    a.href = '/' + page.name;
-
-                    const title = displayName(page);
-                    const span = document.createElement('span');
-                    span.className = 'scroll-text';
-                    span.textContent = title;
-                    a.appendChild(span);
-                    a.title = title; // Tooltip fallback
-
-                    let classes = 'page-link';
-                    if (isBuilder) {
-                        classes += ' builder-page';
-                    } else if (page.pinned) {
-                        classes += ' pinned';
-                    }
-                    a.className = classes;
-
-                    // Context menu handler
-                    a.addEventListener('contextmenu', (e) => {
-                        e.preventDefault();
-                        showContextMenu(e, page);
-                    });
-
-                    // Hover scroll effect for long titles
-                    a.addEventListener('mouseenter', function () {
-                        const textWidth = span.scrollWidth;
-                        const containerWidth = a.clientWidth - 32; // Account for padding
-
-                        if (textWidth > containerWidth) {
-                            const scrollDistance = textWidth - containerWidth + 20;
-                            const duration = Math.max(2, scrollDistance / 30); // Speed based on length
-
-                            a.style.setProperty('--scroll-distance', `-${scrollDistance}px`);
-                            a.style.setProperty('--scroll-duration', `${duration}s`);
-                            a.classList.add('scrolling');
-                        }
-                    });
-
-                    a.addEventListener('mouseleave', function () {
-                        a.classList.remove('scrolling');
-                    });
-
-                    return a;
-                };
-
-                // Re-render if pages already loaded
-                if (typeof allPages !== 'undefined' && allPages && allPages.length > 0) {
-                    renderAll();
-                }
-            })();
-        </script>
-    <script>
-        // Consolidated copy confirm handler - removes old handlers and adds proper auto-formatting
-        (function () {
-            const copyConfirmBtn = document.getElementById('copyConfirmBtn');
-            const copyNewPageName = document.getElementById('copyNewPageName');
-            const copyPageTitle = document.getElementById('copyPageTitle');
-            const copyPageCategories = document.getElementById('copyPageCategories');
-            const copyPageModal = document.getElementById('copyPageModal');
-            const copySourcePageDisplay = document.getElementById('copySourcePageDisplay');
-
-            // Remove all existing click handlers by cloning
-            const newBtn = copyConfirmBtn.cloneNode(true);
-            copyConfirmBtn.parentNode.replaceChild(newBtn, copyConfirmBtn);
-
-            newBtn.addEventListener('click', async () => {
-                if (!currentCopySource) return;
-                const newTitle = copyPageTitle.value.trim();
-                let newName = copyNewPageName.value.trim();
-
-                // Derive page name from title if left blank
-                if (!newName && newTitle) {
-                    newName = newTitle;
-                }
-
-                if (!newName) {
-                    alert('Please enter a title or page name.');
-                    copyPageTitle.focus();
-                    return;
-                }
-
-                // Auto-format: lowercase and replace spaces with underscores
-                newName = newName.toLowerCase().replace(/\s+/g, '_');
-
-                // Remove any remaining invalid characters
-                newName = newName.replace(/[^a-z0-9_-]/g, '');
-
-                if (!newName) {
-                    alert('Page name must contain at least one valid character (letters, numbers, hyphens, or underscores).');
-                    copyPageTitle.focus();
-                    return;
-                }
-                const newCategories = copyPageCategories.value
-                    .split(',')
-                    .map(c => c.trim())
-                    .filter(c => c.length > 0);
-
-                try {
-                    const body = {
-                        name: newName,
-                        title: newTitle,
-                        categories: newCategories
-                    };
-                    const res = await fetch('/api/pages/' + encodeURIComponent(currentCopySource.name) + '/copy', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(body)
-                    });
-                    if (!res.ok) {
-                        const data = await res.json().catch(() => ({}));
-                        throw new Error(data.error || 'Failed to copy page');
-                    }
-                    copyPageModal.classList.remove('show');
-                    currentCopySource = null;
-                    // Navigate to the new page
-                    window.location.href = '/' + newName;
-                } catch (err) {
-                    console.error('Error copying page:', err);
-                    alert('Failed to copy page: ' + err.message);
-                }
-            });
-        })();
-    </script>
-    <script>
+        
+        
+    
+    <script id="pages-core">
         // ---- Page data & state ----
         let allPages = [];
         let activeCategory = 'All';
@@ -2291,24 +1838,45 @@
         }
 
         loadPages();
-    </script>
-    <script>
-        // ---- Page data & state ----
-        let allPages = [];
-        let activeCategory = 'All';
-        let searchTerm = '';
-        let contextTarget = null; // { name, pinned }
+    </script><script id="context-menu-override">
+        // Override showContextMenu to handle builder page specially
+        const originalShowContextMenu = showContextMenu;
+        showContextMenu = function (e, page) {
+            contextTarget = page;
+            const isBuilder = page.name === BUILDER_PAGE;
 
-        // ---- Render helpers ----
-        function displayName(page) {
-            return page.title || page.name;
-        }
+            // Show/hide menu items based on whether it's the builder
+            pinMenuItem.style.display = isBuilder ? 'none' : '';
+            editMenuItem.style.display = isBuilder ? 'none' : '';
 
-        function createPageLink(page) {
+            if (!isBuilder) {
+                pinMenuItem.textContent = page.pinned ? 'Unpin from Favorites' : 'Pin to Favorites';
+            }
+
+            // Show/hide update menu item based on page version
+            var updateItem = document.getElementById('updateMenuItem');
+            var latestVersion = window.pageInfo ? window.pageInfo.latestPageVersion : 0;
+            updateItem.style.display = (page.pageVersion < latestVersion) ? '' : 'none';
+
+            contextMenu.style.left = e.clientX + 'px';
+            contextMenu.style.top = e.clientY + 'px';
+            contextMenu.style.display = 'block';
+        };
+
+        // Update createPageLink to allow context menu on builder
+        function createPageLinkUpdated(page, isBuilder = false) {
             const a = document.createElement('a');
             a.href = '/' + page.name;
             a.textContent = displayName(page);
-            a.className = 'page-link' + (page.pinned ? ' pinned' : '');
+            let classes = 'page-link';
+            if (isBuilder) {
+                classes += ' builder-page';
+            } else if (page.pinned) {
+                classes += ' pinned';
+            }
+            a.className = classes;
+
+            // Allow context menu for builder (copy only) and other pages
             a.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 showContextMenu(e, page);
@@ -2316,150 +1884,71 @@
             return a;
         }
 
-        function renderFavorites() {
-            const pinned = allPages.filter(p => p.pinned);
-            const section = document.getElementById('favoritesSection');
-            const grid = document.getElementById('favoritesGrid');
-            grid.innerHTML = '';
-            if (pinned.length === 0) {
-                section.style.display = 'none';
-                return;
-            }
-            section.style.display = '';
-            pinned.forEach(p => grid.appendChild(createPageLink(p)));
+        // Override the original createPageLink
+        createPageLink = createPageLinkUpdated;
+
+        // Re-render to apply changes
+        if (allPages.length > 0) {
+            renderAll();
         }
+    </script><script id="page-link-scroll">
+            // Enhanced page link creation with ellipsis and scroll effect for long titles
+            (function () {
+                createPageLink = function (page, isBuilder = false) {
+                    const a = document.createElement('a');
+                    a.href = '/' + page.name;
 
-        function renderFilterBar() {
-            const bar = document.getElementById('filterBar');
-            // Remove old category buttons (keep the search input)
-            const searchInput = document.getElementById('searchInput');
-            bar.innerHTML = '';
+                    const title = displayName(page);
+                    const span = document.createElement('span');
+                    span.className = 'scroll-text';
+                    span.textContent = title;
+                    a.appendChild(span);
+                    a.title = title; // Tooltip fallback
 
-            // Collect unique categories
-            const cats = new Set();
-            allPages.forEach(p => p.categories.forEach(c => cats.add(c)));
-            const sorted = Array.from(cats).sort();
+                    let classes = 'page-link';
+                    if (isBuilder) {
+                        classes += ' builder-page';
+                    } else if (page.pinned) {
+                        classes += ' pinned';
+                    }
+                    a.className = classes;
 
-            // "All" button first
-            const allBtn = document.createElement('button');
-            allBtn.className = 'filter-btn' + (activeCategory === 'All' ? ' active' : '');
-            allBtn.textContent = 'All';
-            allBtn.dataset.category = 'All';
-            allBtn.addEventListener('click', () => setCategory('All'));
-            bar.appendChild(allBtn);
+                    // Context menu handler
+                    a.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        showContextMenu(e, page);
+                    });
 
-            sorted.forEach(cat => {
-                const btn = document.createElement('button');
-                btn.className = 'filter-btn' + (activeCategory === cat ? ' active' : '');
-                btn.textContent = cat;
-                btn.dataset.category = cat;
-                btn.addEventListener('click', () => setCategory(cat));
-                bar.appendChild(btn);
-            });
+                    // Hover scroll effect for long titles
+                    a.addEventListener('mouseenter', function () {
+                        const textWidth = span.scrollWidth;
+                        const containerWidth = a.clientWidth - 32; // Account for padding
 
-            bar.appendChild(searchInput);
-        }
+                        if (textWidth > containerWidth) {
+                            const scrollDistance = textWidth - containerWidth + 20;
+                            const duration = Math.max(2, scrollDistance / 30); // Speed based on length
 
-        function renderPages() {
-            const grid = document.getElementById('pagesGrid');
-            grid.innerHTML = '';
-            const term = searchTerm.toLowerCase();
-            allPages.forEach(p => {
-                // Category filter
-                if (activeCategory !== 'All' && !p.categories.includes(activeCategory)) return;
-                // Search filter (match name or title)
-                if (term && !p.name.toLowerCase().includes(term) && !displayName(p).toLowerCase().includes(term)) return;
-                grid.appendChild(createPageLink(p));
-            });
-        }
+                            a.style.setProperty('--scroll-distance', `-${scrollDistance}px`);
+                            a.style.setProperty('--scroll-duration', `${duration}s`);
+                            a.classList.add('scrolling');
+                        }
+                    });
 
-        function setCategory(cat) {
-            activeCategory = cat;
-            renderFilterBar();
-            renderPages();
-        }
+                    a.addEventListener('mouseleave', function () {
+                        a.classList.remove('scrolling');
+                    });
 
-        function renderAll() {
-            renderFavorites();
-            renderFilterBar();
-            renderPages();
-        }
+                    return a;
+                };
 
-        // ---- Search ----
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            searchTerm = e.target.value;
-            renderPages();
-        });
-
-        // ---- Context menu ----
-        const contextMenu = document.getElementById('contextMenu');
-        const pinMenuItem = document.getElementById('pinMenuItem');
-
-        function showContextMenu(e, page) {
-            contextTarget = page;
-            pinMenuItem.textContent = page.pinned ? 'Unpin from Favorites' : 'Pin to Favorites';
-            contextMenu.style.left = e.clientX + 'px';
-            contextMenu.style.top = e.clientY + 'px';
-            contextMenu.style.display = 'block';
-        }
-
-        function hideContextMenu() {
-            contextMenu.style.display = 'none';
-            contextTarget = null;
-        }
-
-        document.addEventListener('click', hideContextMenu);
-        contextMenu.addEventListener('click', (e) => e.stopPropagation());
-
-        pinMenuItem.addEventListener('click', async () => {
-            if (!contextTarget) return;
-            const pageName = contextTarget.name;
-            const newPinned = !contextTarget.pinned;
-            const categories = contextTarget.categories || [];
-            hideContextMenu();
-
-            try {
-                const res = await fetch('/api/pages/' + encodeURIComponent(pageName), {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ categories: categories, pinned: newPinned })
-                });
-
-                if (!res.ok) {
-                    const errorText = await res.text();
-                    throw new Error('Failed to update page metadata: ' + errorText);
-                }
-
-                // Update local state immediately for responsive UI
-                const pageIndex = allPages.findIndex(p => p.name === pageName);
-                if (pageIndex !== -1) {
-                    allPages[pageIndex].pinned = newPinned;
+                // Re-render if pages already loaded
+                if (typeof allPages !== 'undefined' && allPages && allPages.length > 0) {
                     renderAll();
                 }
-
-                // Also reload from server to ensure consistency
-                await loadPages();
-            } catch (err) {
-                console.error('Error toggling pin:', err);
-                alert('Failed to update pin status: ' + err.message);
-            }
-        });
-
-        // ---- Load pages from API ----
-        async function loadPages() {
-            try {
-                const res = await fetch('/api/pages');
-                if (!res.ok) throw new Error('Failed to fetch pages');
-                allPages = await res.json();
-                renderAll();
-            } catch (err) {
-                console.error('Error fetching pages:', err);
-            }
-        }
-
-        loadPages();
-    </script>
-    <script>
+            })();
+        </script>
+    
+    <script id="modal-logic">
         // Modal functionality
         const editPageModal = document.getElementById('editPageModal');
         const copyPageModal = document.getElementById('copyPageModal');
@@ -2621,7 +2110,7 @@
 
         // (copy confirm handler moved to re-bind block below)
     </script>
-    <script>
+    <script id="edit-modal-override">
         // Update edit modal to use new page name display
         const editPageNameDisplay = document.getElementById('editPageNameDisplay');
 
@@ -2640,9 +2129,8 @@
         };
         editMenuItem.addEventListener('click', editMenuItem._handler);
     </script>
-    <script id="error"
-        type="application/json">{"message":"Something went wrong try again","details":"delete: node 53 not found"}</script>
-    <script>
+    <script id="error" type="application/json">{"message":"Something went wrong try again","details":"delete: node 53 not found"}</script>
+    <script id="copy-modal-rebind">
         // Re-bind copy modal elements after DOM update
         const copySourcePageDisplay = document.getElementById('copySourcePageDisplay');
         const copyPageCategories = document.getElementById('copyPageCategories');
@@ -2682,7 +2170,7 @@
     </script>
 
 
-    <script>
+    <script id="copy-confirm-handler">
         // Override the copy confirm handler to auto-format page name
         newCopyConfirmBtn.removeEventListener('click', newCopyConfirmBtn._handler);
         newCopyConfirmBtn._handler = async () => {
@@ -2742,7 +2230,7 @@
         };
         newCopyConfirmBtn.addEventListener('click', newCopyConfirmBtn._handler);
     </script>
-    <script>
+    <script id="advanced-toggle">
         // Advanced options toggle
         document.getElementById('advancedToggle').addEventListener('click', function () {
             const content = document.getElementById('advancedContent');
@@ -2757,7 +2245,7 @@
             }
         });
     </script>
-    <script>
+    <script id="update-handler">
         // Update page handler (context menu)
         document.getElementById('updateMenuItem').addEventListener('click', async function () {
             if (!contextTarget) return;
@@ -2768,7 +2256,7 @@
     </script>
     <!-- Toast container -->
     <div id="upgradeToast" class="upgrade-toast"></div>
-    <script>
+    <script id="upgrade-logic">
         // Show a brief toast notification
         function showUpgradeToast(message) {
             var toast = document.getElementById('upgradeToast');
@@ -2882,6 +2370,6 @@
     </script>
 <script id="page-helpers" src="/api/page-helpers.js?v=2"></script>
 <script id="page-script" src="/api/page-script.js?v=2"></script>
-</body>
 
-</html>
+
+</body></html>

@@ -27,7 +27,7 @@ Users conversationally build apps, tools, games, visualizations — anything exp
 - **`page-scripts/`** — versioned page scripts (e.g. `page-v2.js`), served directly (not copied to `.synthos/`)
 
 ## API Surface
-- **Data** (`/api/data/:table`) — file-based JSON storage; folders under `.synthos/`, rows are UUID-named JSON files; full CRUD
+- **Data** (`/api/data/:page/:table`) — file-based JSON storage scoped per-page; tables stored as sub-folders of each page's folder (`.synthos/pages/<page>/<table>/`), rows are UUID-named JSON files; full CRUD; client helpers auto-scope to current page via `window.pageInfo.name`
 - **Completions** (`/api/generate/completion`) — proxies to OpenAI/Anthropic via `agentm-core`; uses chain-of-thought
 - **Image generation** (`/api/generate/image`) — DALL-E 3 via OpenAI; non-OpenAI models get placeholder
 - **Scripts** (`/api/scripts/:id`) — executes shell commands from JSON templates with `{{variable}}` substitution; returns stdout

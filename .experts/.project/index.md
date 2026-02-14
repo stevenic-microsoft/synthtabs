@@ -30,6 +30,17 @@ When: express, route, endpoint, API route, middleware, server, requiresSettings,
   Content-Type, Cache-Control, body parser, route handler
 → Read `.experts/.project/express-routes.md`
 
+### API Checklist — mandatory sync steps when adding or changing APIs
+When: add API, new endpoint, new route, change API, remove endpoint, rename API,
+  api explorer, serverAPIs, apis.html, API sync, update APIs, API documentation
+→ Read `.experts/.project/api-checklist.md`
+
+### Page Checklist — impact check when core page infrastructure changes
+When: page-v2, helpers-v2, page script, page helpers, builder.html, builder page,
+  injectPageInfoScript, injectPageHelpers, injectPageScript, ensureRequiredImports,
+  REQUIRED_IMPORTS, SYSTEM_IDS, core page script, injection, injected script
+→ Read `.experts/.project/page-checklist.md`
+
 ### SynthOS Themes — theme system, CSS custom properties, light/dark mode
 When: theme, themes, CSS custom properties, light mode, dark mode, light-mode,
   dark-mode, theme-info, theme.css, ThemeInfo, loadTheme, loadThemeInfo,
@@ -65,4 +76,4 @@ Project experts are scoped to the current codebase's stack. They pair naturally 
 
 ## file inventory
 
-`agentm-core.md` | `cheerio-transforms.md` | `express-routes.md` | `mocha-testing.md` | `prompt-templates.md` | `synthos-pages.md` | `synthos-themes.md`
+`agentm-core.md` | `api-checklist.md` | `cheerio-transforms.md` | `express-routes.md` | `mocha-testing.md` | `page-checklist.md` | `prompt-templates.md` | `synthos-pages.md` | `synthos-themes.md`

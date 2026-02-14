@@ -115,7 +115,7 @@
         <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     </div>
     <div id="thoughts" style="display: none;">I've show the user a list of available scripts.</div>
-    <script>
+    <script id="script-editor">
         // Script Editor Functionality
         const scriptList = document.getElementById('scriptList');
         const scriptId = document.getElementById('scriptId');
@@ -159,7 +159,7 @@
         }
 
         function loadScripts() {
-            fetch('/api/data/scripts')
+            fetch('/api/data/scripts/scripts')
                 .then(response => response.json())
                 .then(scripts => {
                     scriptList.innerHTML = '';
@@ -178,7 +178,7 @@
         }
 
         function saveScript(script) {
-            fetch('/api/data/scripts')
+            fetch('/api/data/scripts/scripts')
                 .then(response => response.json())
                 .then(scripts => {
                     const existingScript = scripts.find(s => s.id === script.id);
@@ -194,7 +194,7 @@
         }
 
         function performSave(script) {
-            fetch('/api/data/scripts', {
+            fetch('/api/data/scripts/scripts', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -217,7 +217,7 @@
 
         function deleteScript(id) {
             if (confirm('Are you sure you want to delete this script?')) {
-                fetch(`/api/data/scripts/${id}`, {
+                fetch(`/api/data/scripts/scripts/${id}`, {
                     method: 'DELETE',
                 })
                     .then(response => response.json())

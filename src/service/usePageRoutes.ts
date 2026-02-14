@@ -37,8 +37,14 @@ const HOME_PAGE_ROUTE = '/builder';
 const PAGE_NOT_FOUND = 'Page not found';
 
 function injectPageInfoScript(html: string, pageName: string): string {
-    if (html.includes('id="page-info"')) return html;
     const tag = `<script id="page-info" src="/api/page-info.js?page=${encodeURIComponent(pageName)}"></script>`;
+
+    // Replace any existing page-info script (may have a stale page name from the template)
+    const existing = html.match(/<script\s+id="page-info"[^>]*><\/script>/);
+    if (existing) {
+        return html.replace(existing[0], tag);
+    }
+
     const idx = html.indexOf('</head>');
     if (idx !== -1) {
         return html.slice(0, idx) + tag + '\n' + html.slice(idx);
@@ -48,13 +54,29 @@ function injectPageInfoScript(html: string, pageName: string): string {
 
 function injectPageHelpers(html: string, pageVersion: number): string {
     if (pageVersion < 2) return html;
-    if (html.includes('id="page-helpers"')) return html;
     const tag = `<script id="page-helpers" src="/api/page-helpers.js?v=${pageVersion}"></script>`;
-    const idx = html.indexOf('</body>');
+
+    // Replace any existing page-helpers script (may be at wrong position from prior LLM output)
+    const existing = html.match(/<script\s+id="page-helpers"[^>]*><\/script>/);
+    if (existing) {
+        return html.replace(existing[0], tag);
+    }
+
+    // Inject into <head> after page-info so helpers are available before inline body scripts
+    const pageInfo = html.indexOf('id="page-info"');
+    if (pageInfo !== -1) {
+        const closeTag = html.indexOf('</script>', pageInfo);
+        if (closeTag !== -1) {
+            const insertAt = closeTag + '</script>'.length;
+            return html.slice(0, insertAt) + '\n' + tag + html.slice(insertAt);
+        }
+    }
+
+    const idx = html.indexOf('</head>');
     if (idx !== -1) {
         return html.slice(0, idx) + tag + '\n' + html.slice(idx);
     }
-    return html + '\n' + tag;
+    return tag + '\n' + html;
 }
 
 function injectPageScript(html: string, pageVersion: number): string {

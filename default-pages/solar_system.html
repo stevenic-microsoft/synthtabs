@@ -71,7 +71,7 @@
         <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     </div>
     <div id="thoughts" style="display: none;">Created an accurate solar system animation using canvas. Key accuracy features: 1) Real orbital periods relative to Earth (Mercury 0.24 years, Venus 0.62, Mars 1.88, Jupiter 11.86, Saturn 29.46, Uranus 84.01, Neptune 164.8, Pluto 248). 2) Accurate orbital eccentricities for elliptical orbits (Mercury has the most eccentric at 0.206). 3) Relative planet sizes (though scaled up for visibility). 4) Included the asteroid belt between Mars and Jupiter. 5) Added Pluto as a dwarf planet with its highly inclined and eccentric orbit. The simulation is interactive with speed controls, orbit toggles, and clickable planets for information. Used requestAnimationFrame for smooth animation.</div>
-    <script>
+    <script id="solar-sim">
         // Solar System Simulation
         const container = document.getElementById('solarSystem');
         const canvas = document.createElement('canvas');

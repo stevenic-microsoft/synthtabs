@@ -266,7 +266,7 @@ settings:
     panel. I updated the viewer panel to use flexbox with column direction, made the dialog-content flex: 1 to fill
     available space, and distributed the remaining space between the input textarea and result panel using flex: 1 on
     both. This allows both areas to grow and fill the available vertical space.</div>
-  <script>
+  <script id="json-tools-logic">
     document.getElementById("copyButton").addEventListener("click", function () { const resultPanel = document.getElementById("resultPanel"); navigator.clipboard.writeText(resultPanel.innerText).then(() => alert('Text copied to clipboard!'), (err) => console.error('Could not copy text: ', err)) });
     document.getElementById("convertButton").addEventListener("click", function () {
       const userInput = document.getElementById("userInput").value;

@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import { completePrompt } from 'agentm-core';
+import { deduplicateInlineScripts } from './service/transformPage';
 
 /**
  * Registry of migration functions: fromVersion -> transform.
@@ -81,6 +82,19 @@ const V1_TO_V2_SYSTEM_PROMPT = `You are a code migration tool. You convert Synth
 
 ## Rules — What to TRANSFORM
 
+### Data/Table API migration
+The data API changed from global tables to **page-scoped** tables:
+- Old: \`/api/data/:table\` → New: \`/api/data/:page/:table\`
+- Old: \`/api/data/:table/:id\` → New: \`/api/data/:page/:table/:id\`
+- Tables are now stored as sub-folders of each page's folder.
+- **Raw fetch() calls** must be updated: e.g. \`fetch('/api/data/notes')\` → \`fetch('/api/data/' + pageName + '/notes')\`
+- **synthos.data.\* helpers** handle this automatically — they read the current page name from \`window.pageInfo.name\`. Prefer converting raw fetch data calls to use the helpers instead:
+  - \`fetch('/api/data/notes')\` → \`synthos.data.list('notes')\`
+  - \`fetch('/api/data/notes/' + id)\` → \`synthos.data.get('notes', id)\`
+  - \`fetch('/api/data/notes', { method: 'POST', ... })\` → \`synthos.data.save('notes', row)\`
+  - \`fetch('/api/data/notes/' + id, { method: 'DELETE' })\` → \`synthos.data.remove('notes', id)\`
+
+### Color variables
 Replace hardcoded Nebula Dusk colors with CSS variables in **page-specific** CSS only:
 | Hardcoded | CSS Variable |
 |-----------|-------------|
@@ -246,5 +260,6 @@ export function postProcessV2(html: string): string {
         }
     });
 
-    return $.html();
+    // Remove duplicate inline scripts that share overlapping declarations
+    return deduplicateInlineScripts($.html());
 }

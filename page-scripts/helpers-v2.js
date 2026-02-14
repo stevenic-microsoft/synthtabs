@@ -15,6 +15,10 @@
             var isJson = ct.indexOf('application/json') !== -1;
             return (isJson ? res.json() : res.text()).then(function(data) {
                 if (!res.ok) {
+                    if (res.status === 404 && isJson && data && data.error === 'table_not_found') {
+                        var msg = 'Table "' + data.table + '" not found on page "' + data.page + '".\n\nIf this is a v1 page, the table data needs to be migrated to the new page-scoped format.';
+                        alert(msg);
+                    }
                     var err = new Error(isJson && data && data.error ? data.error : data);
                     err.status = res.status;
                     throw err;
@@ -24,19 +28,30 @@
         });
     }
 
+    function _pageName() {
+        return (window.pageInfo && window.pageInfo.name) || 'default';
+    }
+
     window.synthos = {
         data: {
-            list: function(table) {
-                return _json('GET', '/api/data/' + encodeURIComponent(table));
+            list: function(table, opts) {
+                var url = '/api/data/' + encodeURIComponent(_pageName()) + '/' + encodeURIComponent(table);
+                if (opts && typeof opts.limit === 'number') {
+                    url += '?limit=' + opts.limit;
+                    if (typeof opts.offset === 'number') {
+                        url += '&offset=' + opts.offset;
+                    }
+                }
+                return _json('GET', url);
             },
             get: function(table, id) {
-                return _json('GET', '/api/data/' + encodeURIComponent(table) + '/' + encodeURIComponent(id));
+                return _json('GET', '/api/data/' + encodeURIComponent(_pageName()) + '/' + encodeURIComponent(table) + '/' + encodeURIComponent(id));
             },
             save: function(table, row) {
-                return _json('POST', '/api/data/' + encodeURIComponent(table), row);
+                return _json('POST', '/api/data/' + encodeURIComponent(_pageName()) + '/' + encodeURIComponent(table), row);
             },
             remove: function(table, id) {
-                return _json('DELETE', '/api/data/' + encodeURIComponent(table) + '/' + encodeURIComponent(id));
+                return _json('DELETE', '/api/data/' + encodeURIComponent(_pageName()) + '/' + encodeURIComponent(table) + '/' + encodeURIComponent(id));
             }
         },
 
