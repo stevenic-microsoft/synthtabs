@@ -2,6 +2,77 @@
     if (window.__synthOSChatPanel) return;
     window.__synthOSChatPanel = true;
 
+    // 0. Themed tooltips for chat panel controls
+    (function() {
+        var style = document.createElement('style');
+        style.textContent =
+            '.synthos-tooltip {' +
+                'position: fixed;' +
+                'padding: 6px 10px;' +
+                'background: var(--bg-tertiary, #0f0f23);' +
+                'color: var(--text-secondary, #b794f6);' +
+                'border: 1px solid var(--border-color, rgba(138,43,226,0.3));' +
+                'border-radius: 6px;' +
+                'font-size: 12px;' +
+                'max-width: 150px;' +
+                'text-align: center;' +
+                'pointer-events: none;' +
+                'z-index: 10000;' +
+                'box-shadow: 0 2px 8px rgba(0,0,0,0.3);' +
+                'opacity: 0;' +
+                'transition: opacity 0.15s;' +
+            '}' +
+            '.synthos-tooltip.visible { opacity: 1; }';
+        document.head.appendChild(style);
+
+        var tip = document.createElement('div');
+        tip.className = 'synthos-tooltip';
+        document.body.appendChild(tip);
+
+        function show(el) {
+            tip.textContent = el.getAttribute('data-tooltip');
+            tip.style.display = 'block';
+            tip.classList.remove('visible');
+            var r = el.getBoundingClientRect();
+            var tw = tip.offsetWidth;
+            var left = r.left + (r.width / 2) - (tw / 2);
+            if (left < 4) left = 4;
+            if (left + tw > window.innerWidth - 4) left = window.innerWidth - tw - 4;
+            tip.style.left = left + 'px';
+            tip.style.top = (r.top - tip.offsetHeight - 6) + 'px';
+            void tip.offsetWidth;
+            tip.classList.add('visible');
+        }
+
+        function hide() {
+            tip.classList.remove('visible');
+            tip.style.display = 'none';
+        }
+        hide();
+
+        function attach(el, text) {
+            el.setAttribute('data-tooltip', text);
+            el.addEventListener('mouseenter', function() { show(el); });
+            el.addEventListener('mouseleave', hide);
+        }
+
+        // Pages link is never renamed
+        var pagesLink = document.getElementById('pagesLink');
+        if (pagesLink) attach(pagesLink, 'Browse all pages');
+
+        // Save and Reset tooltips deferred — locked-mode renames them on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var s = document.getElementById('saveLink');
+                if (s) attach(s, s.textContent.trim() === 'Copy' ? 'Copy page as a new name' : 'Save page as a new name');
+                var r = document.getElementById('resetLink');
+                if (r) attach(r, r.textContent.trim() === 'Reload' ? 'Reload this page' : 'Reset page to default');
+            }, 0);
+        });
+
+        window.__synthOSTooltip = attach;
+    })();
+
     // 1. Initial focus
     var chatInput = document.getElementById('chatInput');
     if (chatInput) chatInput.focus();
@@ -125,7 +196,7 @@
         var brainstormBtn = document.createElement('button');
         brainstormBtn.type = 'button';
         brainstormBtn.className = 'brainstorm-icon-btn';
-        brainstormBtn.title = 'Brainstorm ideas';
+        if (window.__synthOSTooltip) window.__synthOSTooltip(brainstormBtn, 'Brainstorm ideas');
         brainstormBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
             '<circle cx="12" cy="12" r="3"></circle>' +
             '<path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>' +

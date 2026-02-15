@@ -1,0 +1,66 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SynthOS - Split Panel Application</title>
+    <script id="theme-info" src="/api/theme-info.js" data-locked="true"></script>
+    <link id="theme-css" rel="stylesheet" href="/api/theme.css" data-locked="true">
+    <style>.application-panel{width:100%;max-width:900px;height:calc(100vh - 50px);display:flex;flex-direction:column;position:relative;z-index:1;border-radius:15px;overflow:hidden;border:1px solid var(--border-color);box-shadow:0 0 40px var(--accent-glow)}.application-header{font-size:18px;font-weight:600;padding:14px 20px;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;text-align:center;text-shadow:0 2px 8px rgba(0,0,0,.3);letter-spacing:1px}.application-content{flex:1;display:flex;flex-direction:column;background:rgba(15,15,35,.6);overflow:hidden}.application-content.vertical{flex-direction:row}.application-bottom,.application-top{flex-basis:50%;padding:20px;overflow-y:auto;display:flex;flex-direction:column}.application-top{background:linear-gradient(180deg,rgba(102,126,234,.1) 0,rgba(118,75,162,.05) 100%);border-bottom:none}.application-bottom{background:linear-gradient(180deg,rgba(118,75,162,.05) 0,rgba(240,147,251,.1) 100%)}.application-content.vertical .application-top{background:linear-gradient(90deg,rgba(102,126,234,.1) 0,rgba(118,75,162,.05) 100%)}.application-content.vertical .application-bottom{background:linear-gradient(90deg,rgba(118,75,162,.05) 0,rgba(240,147,251,.1) 100%)}.application-left{flex-basis:50%;padding:20px;overflow-y:auto;display:flex;flex-direction:column;background:linear-gradient(90deg,rgba(102,126,234,.1) 0,rgba(118,75,162,.05) 100%)}.application-right{flex-basis:50%;padding:20px;overflow-y:auto;display:flex;flex-direction:column;background:linear-gradient(90deg,rgba(118,75,162,.05) 0,rgba(240,147,251,.1) 100%)}.application-bottom p,.application-top p,.application-left p,.application-right p{color:var(--text-secondary);font-size:14px;line-height:1.6}.panel-title{font-size:14px;font-weight:600;color:var(--accent-tertiary);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border-color);text-transform:uppercase;letter-spacing:1px}.splitter{height:8px;background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary),var(--accent-tertiary));cursor:row-resize;flex-shrink:0;position:relative;transition:.2s}.splitter::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:4px;background:rgba(255,255,255,.3);border-radius:2px}.splitter:hover{background:linear-gradient(90deg,var(--accent-tertiary),var(--accent-secondary),var(--accent-primary));box-shadow:0 0 15px var(--accent-glow)}.splitter.vertical{width:8px;height:auto;cursor:col-resize;background:linear-gradient(180deg,var(--accent-primary),var(--accent-secondary),var(--accent-tertiary))}.splitter.vertical::before{width:4px;height:40px}.splitter.vertical:hover{background:linear-gradient(180deg,var(--accent-tertiary),var(--accent-secondary),var(--accent-primary))}</style>
+    <style id="placeholder-styles">.content-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;min-height:100px;color:var(--text-secondary);text-align:center;padding:20px;opacity:0.7;transition:opacity 0.3s ease}.content-placeholder .placeholder-icon{font-size:2.5em;margin-bottom:12px;animation:float 3s ease-in-out infinite}.content-placeholder .placeholder-text{font-size:1.1em;font-weight:600;background:linear-gradient(90deg,var(--accent-primary),var(--accent-tertiary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}.content-placeholder .placeholder-hint{font-size:0.85em;color:var(--text-secondary);opacity:0.8}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}.light-mode .content-placeholder{color:var(--text-secondary)}.light-mode .application-content{background:rgba(245,245,250,.6)}.light-mode .application-top{background:linear-gradient(180deg,rgba(102,126,234,.05) 0,rgba(118,75,162,.02) 100%)}.light-mode .application-bottom{background:linear-gradient(180deg,rgba(118,75,162,.02) 0,rgba(240,147,251,.05) 100%)}.light-mode .application-content.vertical .application-top{background:linear-gradient(90deg,rgba(102,126,234,.05) 0,rgba(118,75,162,.02) 100%)}.light-mode .application-content.vertical .application-bottom{background:linear-gradient(90deg,rgba(118,75,162,.02) 0,rgba(240,147,251,.05) 100%)}.light-mode .application-left{background:linear-gradient(90deg,rgba(102,126,234,.05) 0,rgba(118,75,162,.02) 100%)}.light-mode .application-right{background:linear-gradient(90deg,rgba(118,75,162,.02) 0,rgba(240,147,251,.05) 100%)}</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
+    <script id="page-info" src="/api/page-info.js?page=split-application"></script>
+</head>
+<body>
+    <div class="chat-panel" data-locked="true">
+        <div class="chat-header" data-locked="true">SynthOS</div>
+        <div class="chat-messages" id="chatMessages" data-locked="true">
+            <div class="chat-message"><p><strong>SynthOS:</strong> Welcome to the <strong>Two-Panel</strong> layout template! By default, panels are stacked <strong>top/bottom</strong> (horizontal splitter). You can ask me to switch to <strong>left/right</strong> (vertical splitter) at any time. Just tell me what you'd like in each panel!</p></div>
+        </div>
+        <div class="link-group" data-locked="true">
+            <a href="#" id="saveLink" data-locked="true">Save</a>
+            <a href="/pages" id="pagesLink" data-locked="true">Pages</a>
+            <a href="#" id="resetLink" data-locked="true">Reset</a>
+        </div>
+        <form action="/" method="POST" id="chatForm" data-locked="true">
+            <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message..." data-locked="true">
+            <button type="submit" class="chat-submit" data-locked="true">Send</button>
+        </form>
+    </div>
+    <div class="viewer-panel" id="viewerPanel">
+        <div class="application-panel">
+            <div class="application-header">Split Panel Application</div>
+            <div class="application-content" id="applicationContent" data-orientation="horizontal">
+                <div class="application-top">
+                    <div class="content-placeholder">
+                        <div class="placeholder-icon">&#x2728;</div>
+                        <div class="placeholder-text">Top Panel</div>
+                        <div class="placeholder-hint">Ask SynthOS to add content here</div>
+                    </div>
+                </div>
+                <div class="splitter" id="splitter"></div>
+                <div class="application-bottom">
+                    <div class="content-placeholder">
+                        <div class="placeholder-icon">&#x2728;</div>
+                        <div class="placeholder-text">Bottom Panel</div>
+                        <div class="placeholder-hint">Ask SynthOS to add content here</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
+    </div>
+    <div id="instructions" style="display: none;" data-locked="true">This is a two-panel layout. By default, assume the user is updating panel content. The layout supports two orientations:
+
+HORIZONTAL (default, top/bottom): Uses .application-top and .application-bottom with a horizontal .splitter between them. The .application-content has flex-direction: column.
+
+VERTICAL (left/right, side by side): Uses .application-top and .application-bottom (or .application-left and .application-right) with a vertical .splitter between them. To switch to vertical: add class "vertical" to #applicationContent, add class "vertical" to #splitter, and set data-orientation="vertical" on #applicationContent.
+
+If the user says "left/right", "side by side", or "vertical" — switch to vertical layout by adding the "vertical" class to both .application-content and .splitter, and updating data-orientation to "vertical".
+
+If the user says "top/bottom", "stacked", or "horizontal" — switch to horizontal layout by removing the "vertical" class from both .application-content and .splitter, and updating data-orientation to "horizontal".
+
+When switching orientation, preserve existing panel content.</div>
+    <div id="thoughts" style="display: none;" data-locked="true"></div>
+    <script id="splitter-logic">const splitter=document.getElementById("splitter"),content=document.getElementById("applicationContent");let isDragging=false;function getOrientation(){return content.dataset.orientation||"horizontal"}splitter.addEventListener("mousedown",()=>{isDragging=true;document.body.style.cursor=getOrientation()==="vertical"?"col-resize":"row-resize"});document.addEventListener("mousemove",e=>{if(!isDragging)return;const rect=content.getBoundingClientRect();const panels=content.querySelectorAll(':scope > :not(.splitter)');if(panels.length<2)return;const first=panels[0],second=panels[1];if(getOrientation()==="vertical"){const pct=(e.clientX-rect.left)/rect.width*100;if(pct>10&&pct<90){first.style.flexBasis=pct+"%";second.style.flexBasis=(100-pct)+"%"}}else{const pct=(e.clientY-rect.top)/rect.height*100;if(pct>10&&pct<90){first.style.flexBasis=pct+"%";second.style.flexBasis=(100-pct)+"%"}}});document.addEventListener("mouseup",()=>{isDragging=false;document.body.style.cursor="default"});</script>
+<script id="page-helpers" src="/api/page-helpers.js?v=2" data-locked="true"></script>
+<script id="page-script" src="/api/page-script.js?v=2" data-locked="true"></script>
+</body></html>
