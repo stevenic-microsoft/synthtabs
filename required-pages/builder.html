@@ -2,8 +2,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SynthOS</title>
-    <script src="/api/theme-info.js"></script>
-    <link rel="stylesheet" href="/api/theme.css">
+    <script id="theme-info" src="/api/theme-info.js" data-locked="true"></script>
+    <link id="theme-css" rel="stylesheet" href="/api/theme.css" data-locked="true">
     <style>.idle-container{position:absolute;width:100%;height:100%;pointer-events:none;opacity:1;transition:opacity 1s ease-out}.idle-container.hidden{opacity:0}.breathing-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(102,126,234,.15) 0,transparent 70%);animation:4s ease-in-out infinite breathe}.breathing-orb::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:rgba(183,148,246,.6);box-shadow:0 0 20px rgba(183,148,246,.4);animation:4s ease-in-out infinite core-pulse}@keyframes breathe{0%,100%{width:80px;height:80px;opacity:.3}50%{width:120px;height:120px;opacity:.6}}@keyframes core-pulse{0%,100%{opacity:.4;box-shadow:0 0 20px rgba(183,148,246,.3)}50%{opacity:.8;box-shadow:0 0 30px rgba(183,148,246,.5)}}.orbit-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;border:1px solid rgba(102,126,234,.1);border-radius:50%;animation:20s linear infinite orbit-rotate}.orbit-ring::after{content:'';position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:6px;height:6px;background:rgba(240,147,251,.5);border-radius:50%;box-shadow:0 0 10px rgba(240,147,251,.3)}@keyframes orbit-rotate{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}</style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
@@ -11,19 +11,19 @@
     <script id="page-info" src="/api/page-info.js?page=builder"></script>
 </head>
 <body>
-    <div class="chat-panel">
-        <div class="chat-header">SynthOS</div>
-        <div class="chat-messages" id="chatMessages">
+    <div class="chat-panel" data-locked="true">
+        <div class="chat-header" data-locked="true">SynthOS</div>
+        <div class="chat-messages" id="chatMessages" data-locked="true">
             <div class="chat-message"><p><strong>SynthOS:</strong> What can I create for you?</p></div>
         </div>
-        <div class="link-group">
-            <a href="#" id="saveLink">Save</a>
-            <a href="/pages" id="pagesLink">Pages</a>
-            <a href="#" id="resetLink">Reset</a>
+        <div class="link-group" data-locked="true">
+            <a href="#" id="saveLink" data-locked="true">Save</a>
+            <a href="/pages" id="pagesLink" data-locked="true">Pages</a>
+            <a href="#" id="resetLink" data-locked="true">Reset</a>
         </div>
-        <form action="/" method="POST" id="chatForm">
-            <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message...">
-            <button type="submit" class="chat-submit">Send</button>
+        <form action="/" method="POST" id="chatForm" data-locked="true">
+            <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message..." data-locked="true">
+            <button type="submit" class="chat-submit" data-locked="true">Send</button>
         </form>
     </div>
     <div class="viewer-panel" id="viewerPanel">
@@ -33,8 +33,8 @@
         </div>
         <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     </div>
-    <div id="instructions" style="display: none;" data-locked=""></div>
-    <div id="thoughts" style="display: none;" data-locked=""></div>
+    <div id="instructions" style="display: none;" data-locked="true"></div>
+    <div id="thoughts" style="display: none;" data-locked="true"></div>
     <script id="idle-animation">function hideIdleAnimation(){const idleContainer=document.getElementById("idleAnimation");idleContainer&&(idleContainer.classList.add("hidden"),setTimeout(()=>{idleContainer.style.display="none"},1e3))}function showIdleAnimation(){const idleContainer=document.getElementById("idleAnimation");idleContainer&&(idleContainer.style.display="block",setTimeout(()=>{idleContainer.classList.remove("hidden")},10))}</script>
     <button class="chat-toggle" aria-label="Toggle chat panel">
         <span class="chat-toggle-dots">
@@ -43,7 +43,6 @@
             <span class="chat-toggle-dot"></span>
         </span>
     </button>
-<script id="page-helpers" src="/api/page-helpers.js?v=2"></script>
-<script id="page-script" src="/api/page-script.js?v=2"></script>
-
+<script id="page-helpers" src="/api/page-helpers.js?v=2" data-locked="true"></script>
+<script id="page-script" src="/api/page-script.js?v=2" data-locked="true"></script>
 </body></html>

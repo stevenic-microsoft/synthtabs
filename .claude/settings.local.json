@@ -30,7 +30,9 @@
       "Bash(node -e:*)",
       "Bash(node:*)",
       "Bash(del:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npx jest:*)",
+      "Bash(npx mocha:*)"
     ]
   }
 }

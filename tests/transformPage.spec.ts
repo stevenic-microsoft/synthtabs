@@ -30,6 +30,18 @@ describe('assignNodeIds', () => {
         // cheerio wraps in <html><head></head><body>...</body> so count includes those
         assert.ok(nodeCount >= 4); // html, head, body, div, span, span = 6
     });
+
+    it('assigns data-node-id to script and style elements', () => {
+        const html = '<html><head><style>.a{color:red}</style><script>var x=1;</script></head><body><script src="/app.js"></script></body></html>';
+        const { html: result, nodeCount } = assignNodeIds(html);
+        // All 6 elements should have ids: html, head, style, script(inline), body, script(src)
+        const ids = result.match(/data-node-id="/g);
+        assert.strictEqual(ids?.length, nodeCount);
+        assert.strictEqual(nodeCount, 6);
+        // Verify the style and script tags specifically got ids
+        assert.ok(result.match(/<style[^>]+data-node-id="/), 'style element should have data-node-id');
+        assert.ok(result.match(/<script[^>]+data-node-id="/), 'script element should have data-node-id');
+    });
 });
 
 // ---------------------------------------------------------------------------
@@ -149,6 +161,72 @@ describe('applyChangeList', () => {
             { op: 'insert', parentId: '999', position: 'append', html: '<em>Fail</em>' },
         ];
         assert.throws(() => applyChangeList(annotated, changes), /not found/);
+    });
+
+    it('applies "style-element" — sets style attribute on unlocked element', () => {
+        const changes: ChangeList = [
+            { op: 'style-element', nodeId: '11', style: 'color: red; font-size: 16px' },
+        ];
+        const result = applyChangeList(annotated, changes);
+        assert.ok(result.includes('style="color: red; font-size: 16px"'));
+        assert.ok(result.includes('data-node-id="11"'));
+    });
+
+    it('skips "style-element" on a data-locked element', () => {
+        const lockedHtml = '<html><head></head><body>' +
+            '<div data-node-id="10"><p data-node-id="11" data-locked>Locked text</p></div>' +
+            '</body></html>';
+        const changes: ChangeList = [
+            { op: 'style-element', nodeId: '11', style: 'color: red' },
+        ];
+        const result = applyChangeList(lockedHtml, changes);
+        assert.ok(!result.includes('style="color: red"'));
+    });
+
+    it('warns but does not throw on missing node for style-element', () => {
+        const changes: ChangeList = [
+            { op: 'style-element', nodeId: '999', style: 'color: red' },
+        ];
+        const result = applyChangeList(annotated, changes);
+        assert.ok(!result.includes('color: red'));
+    });
+
+    it('allows delete of unlocked child inside a data-locked parent', () => {
+        const lockedParentHtml = '<html><head></head><body>' +
+            '<div data-node-id="10" data-locked="true">' +
+            '<p data-node-id="11">Child message</p>' +
+            '<p data-node-id="12">Another child</p>' +
+            '</div></body></html>';
+        const changes: ChangeList = [
+            { op: 'delete', nodeId: '11' },
+        ];
+        const result = applyChangeList(lockedParentHtml, changes);
+        assert.ok(!result.includes('Child message'));
+        assert.ok(result.includes('Another child'));
+    });
+
+    it('blocks delete of element that itself has data-locked', () => {
+        const lockedHtml = '<html><head></head><body>' +
+            '<div data-node-id="10"><p data-node-id="11" data-locked="true">Locked</p></div>' +
+            '</body></html>';
+        const changes: ChangeList = [
+            { op: 'delete', nodeId: '11' },
+        ];
+        const result = applyChangeList(lockedHtml, changes);
+        assert.ok(result.includes('Locked'));
+    });
+
+    it('allows replace of unlocked child inside a data-locked parent', () => {
+        const lockedParentHtml = '<html><head></head><body>' +
+            '<div data-node-id="10" data-locked="true">' +
+            '<p data-node-id="11">Old child</p>' +
+            '</div></body></html>';
+        const changes: ChangeList = [
+            { op: 'replace', nodeId: '11', html: '<span>New child</span>' },
+        ];
+        const result = applyChangeList(lockedParentHtml, changes);
+        assert.ok(result.includes('<span>New child</span>'));
+        assert.ok(!result.includes('Old child'));
     });
 
     it('throws on unknown op', () => {

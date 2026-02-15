@@ -1,0 +1,49 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SynthOS</title>
+    <script id="theme-info" src="/api/theme-info.js" data-locked="true"></script>
+    <link id="theme-css" rel="stylesheet" href="/api/theme.css" data-locked="true">
+    <style>.sidebar-panel{width:300px;height:100%;position:relative;z-index:1;flex-shrink:0;overflow-y:auto}.sidebar-title{font-size:1.4em;font-weight:700;background:linear-gradient(90deg,var(--accent-primary),var(--accent-tertiary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;border-bottom:2px solid var(--border-color);padding-bottom:.3em;margin-bottom:1em;text-shadow:0 0 30px var(--accent-glow)}.sidebar-content{background:linear-gradient(135deg,rgba(102,126,234,.1) 0,rgba(118,75,162,.1) 100%);border:1px solid var(--border-color);border-radius:12px;padding:20px;box-shadow:0 4px 20px var(--accent-glow)}.sidebar-content p{color:rgba(224,224,224,.9);line-height:1.7;margin-bottom:1em}.sidebar-content p:last-child{margin-bottom:0}.sidebar-section{margin-top:1.2em;padding-top:1em;border-top:1px solid var(--border-color)}.sidebar-section-title{font-size:1.2em;font-weight:600;background:linear-gradient(90deg,var(--accent-primary),var(--accent-tertiary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.6em}.sidebar-list{margin:0 0 1em 20px}.sidebar-list li{margin-bottom:.4em;color:rgba(224,224,224,.85)}.sidebar-list li::marker{color:var(--accent-tertiary)}.sidebar-quote{margin:1em 0;padding:12px 20px;border-left:4px solid var(--accent-secondary);background:linear-gradient(135deg,rgba(102,126,234,.15) 0,rgba(118,75,162,.15) 100%);border-radius:0 10px 10px 0;font-style:italic;color:var(--text-secondary)}.sidebar-code{background:rgba(138,43,226,.25);padding:3px 7px;border-radius:5px;font-family:'Fira Code','Courier New',monospace;color:var(--accent-tertiary);border:1px solid rgba(240,147,251,.2);font-size:.9em}.sidebar-link{color:var(--accent-tertiary);text-decoration:none;border-bottom:1px solid transparent;transition:.3s}.sidebar-link:hover{border-bottom-color:var(--accent-tertiary);text-shadow:0 0 10px var(--accent-glow)}.light-mode .sidebar-content p{color:rgba(45,38,64,.9)}.light-mode .sidebar-list li{color:rgba(45,38,64,.85)}</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
+    <script id="page-info" src="/api/page-info.js?page=sidebar"></script>
+<style id="placeholder-styles">.content-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;min-height:300px;color:var(--text-secondary);text-align:center;padding:40px;opacity:0.7;transition:opacity 0.3s ease}.content-placeholder .placeholder-icon{font-size:4em;margin-bottom:20px;animation:float 3s ease-in-out infinite}.content-placeholder .placeholder-text{font-size:1.4em;font-weight:600;background:linear-gradient(90deg,var(--accent-primary),var(--accent-tertiary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px}.content-placeholder .placeholder-hint{font-size:0.95em;color:var(--text-secondary);opacity:0.8}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}.viewer-panel:has(.content-placeholder ~ *:not(.sidebar-panel):not(.loading-overlay):not(#loadingOverlay)) .content-placeholder{display:none}.light-mode .content-placeholder{color:var(--text-secondary)}</style></head>
+<body>
+    <div class="chat-panel" data-locked="true">
+        <div class="chat-header" data-locked="true">SynthOS</div>
+        <div class="chat-messages" id="chatMessages" data-locked="true">
+            <div class="chat-message"><p><strong>SynthOS:</strong> Welcome to the Sidebar template! You can ask me to modify the <strong>content area</strong> on the left or customize the <strong>sidebar</strong> on the right. Just let me know what you'd like to create.</p></div>
+        </div>
+        <div class="link-group" data-locked="true">
+            <a href="#" id="saveLink" data-locked="true">Save</a>
+            <a href="/pages" id="pagesLink" data-locked="true">Pages</a>
+            <a href="#" id="resetLink" data-locked="true">Reset</a>
+        </div>
+        <form action="/" method="POST" id="chatForm" data-locked="true">
+            <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message..." data-locked="true">
+            <button type="submit" class="chat-submit" data-locked="true">Send</button>
+        </form>
+    </div>
+    <div class="viewer-panel" id="viewerPanel" style="display: flex !important; flex-direction: row !important; align-items: stretch !important;"><div id="contentPlaceholder" class="content-placeholder"><div class="placeholder-icon">✨</div><div class="placeholder-text">Your content will appear here</div><div class="placeholder-hint">Ask SynthOS to add something!</div></div>
+        <div class="sidebar-panel" style="margin-left: auto; width: 300px; height: 100%; flex-shrink: 0;">
+            <div class="sidebar-title">Sidebar</div>
+            <div class="sidebar-content">
+                <p>This is the sidebar content. You can customize this area with various widgets, information, or controls as needed.</p>
+                <div class="sidebar-quote">Styled in the spirit of markdown — clean, elegant, and cohesive with the nebula dusk theme.</div>
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Features</div>
+                    <ul class="sidebar-list">
+                        <li>Gradient text headings</li>
+                        <li>Glowing borders &amp; shadows</li>
+                        <li>Consistent color palette</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
+    </div>
+    <div id="instructions" style="display: none;" data-locked="true">Assume that the user is updating the content area of the page unless they say they're updating the sidebar.</div>
+    <div id="thoughts" style="display: none;" data-locked="true"></div>
+
+
+<script id="page-helpers" src="/api/page-helpers.js?v=2" data-locked="true"></script><script id="page-script" src="/api/page-script.js?v=2" data-locked="true"></script></body></html>

@@ -2,30 +2,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SynthOS</title>
-    <script src="/api/theme-info.js"></script>
-    <link rel="stylesheet" href="/api/theme.css">
+    <script id="theme-info" src="/api/theme-info.js" data-locked="true"></script>
+    <link id="theme-css" rel="stylesheet" href="/api/theme.css" data-locked="true">
     <style>.viewer-panel{overflow:auto}.markdown-content{text-align:left;color:var(--text-primary);width:100%;max-width:800px;margin:0 auto;line-height:1.7;position:relative;z-index:1}.markdown-content h1,.markdown-content h2,.markdown-content h3,.markdown-content h4,.markdown-content h5{background:linear-gradient(90deg,var(--accent-primary),var(--accent-tertiary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:1.2em 0 .6em;font-weight:700}.markdown-content h1{font-size:2.2em;border-bottom:2px solid var(--border-color);padding-bottom:.3em;text-shadow:0 0 30px var(--accent-glow)}.markdown-content h2{font-size:1.8em}.markdown-content h3{font-size:1.4em}.markdown-content p{margin-bottom:1em;color:rgba(224,224,224,.9)}.markdown-content ol,.markdown-content ul{margin:0 0 1em 20px}.markdown-content li{margin-bottom:.4em;color:rgba(224,224,224,.85)}.markdown-content li::marker{color:var(--accent-tertiary)}.markdown-content blockquote{margin:1em 0;padding:12px 20px;border-left:4px solid var(--accent-secondary);background:linear-gradient(135deg,rgba(102,126,234,.1) 0,rgba(118,75,162,.1) 100%);border-radius:0 10px 10px 0;font-style:italic;color:var(--text-secondary)}.markdown-content code{background:rgba(138,43,226,.25);padding:3px 7px;border-radius:5px;font-family:'Fira Code','Courier New',monospace;color:var(--accent-tertiary);border:1px solid rgba(240,147,251,.2);font-size:.9em}.markdown-content pre{background:0 0!important;padding:0;margin:0}.markdown-content .code-block{border-radius:12px;overflow:hidden;margin:1em 0;border:1px solid var(--border-color);box-shadow:0 4px 20px var(--accent-glow)}.markdown-content .code-block pre{margin:0;padding:15px;background:rgba(15,15,35,.9)!important}.markdown-content .code-block code{background:0 0;border:none;padding:0;color:inherit}.markdown-content a{color:var(--accent-tertiary);text-decoration:none;border-bottom:1px solid transparent;transition:.3s}.markdown-content a:hover{border-bottom-color:var(--accent-tertiary);text-shadow:0 0 10px var(--accent-glow)}.markdown-content table{width:100%;border-collapse:collapse;margin:1em 0;border-radius:10px;overflow:hidden;box-shadow:0 4px 15px var(--accent-glow)}.markdown-content th{padding:12px 15px;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;font-weight:600;text-align:left}.markdown-content td{padding:10px 15px;background:rgba(15,15,35,.6);border-top:1px solid var(--border-color)}.markdown-content tr:hover td{background:rgba(102,126,234,.15)}.markdown-content img{max-width:100%;border-radius:12px;margin:1em auto;display:block;box-shadow:0 4px 25px var(--accent-glow);border:1px solid var(--border-color)}.markdown-content hr{border:none;height:2px;background:linear-gradient(90deg,transparent,var(--accent-secondary),var(--accent-tertiary),var(--accent-secondary),transparent);margin:2em 0}.markdown-content input[type=checkbox]{accent-color:var(--accent-tertiary);margin-right:8px}.code-header{background:linear-gradient(135deg,rgba(102,126,234,.3),rgba(118,75,162,.3));padding:8px 15px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-color)}.code-header span{font-size:.85em;color:var(--text-secondary);font-weight:500}.copy-button{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));border:none;color:#fff;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:.8em;transition:.3s}.copy-button:hover{box-shadow:0 0 15px var(--accent-glow);transform:translateY(-1px)}.light-mode .markdown-content p{color:rgba(45,38,64,.9)}.light-mode .markdown-content li{color:rgba(45,38,64,.85)}.light-mode .markdown-content .code-block pre{background:rgba(247,242,250,.9)!important}.light-mode .markdown-content td{background:rgba(255,255,255,.6)}</style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.0/mermaid.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/night-owl.min.css" rel="stylesheet">
-    <script id="page-info" src="/api/page-info.js?page=markdown"></script>
 </head>
 <body>
-    <div class="chat-panel">
-        <div class="chat-header">SynthOS</div>
-        <div class="chat-messages" id="chatMessages">
+    <div class="chat-panel" data-locked="true">
+        <div class="chat-header" data-locked="true">SynthOS</div>
+        <div class="chat-messages" id="chatMessages" data-locked="true">
             <div class="chat-message"><p><strong>SynthOS:</strong> what document can I write for you?</p></div>
         </div>
-        <div class="link-group">
-            <a href="#" id="saveLink">Save</a>
-            <a href="/pages" id="pagesLink">Pages</a>
-            <a href="#" id="resetLink">Reset</a>
+        <div class="link-group" data-locked="true">
+            <a href="#" id="saveLink" data-locked="true">Save</a>
+            <a href="/pages" id="pagesLink" data-locked="true">Pages</a>
+            <a href="#" id="resetLink" data-locked="true">Reset</a>
         </div>
-        <form action="/" method="POST" id="chatForm">
-            <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message...">
-            <button type="submit" class="chat-submit">Send</button>
+        <form action="/" method="POST" id="chatForm" data-locked="true">
+            <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message..." data-locked="true">
+            <button type="submit" class="chat-submit" data-locked="true">Send</button>
         </form>
     </div>
     <div class="viewer-panel" id="viewerPanel">
@@ -34,10 +33,9 @@
         </div>
         <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     </div>
-    <div id="instructions" style="display: none;" data-locked=""></div>
-    <div id="thoughts" style="display: none;" data-locked=""></div>
+    <div id="instructions" style="display: none;" data-locked="true"></div>
+    <div id="thoughts" style="display: none;" data-locked="true"></div>
     <script id="markdown-renderer">function copyToClipboard(button){const codeBlock=button.parentElement.nextElementSibling.querySelector("code");navigator.clipboard.writeText(codeBlock.textContent).then(()=>{button.textContent="Copied!",setTimeout(()=>{button.textContent="Copy"},2e3)})}window.onload=function(){const renderer=new marked.Renderer;renderer.code=function(code){const highlighted=code.lang&&hljs.getLanguage(code.lang)?hljs.highlight(code.lang,code.text).value:code.text;return console.log(highlighted),`<div class="code-block">\n                            <div class="code-header">\n                                <span>${code.lang||"plaintext"}</span>\n                                <button class="copy-button" onclick="copyToClipboard(this)">Copy</button>\n                            </div>\n                            <pre><code class="${code.lang}">${highlighted}</code></pre>\n                        </div>`},marked.setOptions({renderer:renderer,highlight:function(code){return code.lang&&hljs.getLanguage(code.lang)?hljs.highlight(code.lang,code.text).value:code.textS}}),document.getElementById("markdownContent").innerHTML=marked.parse(markdownContent),mermaid.initialize({startOnLoad:!0,theme:"dark"}),mermaid.init(void 0,document.querySelectorAll(".language-mermaid"))};const markdownContent="# SynthOS's Markdown Showcase\n\nThis page demonstrates various markdown elements and how they are styled in our custom theme.\n\n## Text Formatting\n\nYou can make text **bold**, *italic*, or ***both***. You can also use ~~strikethrough~~ for deleted text.\n\n## Lists\n\n### Unordered List\n\n- Item 1\n- Item 2\n  - Subitem 2.1\n  - Subitem 2.2\n- Item 3\n\n### Ordered List\n\n1. First item\n2. Second item\n3. Third item\n   1. Subitem 3.1\n   2. Subitem 3.2\n\n## Links and Images\n\nYou can create [links to websites](https://www.example.com) or add images:\n\n![Sample Image](https://via.placeholder.com/300x200.png?text=Sample+Image)\n\n## Blockquotes\n\n> This is a blockquote. It's great for highlighting important information or quoting sources.\n\n## Code Blocks\n\nInline code: `console.log('Hello, World!');`\n\nCode block:\n\n```javascript\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\n\nconsole.log(greet('SynthOS'));\n```\n\n## Tables\n\n| Header 1 | Header 2 | Header 3 |\n|----------|----------|----------|\n| Row 1, Col 1 | Row 1, Col 2 | Row 1, Col 3 |\n| Row 2, Col 1 | Row 2, Col 2 | Row 2, Col 3 |\n\n## Horizontal Rule\n\n---\n\n## Task Lists\n\n- [x] Complete task\n- [ ] Incomplete task\n- [ ] Another task\n\n## Mermaid Diagrams\n\n```mermaid\ngraph TD\n    A[Start] --\x3e B{Is it?}\n    B -- Yes --\x3e C[OK]\n    C --\x3e D[Rethink]\n    D --\x3e B\n    B -- No ----\x3e E[End]\n```\n\nThis showcase demonstrates the various markdown elements and how they are styled in our custom theme. Feel free to use these examples as a reference when creating your own markdown content!\n\n## Additional Content for Scrolling\n\nTo demonstrate the scrolling functionality, we've added some extra content below.\n\n### Lorem Ipsum\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nunc id aliquam tincidunt, nisl nunc tincidunt nunc, vitae aliquam nunc nunc vitae nunc. Sed euismod, nunc id aliquam tincidunt, nisl nunc tincidunt nunc, vitae aliquam nunc nunc vitae nunc.\n\n### Code Example\n\nHere's another code example to show how syntax highlighting works with scrolling:\n\n```python\ndef fibonacci(n):\n    if n <= 1:\n        return n\n    else:\n        return fibonacci(n-1) + fibonacci(n-2)\n\n# Print the first 10 Fibonacci numbers\nfor i in range(10):\n    print(fibonacci(i))\n```\n\n### Final Thoughts\n\nThis extended markdown content demonstrates how the viewer panel now scrolls independently of the chat panel, allowing users to read through longer documents while still having access to the chat functionality.";</script>
-<script id="page-helpers" src="/api/page-helpers.js?v=2"></script>
-<script id="page-script" src="/api/page-script.js?v=2"></script>
-
+<script id="page-helpers" src="/api/page-helpers.js?v=2" data-locked="true"></script>
+<script id="page-script" src="/api/page-script.js?v=2" data-locked="true"></script>
 </body></html>

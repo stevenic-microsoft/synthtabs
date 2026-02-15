@@ -2,31 +2,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SynthOS - JSON Tools</title>
-  <script src="/api/theme-info.js"></script>
-  <link rel="stylesheet" href="/api/theme.css">
+  <script id="theme-info" src="/api/theme-info.js" data-locked="true"></script>
+  <link id="theme-css" rel="stylesheet" href="/api/theme.css" data-locked="true">
   <style>.dialog-title{font-size:22px;font-weight:700;min-height:var(--header-min-height);padding:var(--header-padding-vertical) var(--header-padding-horizontal);line-height:var(--header-line-height);display:flex;align-items:center;justify-content:center;box-sizing:border-box;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;border-radius:12px;width:100%;max-width:800px;box-shadow:0 6px 25px var(--accent-glow);position:relative;z-index:1}.dialog-content{font-size:14px;color:rgba(224,224,224,.8);padding:15px 0;flex-grow:1;width:100%;max-width:800px;position:relative;z-index:1;overflow-y:auto;display:flex;flex-direction:column;gap:15px}.conversion-select{width:100%;padding:12px 15px;border-radius:10px;border:1px solid var(--border-color);background:rgba(15,15,35,.8);color:var(--text-primary);font-size:14px;cursor:pointer;transition:.3s}.conversion-select:focus{outline:0;border-color:var(--text-secondary);box-shadow:0 0 15px var(--accent-glow)}.conversion-select option{background:var(--bg-tertiary);color:var(--text-primary)}.multi-line-input{width:100%;min-height:220px;padding:15px;border-radius:10px;border:1px solid var(--border-color);background:rgba(15,15,35,.8);color:var(--text-primary);font-size:14px;font-family:'Courier New',monospace;resize:vertical;transition:.3s}.multi-line-input:focus{outline:0;border-color:var(--text-secondary);box-shadow:0 0 15px var(--accent-glow)}.button-group{display:flex;justify-content:space-between;align-items:center;gap:10px}.button-group div{display:flex;gap:10px}.action-btn{padding:12px 24px;border:none;border-radius:25px;font-size:14px;font-weight:600;cursor:pointer;transition:.3s;letter-spacing:1px}.convert-btn{background:linear-gradient(135deg,var(--accent-primary) 0,var(--accent-secondary) 100%);color:#fff;box-shadow:0 4px 20px var(--accent-glow)}.convert-btn:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(102,126,234,.6)}.reset-btn{background:rgba(102,126,234,.2);color:var(--text-secondary);border:1px solid var(--border-color)}.reset-btn:hover{background:rgba(102,126,234,.3);color:var(--accent-tertiary)}.copy-btn{background:linear-gradient(135deg,rgba(240,147,251,.3) 0,rgba(118,75,162,.3) 100%);color:var(--text-secondary);border:1px solid var(--border-color)}.copy-btn:hover:not(:disabled){background:linear-gradient(135deg,rgba(240,147,251,.5) 0,rgba(118,75,162,.5) 100%);color:var(--accent-tertiary)}.copy-btn:disabled{opacity:.5;cursor:not-allowed}.result-panel{width:100%;min-height:220px;max-height:350px;padding:15px;border-radius:10px;border:1px solid var(--border-color);background:rgba(15,15,35,.8);color:var(--accent-tertiary);font-size:13px;font-family:'Courier New',monospace;overflow-y:auto;white-space:pre-wrap;word-break:break-all}.light-mode .dialog-content{color:rgba(45,38,64,.8)}.light-mode .conversion-select,.light-mode .multi-line-input,.light-mode .result-panel{background:rgba(255,255,255,.8)}</style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
-  <script id="page-info" src="/api/page-info.js?page=json_tools"></script>
 </head>
 
 <body>
-  <div class="chat-panel">
-    <div class="chat-header">SynthOS</div>
-    <div class="chat-messages" id="chatMessages">
+  <div class="chat-panel" data-locked="true">
+    <div class="chat-header" data-locked="true">SynthOS</div>
+    <div class="chat-messages" id="chatMessages" data-locked="true">
       <div class="chat-message">
         <p><strong>SynthOS:</strong> You can use the dropdown to select a conversion type, enter your text, and click
           "Convert" to see the result.</p>
       </div>
     </div>
-    <div class="link-group">
-      <a href="#" id="saveLink">Save</a>
-      <a href="/pages" id="pagesLink">Pages</a>
-      <a href="#" id="resetLink">Reset</a>
+    <div class="link-group" data-locked="true">
+      <a href="#" id="saveLink" data-locked="true">Save</a>
+      <a href="/pages" id="pagesLink" data-locked="true">Pages</a>
+      <a href="#" id="resetLink" data-locked="true">Reset</a>
     </div>
-    <form action="/" method="POST" id="chatForm">
-      <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message...">
-      <button type="submit" class="chat-submit">Send</button>
+    <form action="/" method="POST" id="chatForm" data-locked="true">
+      <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message..." data-locked="true">
+      <button type="submit" class="chat-submit" data-locked="true">Send</button>
     </form>
   </div>
   <div class="viewer-panel" id="viewerPanel" style="display: flex; flex-direction: column;">
@@ -82,11 +81,9 @@ settings:
     </div>
     <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
   </div>
-    <div id="instructions" style="display: none;" data-locked=""></div>
-    <div id="thoughts" style="display: none;" data-locked=""></div>
+    <div id="instructions" style="display: none;" data-locked="true"></div>
+    <div id="thoughts" style="display: none;" data-locked="true"></div>
   <script id="json-tools-logic">document.getElementById("copyButton").addEventListener("click",function(){const resultPanel=document.getElementById("resultPanel");navigator.clipboard.writeText(resultPanel.innerText).then(()=>alert("Text copied to clipboard!"),err=>console.error("Could not copy text: ",err))}),document.getElementById("convertButton").addEventListener("click",function(){const userInput=document.getElementById("userInput").value,conversionType=document.getElementById("conversionType").value;let result="";try{"escape"===conversionType?result=JSON.stringify(userInput):"unescape"===conversionType?result=JSON.parse(userInput):"format"===conversionType?result=JSON.stringify(JSON.parse(userInput),null,2):"unformat"===conversionType?result=JSON.stringify(JSON.parse(userInput)):"toYaml"===conversionType?result=jsyaml.dump(JSON.parse(userInput),{indent:2}):"fromYaml"===conversionType&&(result=JSON.stringify(jsyaml.load(userInput),null,2))}catch(e){result="Invalid input: "+e.message}document.getElementById("resultPanel").innerText=result,document.getElementById("copyButton").disabled=!1}),document.getElementById("resetButton").addEventListener("click",function(){document.getElementById("userInput").value="",document.getElementById("resultPanel").innerText="",document.getElementById("copyButton").disabled=!0});</script>
-<script id="page-helpers" src="/api/page-helpers.js?v=2"></script>
-<script id="page-script" src="/api/page-script.js?v=2"></script>
-
-
+<script id="page-helpers" src="/api/page-helpers.js?v=2" data-locked="true"></script>
+<script id="page-script" src="/api/page-script.js?v=2" data-locked="true"></script>
 </body></html>

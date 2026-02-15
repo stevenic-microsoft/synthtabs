@@ -25,7 +25,8 @@ export type ChangeOp =
     | { op: "update"; nodeId: string; html: string }
     | { op: "replace"; nodeId: string; html: string }
     | { op: "delete"; nodeId: string }
-    | { op: "insert"; parentId: string; position: "prepend" | "append" | "before" | "after"; html: string };
+    | { op: "insert"; parentId: string; position: "prepend" | "append" | "before" | "after"; html: string }
+    | { op: "style-element"; nodeId: string; style: string };
 
 export type ChangeList = ChangeOp[];
 
@@ -152,7 +153,10 @@ export async function transformPage(args: TransformPageArgs): Promise<AgentCompl
         // 8. Remove duplicate inline scripts (LLM may insert instead of update)
         const dedupedHtml = deduplicateInlineScripts(cleanHtml);
 
-        return { completed: true, value: { html: dedupedHtml, changeCount: successCount } };
+        // 9. Ensure page-helpers and page-script are last in <body>
+        const safeHtml = ensureScriptsBeforeBodyClose(dedupedHtml);
+
+        return { completed: true, value: { html: safeHtml, changeCount: successCount } };
     } catch (err: unknown) {
         // On any error: return original page with error block injected
         const cleanOriginal = stripNodeIds(annotatedHtml);
@@ -175,7 +179,7 @@ export function assignNodeIds(html: string): { html: string; nodeCount: number }
     let counter = 0;
     $('*').each(function (this: cheerio.Element) {
         const el = $(this);
-        if (this.type === 'tag') {
+        if (this.type === 'tag' || this.type === 'script' || this.type === 'style') {
             el.attr('data-node-id', String(counter++));
         }
     });
@@ -297,6 +301,39 @@ export function deduplicateInlineScripts(html: string): string {
 }
 
 /**
+ * Ensure `#page-helpers` and `#page-script` are the last children of <body>,
+ * in that order. The LLM may move them during transformation; this guarantees
+ * they always execute after the DOM is fully parsed.
+ */
+export function ensureScriptsBeforeBodyClose(html: string): string {
+    const $ = cheerio.load(html, { decodeEntities: false });
+    const body = $('body');
+    if (body.length === 0) return html;
+
+    // Capture outer HTML before removing so we can re-append
+    const helpers = $('script#page-helpers');
+    const pageScript = $('script#page-script');
+
+    const helpersHtml = helpers.length > 0 ? $.html(helpers) : '';
+    const pageScriptHtml = pageScript.length > 0 ? $.html(pageScript) : '';
+
+    // Remove from current position and re-append at end of <body>
+    if (helpers.length > 0) helpers.remove();
+    if (pageScript.length > 0) pageScript.remove();
+    if (helpersHtml) body.append(helpersHtml);
+    if (pageScriptHtml) body.append(pageScriptHtml);
+
+    return $.html();
+}
+
+/**
+ * Check whether an element or any of its ancestors has the `data-locked` attribute.
+ */
+function isElementLocked(el: cheerio.Cheerio, $: cheerio.Root): boolean {
+    return el.attr('data-locked') !== undefined;
+}
+
+/**
  * Apply a list of CRUD operations to annotated HTML (elements must have `data-node-id`).
  */
 export function applyChangeList(html: string, changes: ChangeList): string {
@@ -319,6 +356,10 @@ export function applyChangeList(html: string, changes: ChangeList): string {
                     console.warn(`applyChangeList: skipping replace — node ${change.nodeId} not found (already removed?)`);
                     break;
                 }
+                if (isElementLocked(el, $)) {
+                    console.warn(`applyChangeList: skipping replace — node ${change.nodeId} is data-locked`);
+                    break;
+                }
                 el.replaceWith(change.html);
                 break;
             }
@@ -326,6 +367,10 @@ export function applyChangeList(html: string, changes: ChangeList): string {
                 const el = $(`[data-node-id="${change.nodeId}"]`);
                 if (el.length === 0) {
                     console.warn(`applyChangeList: skipping delete — node ${change.nodeId} not found (already removed?)`);
+                    break;
+                }
+                if (isElementLocked(el, $)) {
+                    console.warn(`applyChangeList: skipping delete — node ${change.nodeId} is data-locked`);
                     break;
                 }
                 el.remove();
@@ -341,6 +386,19 @@ export function applyChangeList(html: string, changes: ChangeList): string {
                     case 'after': parent.after(change.html); break;
                     default: throw new Error(`insert: unknown position "${(change as any).position}"`);
                 }
+                break;
+            }
+            case 'style-element': {
+                const el = $(`[data-node-id="${change.nodeId}"]`);
+                if (el.length === 0) {
+                    console.warn(`applyChangeList: skipping style-element — node ${change.nodeId} not found (already removed?)`);
+                    break;
+                }
+                if (isElementLocked(el, $)) {
+                    console.warn(`applyChangeList: skipping style-element — node ${change.nodeId} is data-locked`);
+                    break;
+                }
+                el.attr('style', change.style);
                 break;
             }
             default:
@@ -380,6 +438,12 @@ function applyChangeListWithReport(html: string, changes: ChangeList): ApplyResu
                     failedOps.push({ op: change, reason });
                     break;
                 }
+                if (isElementLocked(el, $)) {
+                    const reason = `node ${change.nodeId} is data-locked`;
+                    console.warn(`applyChangeListWithReport: skipping replace — ${reason}`);
+                    failedOps.push({ op: change, reason });
+                    break;
+                }
                 el.replaceWith(change.html);
                 break;
             }
@@ -387,6 +451,12 @@ function applyChangeListWithReport(html: string, changes: ChangeList): ApplyResu
                 const el = $(`[data-node-id="${change.nodeId}"]`);
                 if (el.length === 0) {
                     const reason = `node ${change.nodeId} not found (already removed?)`;
+                    console.warn(`applyChangeListWithReport: skipping delete — ${reason}`);
+                    failedOps.push({ op: change, reason });
+                    break;
+                }
+                if (isElementLocked(el, $)) {
+                    const reason = `node ${change.nodeId} is data-locked`;
                     console.warn(`applyChangeListWithReport: skipping delete — ${reason}`);
                     failedOps.push({ op: change, reason });
                     break;
@@ -409,6 +479,23 @@ function applyChangeListWithReport(html: string, changes: ChangeList): ApplyResu
                     case 'after': parent.after(change.html); break;
                     default: throw new Error(`insert: unknown position "${(change as any).position}"`);
                 }
+                break;
+            }
+            case 'style-element': {
+                const el = $(`[data-node-id="${change.nodeId}"]`);
+                if (el.length === 0) {
+                    const reason = `node ${change.nodeId} not found (already removed?)`;
+                    console.warn(`applyChangeListWithReport: skipping style-element — ${reason}`);
+                    failedOps.push({ op: change, reason });
+                    break;
+                }
+                if (isElementLocked(el, $)) {
+                    const reason = `node ${change.nodeId} is data-locked`;
+                    console.warn(`applyChangeListWithReport: skipping style-element — ${reason}`);
+                    failedOps.push({ op: change, reason });
+                    break;
+                }
+                el.attr('style', change.style);
                 break;
             }
             default:
@@ -486,7 +573,7 @@ If there is a <USER_MESSAGE> but the intent is unclear, add a User: message with
 If there is a <USER_MESSAGE> with clear intent, add a User: message with the <USER_MESSAGE> to the chat and add a SynthOS: message explaining your change or answering their question.
 If a <USER_MESSAGE> is overly long, summarize the User: message.
 
-When updating the .viewerPanel you may alse add/remove script & style blocks to the header unless they're data-locked.
+When updating the .viewerPanel you may alse add/remove/update style blocks to the header unless they're data-locked. Use inline styles if you need to modify the .viewerPanel itself.
 You may add/remove new script blocks to the body but all script & style blocks should have a unique id.
 You may modify the contents of a data-locked script block but may not remove it.
 
@@ -521,6 +608,9 @@ Each operation must be one of:
 
 { "op": "insert", "parentId": "<data-node-id>", "position": "prepend"|"append"|"before"|"after", "html": "<new element HTML>" }
   — inserts new HTML relative to the parent element
+
+{ "op": "style-element", "nodeId": "<data-node-id>", "style": "<css style string>" }
+  — sets the style attribute of the target element (must be unlocked)
 
 Return ONLY the JSON array. Example:
 [
@@ -614,5 +704,6 @@ Return ONLY a JSON array of change operations using the same format:
 { "op": "update", "nodeId": "<data-node-id>", "html": "<new innerHTML>" }
 { "op": "replace", "nodeId": "<data-node-id>", "html": "<new outerHTML>" }
 { "op": "delete", "nodeId": "<data-node-id>" }
-{ "op": "insert", "parentId": "<data-node-id>", "position": "prepend"|"append"|"before"|"after", "html": "<new element HTML>" }`;
+{ "op": "insert", "parentId": "<data-node-id>", "position": "prepend"|"append"|"before"|"after", "html": "<new element HTML>" }
+{ "op": "style-element", "nodeId": "<data-node-id>", "style": "<css style string>" }`;
 

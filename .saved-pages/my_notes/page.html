@@ -4,79 +4,12 @@
     <title>SynthOS - Notes</title>
     <script src="/api/theme-info.js"></script>
     <link rel="stylesheet" href="/api/theme.css">
-    <style>
-        /* Page Specific Styles */
-        .application-title {
-            font-size: 22px;
-            font-weight: 700;
-            min-height: var(--header-min-height);
-            padding: var(--header-padding-vertical) var(--header-padding-horizontal);
-            line-height: var(--header-line-height);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-sizing: border-box;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            color: white;
-            border-radius: 12px 12px 0 0;
-            width: 100%;
-            max-width: 800px;
-            box-shadow: 0 6px 25px var(--accent-glow);
-        }
-
-        .application-content {
-            font-size: 14px;
-            color: rgba(224, 224, 224, 0.8);
-            padding: 20px;
-            flex-grow: 1;
-            width: 100%;
-            max-width: 800px;
-            background: rgba(15, 15, 35, 0.8);
-            border-radius: 0 0 12px 12px;
-            border: 1px solid rgba(138, 43, 226, 0.2);
-            border-top: none;
-        }
-
-        /* Light-mode overrides */
-        .light-mode .application-content {
-            color: rgba(45, 38, 64, 0.8);
-            background: rgba(255, 255, 255, 0.8);
-        }
-    </style>
+    <style>.application-title{font-size:22px;font-weight:700;min-height:var(--header-min-height);padding:var(--header-padding-vertical) var(--header-padding-horizontal);line-height:var(--header-line-height);display:flex;align-items:center;justify-content:center;box-sizing:border-box;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;border-radius:12px 12px 0 0;width:100%;max-width:800px;box-shadow:0 6px 25px var(--accent-glow)}.application-content{font-size:14px;color:rgba(224,224,224,.8);padding:20px;flex-grow:1;width:100%;max-width:800px;background:rgba(15,15,35,.8);border-radius:0 0 12px 12px;border:1px solid rgba(138,43,226,.2);border-top:none}.light-mode .application-content{color:rgba(45,38,64,.8);background:rgba(255,255,255,.8)}</style>
     <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
     <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/theme/toastui-editor-dark.min.css">
     <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
     <script id="page-info" src="/api/page-info.js?page=application"></script>
-<style>.notes-app{display:flex;height:100%;width:100%;background:var(--bg-tertiary);border-radius:12px;overflow:hidden;border:1px solid var(--border-color)}.notes-sidebar{width:280px;min-width:280px;background:var(--bg-secondary);border-right:1px solid var(--border-color);display:flex;flex-direction:column}.notes-sidebar-header{padding:16px;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center}.notes-sidebar-header h3{margin:0;font-size:18px;font-weight:600;color:var(--text-primary)}.add-note-btn{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:white;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;transition:transform 0.2s,box-shadow 0.2s}.add-note-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px var(--accent-glow)}.notes-list{flex:1;overflow-y:auto;padding:8px}.note-item{padding:12px 14px;margin-bottom:6px;background:var(--bg-tertiary);border-radius:8px;cursor:pointer;transition:all 0.2s;border:2px solid transparent}.note-item:hover{background:var(--bg-primary)}.note-item.active{border-color:var(--accent-primary);background:var(--bg-primary)}.note-item-title{font-weight:600;color:var(--text-primary);font-size:14px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.note-item-preview{font-size:12px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.notes-main{flex:1;display:flex;flex-direction:column;background:var(--bg-tertiary)}.notes-instructions{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-secondary);text-align:center;padding:40px}.instructions-icon{font-size:64px;margin-bottom:20px;opacity:0.6}.notes-instructions h2{margin:0 0 12px 0;color:var(--text-primary);font-size:24px}.notes-instructions p{margin:0;font-size:15px;max-width:300px;line-height:1.5}.notes-editor{flex:1;display:flex;flex-direction:column;padding:20px}.note-title-input{font-size:24px;font-weight:600;border:none;background:transparent;color:var(--text-primary);padding:12px 0;margin-bottom:12px;border-bottom:2px solid var(--border-color);outline:none}.note-title-input:focus{border-bottom-color:var(--accent-primary)}.note-title-input::placeholder{color:var(--text-secondary);opacity:0.6}.note-content-input{flex:1;font-size:15px;line-height:1.6;border:none;background:var(--bg-secondary);color:var(--text-primary);padding:16px;border-radius:10px;resize:none;outline:none;font-family:inherit}.note-content-input:focus{box-shadow:0 0 0 2px var(--accent-primary)}.note-content-input::placeholder{color:var(--text-secondary);opacity:0.6}.note-actions{display:flex;gap:12px;margin-top:16px;justify-content:flex-end}.note-save-btn,.note-delete-btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;border:none}.note-save-btn{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:white}.note-save-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px var(--accent-glow)}.note-delete-btn{background:var(--bg-secondary);color:#e74c3c;border:1px solid #e74c3c}.note-delete-btn:hover{background:#e74c3c;color:white}.light-mode .note-content-input{background:rgba(255,255,255,0.7)}</style><style id="notes-styles">.notes-app{display:flex;height:100%;width:100%;background:var(--bg-tertiary);border-radius:12px;overflow:hidden;border:1px solid var(--border-color)}.notes-sidebar{width:280px;min-width:280px;background:var(--bg-secondary);border-right:1px solid var(--border-color);display:flex;flex-direction:column}.notes-sidebar-header{padding:16px;border-bottom:1px solid var(--border-color);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}.notes-sidebar-header h3{margin:0;font-size:18px;font-weight:600;color:var(--text-primary)}.add-note-btn{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:white;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;transition:transform 0.2s,box-shadow 0.2s}.add-note-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px var(--accent-glow)}.notes-filter-input{width:100%;padding:8px 12px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-tertiary);color:var(--text-primary);font-size:13px;outline:none;margin-top:8px;box-sizing:border-box}.notes-filter-input:focus{border-color:var(--accent-primary);box-shadow:0 0 0 2px var(--accent-glow)}.notes-filter-input::placeholder{color:var(--text-secondary);opacity:0.6}.notes-list{flex:1;overflow-y:auto;padding:8px}.note-item{padding:12px 14px;margin-bottom:6px;background:var(--bg-tertiary);border-radius:8px;cursor:pointer;transition:all 0.2s;border:2px solid transparent}.note-item:hover{background:var(--bg-primary)}.note-item.active{border-color:var(--accent-primary);background:var(--bg-primary)}.note-item-title{font-weight:600;color:var(--text-primary);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.notes-main{flex:1;display:flex;flex-direction:column;background:var(--bg-tertiary);min-width:0;overflow:hidden}.notes-instructions{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-secondary);text-align:center;padding:40px}.instructions-icon{font-size:64px;margin-bottom:20px;opacity:0.6}.notes-instructions h2{margin:0 0 12px 0;color:var(--text-primary);font-size:24px}.notes-instructions p{margin:0;font-size:15px;max-width:300px;line-height:1.5}.notes-editor{flex:1;display:flex;flex-direction:column;padding:20px;min-width:0;overflow:hidden}.note-title-input{font-size:24px;font-weight:600;border:none;background:transparent;color:var(--text-primary);padding:12px 0;margin-bottom:12px;border-bottom:2px solid var(--border-color);outline:none}.note-title-input:focus{border-bottom-color:var(--accent-primary)}.note-title-input::placeholder{color:var(--text-secondary);opacity:0.6}.note-content-input{flex:1;font-size:15px;line-height:1.6;border:none;background:var(--bg-secondary);color:var(--text-primary);padding:16px;border-radius:10px;resize:none;outline:none;font-family:inherit}.note-content-input:focus{box-shadow:0 0 0 2px var(--accent-primary)}.note-content-input::placeholder{color:var(--text-secondary);opacity:0.6}.note-actions{display:flex;gap:12px;margin-top:16px;justify-content:flex-end}.note-save-btn,.note-delete-btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;border:none}.note-save-btn{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:white}.note-save-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px var(--accent-glow)}.note-delete-btn{background:var(--bg-secondary);color:#e74c3c;border:1px solid #e74c3c}.note-delete-btn:hover{background:#e74c3c;color:white}.light-mode .note-content-input{background:rgba(255,255,255,0.7)}.light-mode .notes-filter-input{background:rgba(255,255,255,0.7)}</style><style id="toastui-theme-overrides">
-/* Toast UI Editor — minimal layout overrides (colours handled by built-in theme) */
-.toastui-editor-defaultUI {
-    border: none !important;
-    border-radius: 10px !important;
-    overflow: hidden;
-}
-
-/* Hide mode switch to keep WYSIWYG only */
-.toastui-editor-mode-switch {
-    display: none !important;
-}
-
-#editor-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
-
-#editor-container .toastui-editor-defaultUI {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-#editor-container .toastui-editor-main {
-    flex: 1;
-}
-</style></head>
+<style>.notes-app{display:flex;height:100%;width:100%;background:var(--bg-tertiary);border-radius:12px;overflow:hidden;border:1px solid var(--border-color)}.notes-sidebar{width:280px;min-width:280px;background:var(--bg-secondary);border-right:1px solid var(--border-color);display:flex;flex-direction:column}.notes-sidebar-header{padding:16px;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center}.notes-sidebar-header h3{margin:0;font-size:18px;font-weight:600;color:var(--text-primary)}.add-note-btn{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;transition:transform .2s,box-shadow .2s}.add-note-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px var(--accent-glow)}.notes-list{flex:1;overflow-y:auto;padding:8px}.note-item{padding:12px 14px;margin-bottom:6px;background:var(--bg-tertiary);border-radius:8px;cursor:pointer;transition:.2s;border:2px solid transparent}.note-item:hover{background:var(--bg-primary)}.note-item.active{border-color:var(--accent-primary);background:var(--bg-primary)}.note-item-title{font-weight:600;color:var(--text-primary);font-size:14px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.note-item-preview{font-size:12px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.notes-main{flex:1;display:flex;flex-direction:column;background:var(--bg-tertiary)}.notes-instructions{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-secondary);text-align:center;padding:40px}.instructions-icon{font-size:64px;margin-bottom:20px;opacity:.6}.notes-instructions h2{margin:0 0 12px;color:var(--text-primary);font-size:24px}.notes-instructions p{margin:0;font-size:15px;max-width:300px;line-height:1.5}.notes-editor{flex:1;display:flex;flex-direction:column;padding:20px}.note-title-input{font-size:24px;font-weight:600;border:none;background:0 0;color:var(--text-primary);padding:12px 0;margin-bottom:12px;border-bottom:2px solid var(--border-color);outline:0}.note-title-input:focus{border-bottom-color:var(--accent-primary)}.note-title-input::placeholder{color:var(--text-secondary);opacity:.6}.note-content-input{flex:1;font-size:15px;line-height:1.6;border:none;background:var(--bg-secondary);color:var(--text-primary);padding:16px;border-radius:10px;resize:none;outline:0;font-family:inherit}.note-content-input:focus{box-shadow:0 0 0 2px var(--accent-primary)}.note-content-input::placeholder{color:var(--text-secondary);opacity:.6}.note-actions{display:flex;gap:12px;margin-top:16px;justify-content:flex-end}.note-delete-btn,.note-save-btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:.2s;border:none}.note-save-btn{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff}.note-save-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px var(--accent-glow)}.note-delete-btn{background:var(--bg-secondary);color:#e74c3c;border:1px solid #e74c3c}.note-delete-btn:hover{background:#e74c3c;color:#fff}.light-mode .note-content-input{background:rgba(255,255,255,.7)}</style><style id="notes-styles">.notes-app{display:flex;height:100%;width:100%;background:var(--bg-tertiary);border-radius:12px;overflow:hidden;border:1px solid var(--border-color)}.notes-sidebar{width:280px;min-width:280px;background:var(--bg-secondary);border-right:1px solid var(--border-color);display:flex;flex-direction:column}.notes-sidebar-header{padding:16px;border-bottom:1px solid var(--border-color);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}.notes-sidebar-header h3{margin:0;font-size:18px;font-weight:600;color:var(--text-primary)}.add-note-btn{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;transition:transform .2s,box-shadow .2s}.add-note-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px var(--accent-glow)}.notes-filter-input{width:100%;padding:8px 12px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-tertiary);color:var(--text-primary);font-size:13px;outline:0;margin-top:8px;box-sizing:border-box}.notes-filter-input:focus{border-color:var(--accent-primary);box-shadow:0 0 0 2px var(--accent-glow)}.notes-filter-input::placeholder{color:var(--text-secondary);opacity:.6}.notes-list{flex:1;overflow-y:auto;padding:8px}.note-item{padding:12px 14px;margin-bottom:6px;background:var(--bg-tertiary);border-radius:8px;cursor:pointer;transition:.2s;border:2px solid transparent}.note-item:hover{background:var(--bg-primary)}.note-item.active{border-color:var(--accent-primary);background:var(--bg-primary)}.note-item-title{font-weight:600;color:var(--text-primary);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.notes-main{flex:1;display:flex;flex-direction:column;background:var(--bg-tertiary);min-width:0;overflow:hidden}.notes-instructions{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-secondary);text-align:center;padding:40px}.instructions-icon{font-size:64px;margin-bottom:20px;opacity:.6}.notes-instructions h2{margin:0 0 12px;color:var(--text-primary);font-size:24px}.notes-instructions p{margin:0;font-size:15px;max-width:300px;line-height:1.5}.notes-editor{flex:1;display:flex;flex-direction:column;padding:20px;min-width:0;overflow:hidden}.note-title-input{font-size:24px;font-weight:600;border:none;background:0 0;color:var(--text-primary);padding:12px 0;margin-bottom:12px;border-bottom:2px solid var(--border-color);outline:0}.note-title-input:focus{border-bottom-color:var(--accent-primary)}.note-title-input::placeholder{color:var(--text-secondary);opacity:.6}.note-content-input{flex:1;font-size:15px;line-height:1.6;border:none;background:var(--bg-secondary);color:var(--text-primary);padding:16px;border-radius:10px;resize:none;outline:0;font-family:inherit}.note-content-input:focus{box-shadow:0 0 0 2px var(--accent-primary)}.note-content-input::placeholder{color:var(--text-secondary);opacity:.6}.note-actions{display:flex;gap:12px;margin-top:16px;justify-content:flex-end}.note-delete-btn,.note-save-btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:.2s;border:none}.note-save-btn{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff}.note-save-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px var(--accent-glow)}.note-delete-btn{background:var(--bg-secondary);color:#e74c3c;border:1px solid #e74c3c}.note-delete-btn:hover{background:#e74c3c;color:#fff}.light-mode .note-content-input,.light-mode .notes-filter-input{background:rgba(255,255,255,.7)}</style><style id="toastui-theme-overrides">.toastui-editor-defaultUI{border:none!important;border-radius:10px!important;overflow:hidden}.toastui-editor-mode-switch{display:none!important}#editor-container{flex:1;display:flex;flex-direction:column;min-height:0}#editor-container .toastui-editor-defaultUI{flex:1;display:flex;flex-direction:column}#editor-container .toastui-editor-main{flex:1}</style></head>
 
 
     <body><div class="chat-panel">
@@ -93,138 +26,10 @@
         </form>
     </div>
     <div class="viewer-panel" id="viewerPanel"><div class="notes-app"><div class="notes-sidebar"><div class="notes-sidebar-header"><h3>My Notes</h3><button class="add-note-btn" id="addNoteBtn">+ New Note</button><input type="text" class="notes-filter-input" id="notesFilterInput" placeholder="Search notes..."></div><div class="notes-list" id="notesList"></div></div><div class="notes-main"><div class="notes-instructions" id="notesInstructions"><div class="instructions-icon">📝</div><h2>Welcome to Notes</h2><p>Select a note from the sidebar to view or edit it, or click "+ New Note" to create a new one.</p></div><div class="notes-editor" id="notesEditor" style="display: none;"><input type="text" class="note-title-input" id="noteTitleInput" placeholder="Note title..."><div id="editor-container"></div><div class="note-actions"><button class="note-save-btn" id="noteSaveBtn">💾 Save</button><button class="note-delete-btn" id="noteDeleteBtn">🗑️ Delete</button></div></div></div></div><div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div></div>
-    <div id="thoughts" style="display: none;">The user wants to remove the markdown editing mode from Toast UI Editor, keeping only WYSIWYG mode. I need to:
-1. Set initialEditType to 'wysiwyg' (already done)
-2. Hide the mode switch tabs at the bottom
-3. Make sure notes still load properly by keeping the setMarkdown call
-4. Add CSS to hide the mode switch
-
-The key is to hide the mode switch UI while keeping the editor functional in WYSIWYG-only mode.</div>
-
+    <div id="instructions" style="display: none;" data-locked=""></div>
+    <div id="thoughts" style="display: none;" data-locked=""></div>
 <script id="page-helpers" src="/api/page-helpers.js?v=2"></script>
 <script id="page-script" src="/api/page-script.js?v=2"></script>
 
-<script id="notes-app-logic">
-let currentNoteId = null;
-let notes = [];
-let editor = null;
-
-function initEditor() {
-    editor = new toastui.Editor({
-        el: document.querySelector('#editor-container'),
-        height: '100%',
-        initialEditType: 'wysiwyg',
-        previewStyle: 'vertical',
-        theme: window.themeInfo.mode === 'light' ? 'light' : 'dark',
-        placeholder: 'Start writing your note...',
-        toolbarItems: [
-            ['heading', 'bold', 'italic', 'strike'],
-            ['hr', 'quote'],
-            ['ul', 'ol', 'task', 'indent', 'outdent'],
-            ['table', 'link', 'image'],
-            ['code', 'codeblock']
-        ]
-    });
-}
-
-async function loadNotes() {
-    try {
-        notes = await synthos.data.list('notes');
-        renderNotesList();
-    } catch (e) {
-        console.error('Failed to load notes:', e);
-        notes = [];
-        renderNotesList();
-    }
-}
-
-function renderNotesList() {
-    const list = document.getElementById('notesList');
-    const filter = (document.getElementById('notesFilterInput').value || '').toLowerCase();
-    list.innerHTML = '';
-    const filtered = filter ? notes.filter(n => (n.title || '').toLowerCase().includes(filter)) : notes;
-    if (filtered.length === 0) {
-        list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-secondary);font-size:13px;">' + (filter ? 'No matching notes.' : 'No notes yet.<br>Click "+ New Note" to create one.') + '</div>';
-        return;
-    }
-    filtered.forEach(note => {
-        const item = document.createElement('div');
-        item.className = 'note-item' + (currentNoteId === note.id ? ' active' : '');
-        item.innerHTML = `<div class="note-item-title">${escapeHtml(note.title || 'Untitled')}</div>`;
-        item.onclick = () => selectNote(note.id);
-        list.appendChild(item);
-    });
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function selectNote(id) {
-    currentNoteId = id;
-    const note = notes.find(n => n.id === id);
-    if (note) {
-        document.getElementById('notesInstructions').style.display = 'none';
-        document.getElementById('notesEditor').style.display = 'flex';
-        document.getElementById('noteTitleInput').value = note.title || '';
-        if (editor) {
-            editor.setMarkdown(note.content || '');
-        }
-        renderNotesList();
-    }
-}
-
-function showInstructions() {
-    currentNoteId = null;
-    document.getElementById('notesInstructions').style.display = 'flex';
-    document.getElementById('notesEditor').style.display = 'none';
-    renderNotesList();
-}
-
-document.getElementById('addNoteBtn').onclick = async function() {
-    const newNote = { id: crypto.randomUUID(), title: '', content: '' };
-    try {
-        const saved = await synthos.data.save('notes', newNote);
-        notes.unshift(saved);
-        selectNote(saved.id);
-    } catch (e) {
-        console.error('Failed to create note:', e);
-    }
-};
-
-document.getElementById('noteSaveBtn').onclick = async function() {
-    if (!currentNoteId) return;
-    const title = document.getElementById('noteTitleInput').value;
-    const content = editor ? editor.getMarkdown() : '';
-    try {
-        const updated = await synthos.data.save('notes', { id: currentNoteId, title, content });
-        const idx = notes.findIndex(n => n.id === currentNoteId);
-        if (idx >= 0) notes[idx] = updated;
-        renderNotesList();
-    } catch (e) {
-        console.error('Failed to save note:', e);
-    }
-};
-
-document.getElementById('noteDeleteBtn').onclick = async function() {
-    if (!currentNoteId) return;
-    if (!confirm('Are you sure you want to delete this note?')) return;
-    try {
-        await synthos.data.remove('notes', currentNoteId);
-        notes = notes.filter(n => n.id !== currentNoteId);
-        showInstructions();
-    } catch (e) {
-        console.error('Failed to delete note:', e);
-    }
-};
-
-// Filter notes as user types
-document.getElementById('notesFilterInput').addEventListener('input', renderNotesList);
-
-// Initialize editor and load notes
-initEditor();
-loadNotes();
-</script>
+<script id="notes-app-logic">let currentNoteId=null,notes=[],editor=null;function initEditor(){editor=new toastui.Editor({el:document.querySelector("#editor-container"),height:"100%",initialEditType:"wysiwyg",previewStyle:"vertical",theme:"light"===window.themeInfo.mode?"light":"dark",placeholder:"Start writing your note...",toolbarItems:[["heading","bold","italic","strike"],["hr","quote"],["ul","ol","task","indent","outdent"],["table","link","image"],["code","codeblock"]]})}async function loadNotes(){try{notes=await synthos.data.list("notes"),renderNotesList()}catch(e){console.error("Failed to load notes:",e),notes=[],renderNotesList()}}function renderNotesList(){const list=document.getElementById("notesList"),filter=(document.getElementById("notesFilterInput").value||"").toLowerCase();list.innerHTML="";const filtered=filter?notes.filter(n=>(n.title||"").toLowerCase().includes(filter)):notes;0!==filtered.length?filtered.forEach(note=>{const item=document.createElement("div");item.className="note-item"+(currentNoteId===note.id?" active":""),item.innerHTML=`<div class="note-item-title">${escapeHtml(note.title||"Untitled")}</div>`,item.onclick=()=>selectNote(note.id),list.appendChild(item)}):list.innerHTML='<div style="padding:20px;text-align:center;color:var(--text-secondary);font-size:13px;">'+(filter?"No matching notes.":'No notes yet.<br>Click "+ New Note" to create one.')+"</div>"}function escapeHtml(text){const div=document.createElement("div");return div.textContent=text,div.innerHTML}function selectNote(id){currentNoteId=id;const note=notes.find(n=>n.id===id);note&&(document.getElementById("notesInstructions").style.display="none",document.getElementById("notesEditor").style.display="flex",document.getElementById("noteTitleInput").value=note.title||"",editor&&editor.setMarkdown(note.content||""),renderNotesList())}function showInstructions(){currentNoteId=null,document.getElementById("notesInstructions").style.display="flex",document.getElementById("notesEditor").style.display="none",renderNotesList()}document.getElementById("addNoteBtn").onclick=async function(){const newNote={id:crypto.randomUUID(),title:"",content:""};try{const saved=await synthos.data.save("notes",newNote);notes.unshift(saved),selectNote(saved.id)}catch(e){console.error("Failed to create note:",e)}},document.getElementById("noteSaveBtn").onclick=async function(){if(!currentNoteId)return;const title=document.getElementById("noteTitleInput").value,content=editor?editor.getMarkdown():"";try{const updated=await synthos.data.save("notes",{id:currentNoteId,title:title,content:content}),idx=notes.findIndex(n=>n.id===currentNoteId);idx>=0&&(notes[idx]=updated),renderNotesList()}catch(e){console.error("Failed to save note:",e)}},document.getElementById("noteDeleteBtn").onclick=async function(){if(currentNoteId&&confirm("Are you sure you want to delete this note?"))try{await synthos.data.remove("notes",currentNoteId),notes=notes.filter(n=>n.id!==currentNoteId),showInstructions()}catch(e){console.error("Failed to delete note:",e)}},document.getElementById("notesFilterInput").addEventListener("input",renderNotesList),initEditor(),loadNotes();</script>
 </body></html>
