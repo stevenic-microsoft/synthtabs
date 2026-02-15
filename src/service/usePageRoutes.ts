@@ -149,33 +149,81 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
     });
 
     // Page save
-    app.get('/:page/save', async (req, res) => {
-        // Redirect if settings not configured
-        const { page } = req.params;
-        const isConfigured = await hasConfiguredSettings(config.pagesFolder);
-        if (!isConfigured) {
-            res.redirect('/settings');
-            return;
-        }
+    app.post('/:page/save', async (req, res) => {
+        try {
+            // Redirect if settings not configured
+            const { page } = req.params;
+            const isConfigured = await hasConfiguredSettings(config.pagesFolder);
+            if (!isConfigured) {
+                res.status(400).json({ error: 'Settings not configured' });
+                return;
+            }
 
-        // Capture raw name before normalization for use as title
-        const rawName = req.query['name'] as string;
-        const saveAs = normalizePageName(rawName);
-        if (!saveAs) {
-            res.status(400).send('Invalid or missing name parameter');
-            return;
-        }
+            // Extract fields from JSON body
+            const { title, categories, greeting } = req.body;
+            if (!title || typeof title !== 'string') {
+                res.status(400).json({ error: 'title is required' });
+                return;
+            }
+            if (!categories || !Array.isArray(categories) || categories.length === 0) {
+                res.status(400).json({ error: 'categories is required (array of strings)' });
+                return;
+            }
 
-        // Load page state
-        const pageState = await loadPageWithFallback(page, config, false);
-        if (!pageState) {
-            res.status(404).send(PAGE_NOT_FOUND);
-            return;
-        }
+            // Normalize page name from title
+            const saveAs = normalizePageName(title);
+            if (!saveAs) {
+                res.status(400).json({ error: 'Invalid title — cannot derive a page name' });
+                return;
+            }
 
-        // Save as new page and redirect to saved page
-        await savePageState(config.pagesFolder, saveAs, pageState, rawName);
-        res.redirect(`/${saveAs}`);
+            // Reject reserved names
+            if (saveAs === 'builder') {
+                res.status(400).json({ error: '"Builder" is a reserved page name' });
+                return;
+            }
+
+            // Load page state
+            let pageState = await loadPageWithFallback(page, config, false);
+            if (!pageState) {
+                res.status(404).json({ error: PAGE_NOT_FOUND });
+                return;
+            }
+
+            // If greeting is provided, process with cheerio
+            if (greeting && typeof greeting === 'string' && greeting.trim().length > 0) {
+                const $ = cheerio.load(pageState);
+                const messages = $('#chatMessages .chat-message');
+                // Keep only the first message, remove the rest
+                messages.slice(1).remove();
+                // Update the greeting text in the first message
+                const firstP = messages.first().find('p');
+                const strong = firstP.find('strong');
+                if (strong.length) {
+                    firstP.html('<strong>Synthos:</strong> ' + greeting.trim());
+                }
+                pageState = $.html();
+            }
+
+            // Save as new page
+            await savePageState(config.pagesFolder, saveAs, pageState, title, categories);
+
+            // Also update metadata with categories (in case page.json already existed)
+            await savePageMetadata(config.pagesFolder, saveAs, {
+                title,
+                categories,
+                pinned: false,
+                createdDate: new Date().toISOString(),
+                lastModified: new Date().toISOString(),
+                pageVersion: PAGE_VERSION,
+                mode: 'unlocked',
+            });
+
+            res.json({ redirect: `/${saveAs}` });
+        } catch (err: unknown) {
+            console.error(err);
+            res.status(500).json({ error: (err as Error).message });
+        }
     });
 
     // Page transformation

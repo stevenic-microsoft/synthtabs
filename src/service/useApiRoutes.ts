@@ -428,7 +428,9 @@ ${context}
             }
             const metadata = await loadPageMetadata(config.pagesFolder, page, config.requiredPagesFolder);
             const mode = metadata?.mode ?? 'unlocked';
-            const info = JSON.stringify({ name: page, mode, latestPageVersion: PAGE_VERSION });
+            const title = metadata?.title ?? '';
+            const categories = metadata?.categories ?? [];
+            const info = JSON.stringify({ name: page, mode, latestPageVersion: PAGE_VERSION, title, categories });
             const js = [
                 `window.pageInfo=${info};`,
                 `if(window.pageInfo.mode==="locked"){`,

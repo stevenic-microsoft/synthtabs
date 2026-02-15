@@ -97,16 +97,219 @@
         });
     }
 
-    // 3. Save link handler
-    var saveLink = document.getElementById('saveLink');
-    if (saveLink) {
-        saveLink.addEventListener('click', function() {
-            var pageName = prompt('Enter the name of the page to save as:');
-            if (pageName) {
-                window.location.href = window.location.pathname + '/save?name=' + encodeURIComponent(pageName);
+    // 3. Save link handler — themed modal with title, categories, greeting
+    (function() {
+        var saveLink = document.getElementById('saveLink');
+        if (!saveLink) return;
+
+        // Detect if current page is a Builders or System page (start with blank fields)
+        var isBuilder = window.pageInfo && Array.isArray(window.pageInfo.categories) &&
+            (window.pageInfo.categories.indexOf('Builders') !== -1 ||
+             window.pageInfo.categories.indexOf('System') !== -1);
+
+        // Original title for change detection
+        var originalTitle = (window.pageInfo && window.pageInfo.title) ? window.pageInfo.title : '';
+
+        // --- Create save modal ---
+        var modal = document.createElement('div');
+        modal.id = 'saveModal';
+        modal.className = 'modal-overlay';
+        modal.innerHTML =
+            '<div class="modal-content" style="max-width:480px;">' +
+                '<div class="modal-header">' +
+                    '<span>Save Page</span>' +
+                    '<button type="button" class="brainstorm-close-btn" id="saveCloseBtn">&times;</button>' +
+                '</div>' +
+                '<div class="modal-body" style="display:flex;flex-direction:column;gap:12px;padding:16px 20px;">' +
+                    '<div>' +
+                        '<label style="display:block;margin-bottom:4px;font-size:13px;color:var(--text-secondary);">Display Title <span style="color:var(--accent-primary);">*</span></label>' +
+                        '<input type="text" id="saveTitleInput" class="brainstorm-input" placeholder="Enter a display title..." style="width:100%;box-sizing:border-box;">' +
+                        '<div id="saveTitleError" style="color:#ff6b6b;font-size:12px;margin-top:4px;display:none;">Title is required</div>' +
+                    '</div>' +
+                    '<div>' +
+                        '<label style="display:block;margin-bottom:4px;font-size:13px;color:var(--text-secondary);">Categories <span style="color:var(--accent-primary);">*</span></label>' +
+                        '<input type="text" id="saveCategoriesInput" class="brainstorm-input" placeholder="e.g. Tool, Game, Utility" style="width:100%;box-sizing:border-box;">' +
+                        '<div id="saveCategoriesError" style="color:#ff6b6b;font-size:12px;margin-top:4px;display:none;">At least one category is required</div>' +
+                    '</div>' +
+                    '<div>' +
+                        '<label style="display:block;margin-bottom:4px;font-size:13px;color:var(--text-secondary);">Greeting <span style="font-size:11px;opacity:0.7;">(optional)</span></label>' +
+                        '<input type="text" id="saveGreetingInput" class="brainstorm-input" placeholder="Available when title changes" style="width:100%;box-sizing:border-box;" disabled>' +
+                        '<div style="font-size:11px;color:var(--text-secondary);margin-top:4px;opacity:0.7;" id="saveGreetingHint">Change the title to enable a custom greeting.</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="modal-footer" style="display:flex;justify-content:flex-end;gap:8px;padding:12px 20px;">' +
+                    '<button type="button" class="brainstorm-send-btn" id="saveCancelBtn" style="background:transparent;border:1px solid var(--border-color);color:var(--text-secondary);">Cancel</button>' +
+                    '<button type="button" class="brainstorm-send-btn" id="saveConfirmBtn">Save</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(modal);
+
+        // --- Create error modal ---
+        var errorModal = document.createElement('div');
+        errorModal.id = 'errorModal';
+        errorModal.className = 'modal-overlay';
+        errorModal.innerHTML =
+            '<div class="modal-content" style="max-width:400px;">' +
+                '<div class="modal-header">' +
+                    '<span>Error</span>' +
+                    '<button type="button" class="brainstorm-close-btn" id="errorCloseBtn">&times;</button>' +
+                '</div>' +
+                '<div class="modal-body" style="padding:16px 20px;">' +
+                    '<p id="errorMessage" style="margin:0;color:var(--text-primary);"></p>' +
+                '</div>' +
+                '<div class="modal-footer" style="display:flex;justify-content:flex-end;padding:12px 20px;">' +
+                    '<button type="button" class="brainstorm-send-btn" id="errorOkBtn">OK</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(errorModal);
+
+        // --- Element references ---
+        var titleInput = document.getElementById('saveTitleInput');
+        var categoriesInput = document.getElementById('saveCategoriesInput');
+        var greetingInput = document.getElementById('saveGreetingInput');
+        var greetingHint = document.getElementById('saveGreetingHint');
+        var titleError = document.getElementById('saveTitleError');
+        var categoriesError = document.getElementById('saveCategoriesError');
+
+        // --- Greeting enable/disable based on title change ---
+        titleInput.addEventListener('input', function() {
+            var changed = titleInput.value.trim() !== originalTitle;
+            greetingInput.disabled = !changed;
+            if (changed) {
+                greetingInput.placeholder = 'Enter a custom greeting...';
+                greetingHint.textContent = 'Replaces the initial Synthos greeting and removes chat history.';
+            } else {
+                greetingInput.placeholder = 'Available when title changes';
+                greetingInput.value = '';
+                greetingHint.textContent = 'Change the title to enable a custom greeting.';
             }
         });
-    }
+
+        // --- Open modal ---
+        function openSaveModal() {
+            // Pre-fill fields (blank for Builder pages)
+            titleInput.value = isBuilder ? '' : originalTitle;
+            categoriesInput.value = isBuilder ? '' : (
+                (window.pageInfo && Array.isArray(window.pageInfo.categories))
+                    ? window.pageInfo.categories.join(', ')
+                    : ''
+            );
+            greetingInput.value = '';
+            greetingInput.disabled = true;
+            greetingInput.placeholder = 'Available when title changes';
+            greetingHint.textContent = 'Change the title to enable a custom greeting.';
+            titleError.style.display = 'none';
+            categoriesError.style.display = 'none';
+            modal.classList.add('show');
+            titleInput.focus();
+        }
+
+        function closeSaveModal() {
+            modal.classList.remove('show');
+        }
+
+        function showError(msg) {
+            document.getElementById('errorMessage').textContent = msg;
+            errorModal.classList.add('show');
+        }
+
+        function closeError() {
+            errorModal.classList.remove('show');
+        }
+
+        // --- Submit ---
+        function submitSave() {
+            var title = titleInput.value.trim();
+            var cats = categoriesInput.value.trim();
+            var greeting = greetingInput.value.trim();
+            var valid = true;
+
+            // Validate
+            if (!title) {
+                titleError.style.display = 'block';
+                valid = false;
+            } else {
+                titleError.style.display = 'none';
+            }
+            if (!cats) {
+                categoriesError.style.display = 'block';
+                valid = false;
+            } else {
+                categoriesError.style.display = 'none';
+            }
+            if (!valid) return;
+
+            // Parse categories
+            var categories = cats.split(',').map(function(c) { return c.trim(); }).filter(Boolean);
+
+            // Disable button during save
+            var confirmBtn = document.getElementById('saveConfirmBtn');
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Saving...';
+
+            var body = { title: title, categories: categories };
+            if (greeting && !greetingInput.disabled) {
+                body.greeting = greeting;
+            }
+
+            fetch(window.location.pathname + '/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            })
+            .then(function(res) {
+                return res.json().then(function(data) {
+                    return { ok: res.ok, data: data };
+                });
+            })
+            .then(function(result) {
+                if (result.ok && result.data.redirect) {
+                    window.location.href = result.data.redirect;
+                } else {
+                    closeSaveModal();
+                    showError(result.data.error || 'An unknown error occurred');
+                    confirmBtn.disabled = false;
+                    confirmBtn.textContent = 'Save';
+                }
+            })
+            .catch(function(err) {
+                closeSaveModal();
+                showError('Network error: ' + err.message);
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = 'Save';
+            });
+        }
+
+        // --- Event listeners ---
+        saveLink.addEventListener('click', openSaveModal);
+        document.getElementById('saveCloseBtn').addEventListener('click', closeSaveModal);
+        document.getElementById('saveCancelBtn').addEventListener('click', closeSaveModal);
+        document.getElementById('saveConfirmBtn').addEventListener('click', submitSave);
+        document.getElementById('errorCloseBtn').addEventListener('click', closeError);
+        document.getElementById('errorOkBtn').addEventListener('click', closeError);
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeSaveModal();
+        });
+        errorModal.addEventListener('click', function(e) {
+            if (e.target === errorModal) closeError();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (modal.classList.contains('show')) closeSaveModal();
+                if (errorModal.classList.contains('show')) closeError();
+            }
+        });
+
+        // Enter key in title/categories inputs triggers save
+        titleInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); submitSave(); }
+        });
+        categoriesInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); submitSave(); }
+        });
+    })();
 
     // 4. Reset link handler
     var resetLink = document.getElementById('resetLink');

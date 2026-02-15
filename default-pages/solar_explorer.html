@@ -1,0 +1,1187 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SynthOS</title>
+    <script id="theme-info" src="/api/theme-info.js" data-locked="true"></script>
+    <link id="theme-css" rel="stylesheet" href="/api/theme.css" data-locked="true">
+    <style id="solar-styles">
+#solarSystem {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.controls {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  z-index: 100;
+  background: rgba(15, 15, 35, 0.6);
+  padding: 10px 20px;
+  border-top: 1px solid rgba(138, 43, 226, 0.3);
+}
+
+.controls button {
+  padding: 8px 24px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667eea 0, #764ba2 100%);
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: 0.3s;
+}
+
+.controls button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
+}
+
+.controls button.active {
+  background: linear-gradient(135deg, #f093fb 0, #764ba2 100%);
+}
+
+.info-panel {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(15, 15, 35, 0.6);
+  padding: 20px;
+  border-radius: 15px;
+  border: 1px solid rgba(138, 43, 226, 0.3);
+  max-width: 280px;
+  z-index: 100;
+}
+
+.info-panel h3 {
+  color: #f093fb;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.info-panel p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #b794f6;
+  margin-bottom: 8px;
+}
+
+.speed-control {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(15, 15, 35, 0.6);
+  padding: 15px 20px;
+  border-radius: 15px;
+  border: 1px solid rgba(138, 43, 226, 0.3);
+  z-index: 100;
+}
+
+.speed-control label {
+  color: #b794f6;
+  font-size: 13px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.speed-control input[type=range] {
+  width: 150px;
+  accent-color: #f093fb;
+}
+
+.planet-label {
+  font-size: 11px;
+  fill: #b794f6;
+  pointer-events: none;
+  text-anchor: middle;
+}
+
+#viewerPanel.full-viewer {
+  background: #0a0a19 !important;
+}
+
+.light-mode .controls,
+.light-mode .info-panel,
+.light-mode .speed-control {
+  background: rgba(15, 15, 35, 0.6) !important;
+}
+
+.light-mode .info-panel h3 {
+  color: #f093fb !important;
+}
+
+.light-mode .info-panel p {
+  color: #b794f6 !important;
+}
+
+.light-mode .speed-control label {
+  color: #b794f6 !important;
+}
+</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
+    <script id="page-info" src="/api/page-info.js?page=solar_system"></script>
+<style id="tutorial-link-styles">.tutorial-link{color:#667eea;text-decoration:underline;cursor:pointer;transition:color 0.2s}.tutorial-link:hover{color:#f093fb}.light-mode .tutorial-link{color:#667eea}.light-mode .tutorial-link:hover{color:#764ba2}</style><style id="detail-card-options">.card-showcase{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:none;gap:30px;z-index:200;padding:20px}.card-showcase.active{display:flex}.planet-detail-card{width:240px;background:rgba(15,15,35,.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:16px;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,.3);position:absolute;pointer-events:none;opacity:0;transition:opacity .2s;z-index:150}.planet-detail-card.visible{opacity:1;pointer-events:auto}.planet-detail-card .planet-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.15)}.planet-detail-card .planet-icon{width:32px;height:32px;border-radius:50%;box-shadow:0 0 12px rgba(255,200,100,.3);flex-shrink:0}.planet-detail-card .planet-name{font-size:18px;font-weight:600;background:linear-gradient(135deg,#f093fb,#667eea);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.planet-detail-card .stat-row{display:flex;justify-content:space-between;padding:6px 0;font-size:12px;border-bottom:1px solid rgba(255,255,255,.08)}.planet-detail-card .stat-row:last-of-type{border-bottom:none}.planet-detail-card .stat-label{color:rgba(255,255,255,.5)}.planet-detail-card .stat-value{color:#fff;font-weight:500}.planet-detail-card .fun-fact{margin-top:12px;padding:10px;background:rgba(102,126,234,.15);border-radius:8px;font-size:11px;color:rgba(255,255,255,.9);line-height:1.4;display:none}.planet-detail-card .fun-fact-label{color:#f093fb;font-weight:600;margin-bottom:4px;display:block}.planet-detail-card .question-section{margin-top:12px;display:none}.planet-detail-card .question-input{width:100%;padding:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;font-size:12px;outline:none;box-sizing:border-box}.planet-detail-card .question-input::placeholder{color:rgba(255,255,255,.4)}.planet-detail-card .question-input:focus{border-color:#667eea;box-shadow:0 0 10px rgba(102,126,234,.3)}.planet-detail-card .ai-answer{margin-top:10px;padding:10px;background:rgba(240,147,251,.1);border-radius:8px;font-size:11px;color:rgba(255,255,255,.9);line-height:1.4;border-left:2px solid #f093fb;max-height:120px;overflow-y:auto;display:none}.planet-detail-card .ai-answer.visible{display:block}.planet-detail-card .ai-answer::-webkit-scrollbar{width:4px}.planet-detail-card .ai-answer::-webkit-scrollbar-track{background:rgba(255,255,255,.05);border-radius:2px}.planet-detail-card .ai-answer::-webkit-scrollbar-thumb{background:rgba(240,147,251,.3);border-radius:2px}.planet-detail-card .ai-answer::-webkit-scrollbar-thumb:hover{background:rgba(240,147,251,.5)}.planet-detail-card.mode-funfact .fun-fact{display:block}.planet-detail-card.mode-funfact .question-section{display:none}.planet-detail-card.mode-question .fun-fact{display:none}.planet-detail-card.mode-question .question-section{display:block}.light-mode .planet-detail-card{background:rgba(15,15,35,.6);border-color:rgba(118,75,162,.3)}.light-mode .planet-detail-card .stat-label{color:rgba(255,255,255,.6)}.light-mode .planet-detail-card .question-input{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.25)}.moon-detail-card{position:absolute;width:200px;background:rgba(15,15,35,.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:12px;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,.3);pointer-events:none;opacity:0;transition:opacity .2s;z-index:200}.moon-detail-card.visible{opacity:1}.moon-detail-card .moon-name{font-size:14px;font-weight:600;background:linear-gradient(135deg,#f093fb,#667eea);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}.moon-detail-card .moon-stat{display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-bottom:1px solid rgba(255,255,255,.08)}.moon-detail-card .moon-stat:last-of-type{border-bottom:none}.moon-detail-card .moon-stat-label{color:rgba(255,255,255,.5)}.moon-detail-card .moon-stat-value{color:#fff}.moon-detail-card .moon-fun-fact{margin-top:8px;padding:8px;background:rgba(102,126,234,.15);border-radius:6px;font-size:10px;color:rgba(255,255,255,.9);line-height:1.4}.light-mode .moon-detail-card{background:rgba(15,15,35,.6);border-color:rgba(118,75,162,.3)}</style><style id="detail-view-styles">.detail-view-container{position:absolute;top:0;left:0;width:100%;height:100%;display:none;background:#0a0a19}.detail-view-container.active{display:flex}.detail-planet-area{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}.detail-planet-canvas{position:absolute;top:0;left:0}.detail-sidebar{width:300px;background:rgba(15,15,35,.95);border-left:1px solid rgba(138,43,226,.3);padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:15px}.detail-sidebar .planet-detail-card{position:relative;opacity:1;pointer-events:auto;width:100%;box-sizing:border-box}.back-button{padding:10px 20px;border:none;border-radius:15px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;cursor:pointer;font-size:13px;transition:.3s;margin-bottom:10px}.back-button:hover{transform:scale(1.05);box-shadow:0 0 15px rgba(102,126,234,.5)}.moon-speed-control{background:rgba(255,255,255,.1);padding:12px;border-radius:10px;margin-top:10px}.moon-speed-control label{color:#b794f6;font-size:12px;display:block;margin-bottom:8px}.moon-speed-control input[type="range"]{width:100%;accent-color:#f093fb}.moon-detail-card{position:absolute;width:200px;background:rgba(15,15,35,.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:12px;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,.3);pointer-events:none;opacity:0;transition:opacity .2s;z-index:200}.moon-detail-card.visible{opacity:1}.moon-detail-card .moon-name{font-size:14px;font-weight:600;background:linear-gradient(135deg,#f093fb,#667eea);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}.moon-detail-card .moon-stat{display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-bottom:1px solid rgba(255,255,255,.08)}.moon-detail-card .moon-stat:last-of-type{border-bottom:none}.moon-detail-card .moon-stat-label{color:rgba(255,255,255,.5)}.moon-detail-card .moon-stat-value{color:#fff}.moon-detail-card .moon-fun-fact{margin-top:8px;padding:8px;background:rgba(102,126,234,.15);border-radius:6px;font-size:10px;color:rgba(255,255,255,.9);line-height:1.4}.light-mode .detail-view-container{background:#0a0a19}.light-mode .detail-sidebar{background:rgba(15,15,35,.95)}</style>
+<script id="planet-details" type="application/json" data-locked="true">{"sun":{"name":"The Sun","type":"G-type main-sequence star","diameter":"1,392,700 km","surfaceTemp":"5,500°C","funFact":"Contains 99.86% of the Solar System's mass and could fit 1.3 million Earths inside it."},"planets":{"mercury":{"name":"Mercury","color":"#b5b5b5","type":"Terrestrial","diameter":"4,879 km","distance":"57.9 million km","orbitalPeriod":"88 Earth days","dayLength":"59 Earth days","surfaceTemp":"-180°C to 430°C","moons":0,"funFact":"Despite being closest to the Sun, Mercury isn't the hottest planet. Its lack of atmosphere means heat escapes quickly at night."},"venus":{"name":"Venus","color":"#e6c87a","type":"Terrestrial","diameter":"12,104 km","distance":"108.2 million km","orbitalPeriod":"225 Earth days","dayLength":"243 Earth days","surfaceTemp":"465°C","moons":0,"funFact":"Venus rotates backwards compared to other planets, so the Sun rises in the west and sets in the east."},"earth":{"name":"Earth","color":"#6b93d6","type":"Terrestrial","diameter":"12,742 km","distance":"149.6 million km","orbitalPeriod":"365.25 days","dayLength":"24 hours","surfaceTemp":"-89°C to 57°C","moons":1,"funFact":"Earth is the only planet not named after a Greek or Roman god. Its name comes from Old English meaning 'ground'.","moonData":{"luna":{"name":"Luna (The Moon)","diameter":"3,474 km","distance":"384,400 km","distanceKm":384400,"orbitalPeriod":"27.3 days","funFact":"The Moon is slowly drifting away from Earth at about 3.8 cm per year."}}},"mars":{"name":"Mars","color":"#c1440e","type":"Terrestrial","diameter":"6,779 km","distance":"227.9 million km","orbitalPeriod":"687 Earth days","dayLength":"24.6 hours","surfaceTemp":"-125°C to 20°C","moons":2,"funFact":"Mars has the largest volcano in the solar system, Olympus Mons, which is nearly 3 times the height of Mount Everest.","moonData":{"phobos":{"name":"Phobos","diameter":"22.4 km","distance":"9,376 km","distanceKm":9376,"orbitalPeriod":"7.7 hours","funFact":"Phobos orbits Mars faster than Mars rotates, so it rises in the west and sets in the east."},"deimos":{"name":"Deimos","diameter":"12.4 km","distance":"23,463 km","distanceKm":23463,"orbitalPeriod":"30.3 hours","funFact":"Deimos is one of the smallest moons in the solar system and may be a captured asteroid."}}},"jupiter":{"name":"Jupiter","color":"#d4a574","type":"Gas Giant","diameter":"139,820 km","distance":"778.5 million km","orbitalPeriod":"11.86 Earth years","dayLength":"9.9 hours","surfaceTemp":"-110°C","moons":95,"funFact":"Jupiter's Great Red Spot is a storm that has been raging for at least 400 years and is larger than Earth.","moonData":{"io":{"name":"Io","diameter":"3,643 km","distance":"421,700 km","distanceKm":421700,"orbitalPeriod":"1.77 days","funFact":"Io is the most volcanically active body in the solar system with over 400 active volcanoes."},"europa":{"name":"Europa","diameter":"3,122 km","distance":"671,034 km","distanceKm":671034,"orbitalPeriod":"3.55 days","funFact":"Europa likely has a subsurface ocean containing more water than all of Earth's oceans combined."},"ganymede":{"name":"Ganymede","diameter":"5,268 km","distance":"1,070,400 km","distanceKm":1070400,"orbitalPeriod":"7.15 days","funFact":"Ganymede is the largest moon in the solar system, even bigger than the planet Mercury."},"callisto":{"name":"Callisto","diameter":"4,821 km","distance":"1,882,700 km","distanceKm":1882700,"orbitalPeriod":"16.69 days","funFact":"Callisto has the oldest and most heavily cratered surface in the solar system."}}},"saturn":{"name":"Saturn","color":"#f4d59e","type":"Gas Giant","diameter":"116,460 km","distance":"1.43 billion km","orbitalPeriod":"29.46 Earth years","dayLength":"10.7 hours","surfaceTemp":"-140°C","moons":146,"funFact":"Saturn's density is so low that it would float if you could find a bathtub big enough to hold it.","moonData":{"mimas":{"name":"Mimas","diameter":"396 km","distance":"185,520 km","distanceKm":185520,"orbitalPeriod":"0.94 days","funFact":"Mimas has a giant crater that makes it look like the Death Star from Star Wars."},"enceladus":{"name":"Enceladus","diameter":"504 km","distance":"238,020 km","distanceKm":238020,"orbitalPeriod":"1.37 days","funFact":"Enceladus shoots geysers of water ice into space, suggesting a subsurface ocean."},"tethys":{"name":"Tethys","diameter":"1,062 km","distance":"294,619 km","distanceKm":294619,"orbitalPeriod":"1.89 days","funFact":"Tethys has a massive canyon called Ithaca Chasma that stretches 2,000 km across its surface."},"dione":{"name":"Dione","diameter":"1,123 km","distance":"377,396 km","distanceKm":377396,"orbitalPeriod":"2.74 days","funFact":"Dione has wispy ice cliffs and may have a subsurface ocean beneath its icy crust."},"rhea":{"name":"Rhea","diameter":"1,527 km","distance":"527,040 km","distanceKm":527040,"orbitalPeriod":"4.52 days","funFact":"Rhea may have its own faint ring system, which would make it the only moon known to have rings."},"titan":{"name":"Titan","diameter":"5,150 km","distance":"1,221,870 km","distanceKm":1221870,"orbitalPeriod":"15.95 days","funFact":"Titan is the only moon with a dense atmosphere and has lakes of liquid methane on its surface."},"iapetus":{"name":"Iapetus","diameter":"1,469 km","distance":"3,560,820 km","distanceKm":3560820,"orbitalPeriod":"79.32 days","funFact":"Iapetus has one hemisphere as dark as coal and the other as bright as snow, giving it a striking two-toned appearance."}}},"uranus":{"name":"Uranus","color":"#d1e7e7","type":"Ice Giant","diameter":"50,724 km","distance":"2.87 billion km","orbitalPeriod":"84.01 Earth years","dayLength":"17.2 hours","surfaceTemp":"-195°C","moons":28,"funFact":"Uranus rotates on its side with an axial tilt of 98°, possibly due to a collision with an Earth-sized object.","moonData":{"miranda":{"name":"Miranda","diameter":"472 km","distance":"129,390 km","distanceKm":129390,"orbitalPeriod":"1.41 days","funFact":"Miranda has the tallest known cliff in the solar system, Verona Rupes, at 20 km high."},"ariel":{"name":"Ariel","diameter":"1,158 km","distance":"191,020 km","distanceKm":191020,"orbitalPeriod":"2.52 days","funFact":"Ariel is the brightest of Uranus's moons and has extensive canyon systems."},"umbriel":{"name":"Umbriel","diameter":"1,169 km","distance":"266,000 km","distanceKm":266000,"orbitalPeriod":"4.14 days","funFact":"Umbriel is the darkest of Uranus's major moons, with a mysterious bright ring on its surface called Wunda crater."},"titania":{"name":"Titania","diameter":"1,578 km","distance":"435,910 km","distanceKm":435910,"orbitalPeriod":"8.71 days","funFact":"Titania is the largest moon of Uranus and may have a subsurface ocean."},"oberon":{"name":"Oberon","diameter":"1,523 km","distance":"583,520 km","distanceKm":583520,"orbitalPeriod":"13.46 days","funFact":"Oberon has a mountain that rises about 6 km above the surrounding terrain."}}},"neptune":{"name":"Neptune","color":"#5b5ddf","type":"Ice Giant","diameter":"49,244 km","distance":"4.5 billion km","orbitalPeriod":"164.8 Earth years","dayLength":"16.1 hours","surfaceTemp":"-200°C","moons":16,"funFact":"Neptune has the strongest winds in the solar system, reaching speeds of 2,100 km/h.","moonData":{"triton":{"name":"Triton","diameter":"2,707 km","distance":"354,760 km","distanceKm":354760,"orbitalPeriod":"5.88 days (retrograde)","funFact":"Triton orbits Neptune backwards and is slowly spiraling inward, destined to be torn apart in about 3.6 billion years."},"proteus":{"name":"Proteus","diameter":"420 km","distance":"117,647 km","distanceKm":117647,"orbitalPeriod":"1.12 days","funFact":"Proteus is Neptune's second largest moon and is irregularly shaped — it's about as large as an object can be without being pulled into a sphere by its own gravity."},"nereid":{"name":"Nereid","diameter":"340 km","distance":"5,513,400 km","distanceKm":5513400,"orbitalPeriod":"360.14 days","funFact":"Nereid has one of the most eccentric orbits of any known moon in the solar system."}}},"pluto":{"name":"Pluto","color":"#a89f91","type":"Dwarf Planet","diameter":"2,377 km","distance":"5.9 billion km","orbitalPeriod":"248 Earth years","dayLength":"6.4 Earth days","surfaceTemp":"-230°C","moons":5,"funFact":"Pluto has a heart-shaped glacier called Tombaugh Regio that's larger than Texas.","moonData":{"charon":{"name":"Charon","diameter":"1,212 km","distance":"19,571 km","distanceKm":19571,"orbitalPeriod":"6.4 days","funFact":"Charon is so large relative to Pluto that they orbit a point in space between them, making them a 'double dwarf planet'."},"styx":{"name":"Styx","diameter":"16 km","distance":"42,656 km","distanceKm":42656,"orbitalPeriod":"20.16 days","funFact":"Styx is the smallest and last-discovered moon of Pluto, found in 2012 by the Hubble Space Telescope."},"nix":{"name":"Nix","diameter":"50 km","distance":"48,694 km","distanceKm":48694,"orbitalPeriod":"24.85 days","funFact":"Nix rotates chaotically due to the gravitational influence of Pluto and Charon."},"kerberos":{"name":"Kerberos","diameter":"19 km","distance":"57,783 km","distanceKm":57783,"orbitalPeriod":"32.17 days","funFact":"Kerberos is surprisingly small and dark, defying predictions that it would be large and bright."},"hydra":{"name":"Hydra","diameter":"51 km","distance":"64,738 km","distanceKm":64738,"orbitalPeriod":"38.2 days","funFact":"Hydra is shaped like a potato and tumbles unpredictably as it orbits."}}}}}</script>
+<style id="markdown-answer-styles">
+#solarAnswer p,
+#solarAnswer ul,
+#solarAnswer ol,
+#solarAnswer li,
+#planetAnswerBox p,
+#planetAnswerBox ul,
+#planetAnswerBox ol,
+#planetAnswerBox li {
+  margin: 0 0 8px 0;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+#solarAnswer p:last-child,
+#planetAnswerBox p:last-child {
+  margin-bottom: 0;
+}
+#solarAnswer ul,
+#solarAnswer ol,
+#planetAnswerBox ul,
+#planetAnswerBox ol {
+  padding-left: 18px;
+}
+#solarAnswer code,
+#planetAnswerBox code {
+  background: rgba(102, 126, 234, 0.2);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+#solarAnswer strong,
+#planetAnswerBox strong {
+  color: #f093fb;
+}
+</style></head>
+<body>
+    <div class="chat-panel" data-locked="true">
+        <div class="chat-header" data-locked="true">SynthOS</div>
+        <div class="chat-messages" id="chatMessages" data-locked="true">
+            <div class="chat-message"><p><strong>SynthOS:</strong> Welcome to the <strong>Solar Explorer</strong></p>
+<p><strong>Main View Controls:</strong></p>
+<ul>
+<li><strong>Hover</strong> over any planet to see quick facts</li>
+<li><strong>Click</strong> a planet to enter its detail view with moons</li>
+<li>Use the <strong>speed slider</strong> (top-left) to control time</li>
+<li>Toggle <strong>orbits, labels, and asteroids</strong> with the bottom toolbar</li>
+</ul>
+<p><strong>Detail View:</strong></p>
+<ul>
+<li>Watch moons orbit realistically around the planet</li>
+<li><strong>Hover</strong> over moons for info, <strong>click</strong> to ask AI about them</li>
+<li>Use the <strong>moon speed slider</strong> to control orbital animation</li>
+<li>Ask questions in the sidebar input box</li>
+</ul>
+<p><strong>Solar Explorer Panel</strong> (top-right): Ask any question about the solar system!</p>
+<p>Try clicking on Jupiter or Saturn to see their impressive moon systems! 🪐</p></div>
+        </div>
+        <div class="link-group" data-locked="true">
+            <a href="#" id="saveLink" data-locked="true">Save</a>
+            <a href="/pages" id="pagesLink" data-locked="true">Pages</a>
+            <a href="#" id="resetLink" data-locked="true">Reset</a>
+        </div>
+        <form action="/" method="POST" id="chatForm" data-locked="true">
+            <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message..." data-locked="true">
+            <button type="submit" class="chat-submit" data-locked="true">Send</button>
+        </form>
+    </div>
+    <div class="viewer-panel full-viewer" id="viewerPanel" style="background: #0a0a19;">
+        <div id="solarSystem"><div id="planetDetailCard" class="planet-detail-card"><div class="planet-header">
+    <div class="planet-icon"></div>
+    <div class="planet-name"></div>
+  </div>
+  <div class="stat-row"><span class="stat-label">Type</span><span class="stat-value" data-field="type"></span></div>
+  <div class="stat-row"><span class="stat-label">Diameter</span><span class="stat-value" data-field="diameter"></span></div>
+  <div class="stat-row"><span class="stat-label">Moons</span><span class="stat-value" data-field="moons"></span></div>
+  <div class="fun-fact">
+    <span class="fun-fact-label">Fun Fact</span>
+    <span data-field="funFact"></span>
+  </div>
+  <div class="question-section">
+    <input type="text" class="question-input" placeholder="Ask a question...">
+    <div class="ai-answer"></div>
+  </div></div><div id="detailViewContainer" class="detail-view-container">
+  <div class="detail-planet-area">
+    <canvas id="detailCanvas" class="detail-planet-canvas"></canvas>
+    <div id="moonDetailCard" class="moon-detail-card">
+      <div class="moon-name"></div>
+      <div class="moon-stat"><span class="moon-stat-label">Diameter</span><span class="moon-stat-value" data-field="diameter"></span></div>
+      <div class="moon-stat"><span class="moon-stat-label">Distance</span><span class="moon-stat-value" data-field="distance"></span></div>
+      <div class="moon-stat"><span class="moon-stat-label">Orbital Period</span><span class="moon-stat-value" data-field="period"></span></div>
+      <div class="moon-fun-fact"></div>
+      <div class="moon-click-hint" style="margin-top: 8px; font-size: 10px; color: #f093fb; font-style: italic;"></div>
+    </div>
+  <div id="moonSpeedControl" class="moon-speed-control" style="display: none; position: absolute; top: 20px; left: 20px; z-index: 100; background: rgba(15, 15, 35, 0.6); padding: 15px 20px; border-radius: 15px; border: 1px solid rgba(138, 43, 226, 0.3);">
+      <label style="color: #b794f6; font-size: 13px; display: block; margin-bottom: 8px;">Moon Orbit Speed: <span id="moonSpeedValue">1x</span></label>
+      <input type="range" id="moonSpeedSlider" min="0" max="20" step="0.5" value="1" style="width: 150px; accent-color: #f093fb;">
+    </div></div>
+  <div class="detail-sidebar" id="detailSidebar" style="width: 340px; min-width: 340px; background: rgba(15, 15, 35, 0.95); border-left: 1px solid rgba(138, 43, 226, 0.3); padding: 20px; display: flex; flex-direction: column; gap: 12px; overflow: hidden;">
+    <button class="back-button" id="backToSystem">← Back to System</button>
+    <div class="detail-planet-header" style="display: flex; align-items: center; gap: 12px;">
+      <div id="detailPlanetIcon" style="width: 40px; height: 40px; border-radius: 50%; box-shadow: 0 0 12px rgba(255, 200, 100, 0.3); flex-shrink: 0;"></div>
+      <div id="detailPlanetName" style="font-size: 20px; font-weight: 600; background: linear-gradient(135deg, #f093fb, #667eea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></div>
+    </div>
+    <div class="detail-stats" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+      <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08);"><span style="color: rgba(255,255,255,0.5);">Type</span><span id="detailType" style="color: #fff; font-weight: 500;"></span></div>
+      <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08);"><span style="color: rgba(255,255,255,0.5);">Diameter</span><span id="detailDiameter" style="color: #fff; font-weight: 500;"></span></div>
+      <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08);"><span style="color: rgba(255,255,255,0.5);">Distance from Sun</span><span id="detailDistance" style="color: #fff; font-weight: 500;"></span></div>
+      <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08);"><span style="color: rgba(255,255,255,0.5);">Orbital Period</span><span id="detailOrbitalPeriod" style="color: #fff; font-weight: 500;"></span></div>
+      <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08);"><span style="color: rgba(255,255,255,0.5);">Day Length</span><span id="detailDayLength" style="color: #fff; font-weight: 500;"></span></div>
+      <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08);"><span style="color: rgba(255,255,255,0.5);">Surface Temp</span><span id="detailSurfaceTemp" style="color: #fff; font-weight: 500;"></span></div>
+      <div style="display: flex; justify-content: space-between; padding: 6px 0;"><span style="color: rgba(255,255,255,0.5);">Moons</span><span id="detailMoons" style="color: #fff; font-weight: 500;"></span></div>
+    </div>
+    <input type="text" id="planetQuestionInput" placeholder="Ask about this planet..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(138, 43, 226, 0.3); background: rgba(255, 255, 255, 0.1); color: #b794f6; font-size: 13px; box-sizing: border-box; flex-shrink: 0;">
+    <div id="planetAnswerBox" style="flex: 1; min-height: 100px; overflow-y: auto; padding: 10px; background: rgba(0, 0, 0, 0.2); border-radius: 8px; font-size: 12px; line-height: 1.5; color: #b794f6;"></div>
+  </div>
+</div></div>
+        <div class="speed-control">
+            <label>Simulation Speed: <span id="speedValue">1x</span></label>
+            <input type="range" id="speedSlider" min="0.0" max="10" step="0.1" value="1">
+        </div>
+        <div class="info-panel" id="infoPanel" style="width: 336px; height: 384px; overflow: hidden; background: rgba(15, 15, 35, 0.6); display: flex; flex-direction: column; padding-bottom: 10px; box-sizing: border-box;"><h3 style="margin: 0 0 10px 0; flex-shrink: 0;">Solar Explorer</h3>
+<input type="text" id="solarQuestion" placeholder="Ask about the solar system..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(138, 43, 226, 0.3); background: rgba(255, 255, 255, 0.1); color: #b794f6; font-size: 13px; box-sizing: border-box; margin-bottom: 10px; flex-shrink: 0;">
+
+<div id="solarAnswer" style="flex: 1; min-height: 0; overflow-y: auto; padding: 10px; background: rgba(0, 0, 0, 0.2); border-radius: 8px; font-size: 12px; line-height: 1.5; color: #b794f6;"></div></div>
+        <div class="controls">
+            <button id="toggleOrbits" class="active">Show Orbits</button>
+            <button id="toggleLabels" class="active">Show Labels</button>
+            <button id="toggleAsteroids">Show Asteroids</button>
+            <button id="resetView">Reset View</button>
+        </div>
+        <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
+    </div>
+    <div id="instructions" style="display: none;" data-locked="true"></div>
+    <div id="thoughts" style="display: none;" data-locked="true"></div>
+    <script id="solar-sim">
+const container = document.getElementById("solarSystem");
+const canvas = document.createElement("canvas");
+const ctx = canvas.getContext("2d");
+let width, height, centerX, centerY;
+container.appendChild(canvas);
+
+let simulationSpeed = 1;
+let timeDirection = 1;
+let showOrbits = true;
+let showLabels = true;
+let showAsteroids = false;
+let time = 0;
+
+const planetDetailsData = JSON.parse(document.getElementById('planet-details').textContent);
+
+const planets = [
+  { name: "Mercury", key: "mercury", color: "#b5b5b5", size: 4, distance: 50, period: 0.24, eccentricity: 0.206 },
+  { name: "Venus", key: "venus", color: "#e6c87a", size: 6, distance: 75, period: 0.62, eccentricity: 0.007 },
+  { name: "Earth", key: "earth", color: "#6b93d6", size: 6, distance: 100, period: 1, eccentricity: 0.017 },
+  { name: "Mars", key: "mars", color: "#c1440e", size: 5, distance: 130, period: 1.88, eccentricity: 0.093 },
+  { name: "Jupiter", key: "jupiter", color: "#d4a574", size: 18, distance: 200, period: 11.86, eccentricity: 0.049 },
+  { name: "Saturn", key: "saturn", color: "#f4d59e", size: 15, distance: 270, period: 29.46, eccentricity: 0.057 },
+  { name: "Uranus", key: "uranus", color: "#d1e7e7", size: 10, distance: 330, period: 84.01, eccentricity: 0.046 },
+  { name: "Neptune", key: "neptune", color: "#5b5ddf", size: 10, distance: 380, period: 164.8, eccentricity: 0.01 },
+  { name: "Pluto", key: "pluto", color: "#a89f91", size: 3, distance: 420, period: 248, eccentricity: 0.249 }
+];
+
+let asteroids = [];
+let planetPositions = [];
+let hoveredPlanet = null;
+let inDetailView = false;
+window.detailPlanet = null;
+let detailMoons = [];
+let detailMoonPositions = [];
+let detailTime = 0;
+let moonSpeed = 1;
+let hoveredMoon = null;
+let detailAnimId = null;
+
+function generateAsteroids() {
+  asteroids = [];
+  for (let i = 0; i < 500; i++) {
+    asteroids.push({
+      distance: 155 + 35 * Math.random(),
+      angle: Math.random() * Math.PI * 2,
+      speed: 5e-4 + 0.001 * Math.random(),
+      size: 0.5 + 1.5 * Math.random()
+    });
+  }
+}
+
+function resize() {
+  width = container.clientWidth;
+  height = container.clientHeight;
+  canvas.width = width;
+  canvas.height = height;
+  centerX = width / 2;
+  centerY = height / 2;
+}
+
+function getOrbitalPosition(planet, t) {
+  const meanAnomaly = (2 * Math.PI) / (365 * planet.period) * t * simulationSpeed;
+  const e = planet.eccentricity;
+  const trueAnomaly = meanAnomaly + 2 * e * Math.sin(meanAnomaly);
+  const r = planet.distance * (1 - e * e) / (1 + e * Math.cos(trueAnomaly));
+  return {
+    x: centerX + r * Math.cos(trueAnomaly),
+    y: centerY + r * Math.sin(trueAnomaly),
+    angle: trueAnomaly
+  };
+}
+
+function drawOrbit(planet) {
+  ctx.beginPath();
+  ctx.strokeStyle = "rgba(138, 43, 226, 0.2)";
+  ctx.lineWidth = 1;
+  const a = planet.distance;
+  const e = planet.eccentricity;
+  const b = a * Math.sqrt(1 - e * e);
+  const c = a * e;
+  ctx.ellipse(centerX + c, centerY, a, b, 0, 0, 2 * Math.PI);
+  ctx.stroke();
+}
+
+function drawSun() {
+  const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 60);
+  gradient.addColorStop(0, "rgba(255, 200, 50, 1)");
+  gradient.addColorStop(0.3, "rgba(255, 150, 0, 0.8)");
+  gradient.addColorStop(0.6, "rgba(255, 100, 0, 0.3)");
+  gradient.addColorStop(1, "rgba(255, 50, 0, 0)");
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 60, 0, 2 * Math.PI);
+  ctx.fillStyle = gradient;
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 25, 0, 2 * Math.PI);
+  ctx.fillStyle = "#fff5c0";
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 30, 0, 2 * Math.PI);
+  ctx.fillStyle = "rgba(255, 220, 100, 0.5)";
+  ctx.fill();
+}
+
+function drawSaturnRings(x, y, size, angle) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(0.4);
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 2.2 * size, 0.5 * size, 0, 0, 2 * Math.PI);
+  ctx.strokeStyle = "rgba(210, 180, 140, 0.6)";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 1.8 * size, 0.4 * size, 0, 0, 2 * Math.PI);
+  ctx.strokeStyle = "rgba(180, 150, 120, 0.4)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawPlanet(planet, pos) {
+  ctx.beginPath();
+  ctx.arc(pos.x + 2, pos.y + 2, planet.size, 0, 2 * Math.PI);
+  ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+  ctx.fill();
+  const gradient = ctx.createRadialGradient(
+    pos.x - 0.3 * planet.size, pos.y - 0.3 * planet.size, 0,
+    pos.x, pos.y, planet.size
+  );
+  gradient.addColorStop(0, lightenColor(planet.color, 30));
+  gradient.addColorStop(1, planet.color);
+  ctx.beginPath();
+  ctx.arc(pos.x, pos.y, planet.size, 0, 2 * Math.PI);
+  ctx.fillStyle = gradient;
+  ctx.fill();
+  if (planet.name === "Saturn") {
+    drawSaturnRings(pos.x, pos.y, planet.size, pos.angle);
+  }
+  if (showLabels) {
+    ctx.fillStyle = "#e0d0f0";
+    ctx.font = "bold 11px Segoe UI, sans-serif";
+    ctx.textAlign = "center";
+    ctx.shadowColor = "rgba(240, 147, 251, 0.6)";
+    ctx.shadowBlur = 4;
+    ctx.fillText(planet.name, pos.x, pos.y - planet.size - 8);
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+  }
+}
+
+function drawAsteroidBelt() {
+  ctx.fillStyle = "rgba(150, 150, 150, 0.6)";
+  asteroids.forEach(function(asteroid) {
+    asteroid.angle += asteroid.speed * simulationSpeed * timeDirection;
+    const x = centerX + asteroid.distance * Math.cos(asteroid.angle);
+    const y = centerY + asteroid.distance * Math.sin(asteroid.angle);
+    ctx.beginPath();
+    ctx.arc(x, y, asteroid.size, 0, 2 * Math.PI);
+    ctx.fill();
+  });
+}
+
+function lightenColor(color, percent) {
+  const num = parseInt(color.replace("#", ""), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = (num >> 16) + amt;
+  const G = (num >> 8 & 255) + amt;
+  const B = (num & 255) + amt;
+  return "#" + (
+    16777216 +
+    65536 * (R < 255 ? (R < 1 ? 0 : R) : 255) +
+    256 * (G < 255 ? (G < 1 ? 0 : G) : 255) +
+    (B < 255 ? (B < 1 ? 0 : B) : 255)
+  ).toString(16).slice(1);
+}
+
+generateAsteroids();
+resize();
+window.addEventListener("resize", function() {
+  resize();
+  if (inDetailView) {
+    resizeDetailCanvas();
+  }
+});
+
+let stars = [];
+
+function generateStars() {
+  stars = [];
+  for (let i = 0; i < 200; i++) {
+    stars.push({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      size: 1.5 * Math.random(),
+      brightness: 0.3 + 0.7 * Math.random()
+    });
+  }
+}
+
+function drawStars() {
+  stars.forEach(function(star) {
+    const twinkle = 0.8 + 0.2 * Math.sin(0.01 * time + star.x);
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, star.size, 0, 2 * Math.PI);
+    ctx.fillStyle = "rgba(255, 255, 255, " + (star.brightness * twinkle) + ")";
+    ctx.fill();
+  });
+}
+
+function animate() {
+  ctx.fillStyle = "rgba(10, 10, 25, 1)";
+  ctx.fillRect(0, 0, width, height);
+  drawStars();
+  if (showOrbits) {
+    planets.forEach(function(planet) { drawOrbit(planet); });
+  }
+  if (showAsteroids) {
+    drawAsteroidBelt();
+  }
+  drawSun();
+  planetPositions = [];
+  planets.forEach(function(planet) {
+    const pos = getOrbitalPosition(planet, time);
+    planetPositions.push({ planet: planet, x: pos.x, y: pos.y, size: planet.size });
+    drawPlanet(planet, pos);
+  });
+
+  if (hoveredPlanet) {
+    const hp = planetPositions.find(p => p.planet.name === hoveredPlanet.name);
+    if (hp) {
+      ctx.beginPath();
+      ctx.arc(hp.x, hp.y, hp.size + 4, 0, 2 * Math.PI);
+      ctx.strokeStyle = "rgba(240, 147, 251, 0.6)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+  }
+
+  time += timeDirection;
+  if (!inDetailView) {
+    requestAnimationFrame(animate);
+  }
+}
+
+generateStars();
+
+document.getElementById("speedSlider").addEventListener("input", function(e) {
+  simulationSpeed = parseFloat(e.target.value);
+  document.getElementById("speedValue").textContent = simulationSpeed.toFixed(1) + "x";
+});
+
+document.getElementById("toggleOrbits").addEventListener("click", function(e) {
+  showOrbits = !showOrbits;
+  e.target.classList.toggle("active");
+});
+
+document.getElementById("toggleLabels").addEventListener("click", function(e) {
+  showLabels = !showLabels;
+  e.target.classList.toggle("active");
+});
+
+document.getElementById("toggleAsteroids").addEventListener("click", function(e) {
+  showAsteroids = !showAsteroids;
+  e.target.classList.toggle("active");
+});
+
+document.getElementById("resetView").addEventListener("click", function() {
+  time = 0;
+  simulationSpeed = 1;
+  timeDirection = 1;
+  document.getElementById("speedSlider").value = 1;
+  document.getElementById("speedValue").textContent = "1x";
+});
+
+/* Detail card hover logic */
+const detailCard = document.getElementById('planetDetailCard');
+
+function getPlanetAtPosition(mx, my) {
+  for (let i = planetPositions.length - 1; i >= 0; i--) {
+    const pp = planetPositions[i];
+    const dx = mx - pp.x;
+    const dy = my - pp.y;
+    const hitRadius = Math.max(pp.size + 6, 12);
+    if (dx * dx + dy * dy <= hitRadius * hitRadius) {
+      return pp;
+    }
+  }
+  return null;
+}
+
+function showDetailCard(pp, mx, my) {
+  const planet = pp.planet;
+  const data = planetDetailsData.planets[planet.key];
+  if (!data) return;
+
+  detailCard.querySelector('.planet-icon').style.background = planet.color;
+  detailCard.querySelector('.planet-name').textContent = data.name;
+  detailCard.querySelector('[data-field="type"]').textContent = data.type;
+  detailCard.querySelector('[data-field="diameter"]').textContent = data.diameter;
+  detailCard.querySelector('[data-field="moons"]').textContent = data.moons;
+  detailCard.querySelector('[data-field="funFact"]').textContent = data.funFact;
+
+  detailCard.classList.add('mode-funfact');
+  detailCard.classList.remove('mode-question');
+
+  let cardX = pp.x + pp.size + 15;
+  let cardY = pp.y - 60;
+
+  const cardWidth = 260;
+  const cardHeight = 280;
+  const containerRect = container.getBoundingClientRect();
+
+  if (cardX + cardWidth > containerRect.width - 20) {
+    cardX = pp.x - pp.size - cardWidth - 15;
+  }
+  if (cardY < 10) cardY = 10;
+  if (cardY + cardHeight > containerRect.height - 10) {
+    cardY = containerRect.height - cardHeight - 10;
+  }
+
+  detailCard.style.left = cardX + 'px';
+  detailCard.style.top = cardY + 'px';
+  detailCard.classList.add('visible');
+}
+
+function hideDetailCard() {
+  detailCard.classList.remove('visible');
+}
+
+canvas.addEventListener("mousemove", function(e) {
+  if (inDetailView) return;
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+
+  const pp = getPlanetAtPosition(mx, my);
+  if (pp) {
+    hoveredPlanet = pp.planet;
+    canvas.style.cursor = 'pointer';
+    showDetailCard(pp, mx, my);
+  } else {
+    hoveredPlanet = null;
+    canvas.style.cursor = 'default';
+    hideDetailCard();
+  }
+});
+
+canvas.addEventListener("mouseleave", function() {
+  if (inDetailView) return;
+  hoveredPlanet = null;
+  canvas.style.cursor = 'default';
+  hideDetailCard();
+});
+
+/* ===== DETAIL VIEW ===== */
+
+const detailViewContainer = document.getElementById('detailViewContainer');
+const detailCanvas = document.getElementById('detailCanvas');
+const detailCtx = detailCanvas.getContext('2d');
+const moonDetailCard = document.getElementById('moonDetailCard');
+const moonSpeedControl = document.getElementById('moonSpeedControl');
+const moonSpeedSlider = document.getElementById('moonSpeedSlider');
+const moonSpeedValue = document.getElementById('moonSpeedValue');
+const backToSystem = document.getElementById('backToSystem');
+
+let detailStars = [];
+let detailWidth = 0;
+let detailHeight = 0;
+
+function generateDetailStars(w, h) {
+  detailStars = [];
+  for (let i = 0; i < 150; i++) {
+    detailStars.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      size: 1.5 * Math.random(),
+      brightness: 0.3 + 0.7 * Math.random()
+    });
+  }
+}
+
+function resizeDetailCanvas() {
+  const area = detailViewContainer.querySelector('.detail-planet-area');
+  if (!area) return;
+  detailWidth = area.clientWidth;
+  detailHeight = area.clientHeight;
+  detailCanvas.width = detailWidth;
+  detailCanvas.height = detailHeight;
+  generateDetailStars(detailWidth, detailHeight);
+}
+
+// Moon color palette
+const moonColors = [
+  '#c8c8c8', '#a0a0b0', '#d4c4a8', '#b8a898',
+  '#e0d8c8', '#9898a8', '#c0b8a0', '#a8b0b8',
+  '#d0c0b0', '#b0a8c0', '#c8c0b8', '#a8a0a0'
+];
+
+function openDetailView(planetObj) {
+  inDetailView = true;
+  window.detailPlanet = planetObj;
+  hideDetailCard();
+  hoveredPlanet = null;
+
+  const data = planetDetailsData.planets[planetObj.key];
+  if (!data) return;
+
+  // Populate sidebar elements directly
+  document.getElementById('detailPlanetIcon').style.background = planetObj.color;
+  document.getElementById('detailPlanetName').textContent = data.name;
+  document.getElementById('detailType').textContent = data.type;
+  document.getElementById('detailDiameter').textContent = data.diameter;
+  document.getElementById('detailDistance').textContent = data.distance || '\u2014';
+  document.getElementById('detailOrbitalPeriod').textContent = data.orbitalPeriod || '\u2014';
+  document.getElementById('detailDayLength').textContent = data.dayLength || '\u2014';
+  document.getElementById('detailSurfaceTemp').textContent = data.surfaceTemp || '\u2014';
+  document.getElementById('detailMoons').textContent = data.moons;
+
+  // Clear the question input and answer box
+  const questionInput = document.getElementById('planetQuestionInput');
+  const answerBox = document.getElementById('planetAnswerBox');
+  if (questionInput) questionInput.value = '';
+  if (answerBox) answerBox.innerHTML = '';
+
+  // Build moon data with actual distances for proportional orbits
+  detailMoons = [];
+  if (data.moonData) {
+    const moonKeys = Object.keys(data.moonData);
+    moonKeys.forEach(function(key, idx) {
+      const md = data.moonData[key];
+      let periodDays = parseFloat(md.orbitalPeriod);
+      if (md.orbitalPeriod.toLowerCase().includes('hour')) {
+        periodDays = parseFloat(md.orbitalPeriod) / 24;
+      }
+      if (isNaN(periodDays)) periodDays = 5;
+
+      // Get actual distance in km for proportional scaling
+      let distanceKm = md.distanceKm || 500000;
+
+      detailMoons.push({
+        key: key,
+        name: md.name,
+        diameter: md.diameter,
+        distanceStr: md.distance,
+        distanceKm: distanceKm,
+        orbitalPeriod: md.orbitalPeriod,
+        funFact: md.funFact,
+        periodDays: periodDays,
+        color: moonColors[idx % moonColors.length],
+        angle: Math.random() * Math.PI * 2,
+        orbitIndex: idx
+      });
+    });
+    
+    // Sort moons by distance for proper layering
+    detailMoons.sort((a, b) => a.distanceKm - b.distanceKm);
+    
+    moonSpeedControl.style.display = 'block';
+  } else {
+    moonSpeedControl.style.display = 'none';
+  }
+
+  // Show detail view
+  detailViewContainer.classList.add('active');
+
+  // Hide main UI elements
+  document.querySelector('.controls').style.display = 'none';
+  document.querySelector('.speed-control').style.display = 'none';
+  document.getElementById('infoPanel').style.display = 'none';
+
+  setTimeout(function() {
+    resizeDetailCanvas();
+    detailTime = 0;
+    moonSpeed = 1;
+    moonSpeedSlider.value = 1;
+    moonSpeedValue.textContent = '1x';
+    animateDetail();
+  }, 50);
+}
+
+function closeDetailView() {
+  inDetailView = false;
+  window.detailPlanet = null;
+  detailMoons = [];
+  detailMoonPositions = [];
+  hoveredMoon = null;
+  moonDetailCard.classList.remove('visible');
+
+  detailViewContainer.classList.remove('active');
+
+  // Show main UI elements
+  document.querySelector('.controls').style.display = 'flex';
+  document.querySelector('.speed-control').style.display = 'block';
+  document.getElementById('infoPanel').style.display = 'block';
+
+  if (detailAnimId) {
+    cancelAnimationFrame(detailAnimId);
+    detailAnimId = null;
+  }
+
+  // Restart main animation
+  animate();
+}
+
+function animateDetail() {
+  if (!inDetailView) return;
+
+  const w = detailCanvas.width;
+  const h = detailCanvas.height;
+  const cx = w / 2;
+  const cy = h / 2;
+
+  // Clear
+  detailCtx.fillStyle = '#0a0a19';
+  detailCtx.fillRect(0, 0, w, h);
+
+  // Stars
+  detailStars.forEach(function(star) {
+    const twinkle = 0.8 + 0.2 * Math.sin(0.01 * detailTime + star.x);
+    detailCtx.beginPath();
+    detailCtx.arc(star.x, star.y, star.size, 0, 2 * Math.PI);
+    detailCtx.fillStyle = 'rgba(255,255,255,' + (star.brightness * twinkle) + ')';
+    detailCtx.fill();
+  });
+
+  // Planet size - make it prominent
+  const planetRadius = Math.min(w, h) * 0.08;
+
+  // Calculate orbit radii using logarithmic scaling for realistic proportions
+  const moonCount = detailMoons.length;
+  const minOrbitRadius = planetRadius + 30;
+  const maxOrbitRadius = Math.min(w, h) * 0.46;
+  
+  // Get min and max distances for scaling
+  let minDist = Infinity, maxDist = 0;
+  detailMoons.forEach(function(moon) {
+    if (moon.distanceKm < minDist) minDist = moon.distanceKm;
+    if (moon.distanceKm > maxDist) maxDist = moon.distanceKm;
+  });
+  
+  // Use logarithmic scaling for better visualization of distant moons
+  const logMin = Math.log(minDist || 1);
+  const logMax = Math.log(maxDist || 1);
+  const logRange = logMax - logMin || 1;
+
+  // Draw planet glow
+  const glowGrad = detailCtx.createRadialGradient(cx, cy, planetRadius * 0.8, cx, cy, planetRadius * 2.5);
+  glowGrad.addColorStop(0, window.detailPlanet.color + '40');
+  glowGrad.addColorStop(1, 'transparent');
+  detailCtx.beginPath();
+  detailCtx.arc(cx, cy, planetRadius * 2.5, 0, 2 * Math.PI);
+  detailCtx.fillStyle = glowGrad;
+  detailCtx.fill();
+
+  // Draw planet
+  const pGrad = detailCtx.createRadialGradient(
+    cx - planetRadius * 0.3, cy - planetRadius * 0.3, 0,
+    cx, cy, planetRadius
+  );
+  pGrad.addColorStop(0, lightenColor(window.detailPlanet.color, 40));
+  pGrad.addColorStop(0.7, window.detailPlanet.color);
+  pGrad.addColorStop(1, lightenColor(window.detailPlanet.color, -20));
+  detailCtx.beginPath();
+  detailCtx.arc(cx, cy, planetRadius, 0, 2 * Math.PI);
+  detailCtx.fillStyle = pGrad;
+  detailCtx.fill();
+
+  // Saturn rings in detail view
+  if (window.detailPlanet.name === 'Saturn') {
+    detailCtx.save();
+    detailCtx.translate(cx, cy);
+    detailCtx.rotate(0.4);
+    detailCtx.beginPath();
+    detailCtx.ellipse(0, 0, planetRadius * 2.0, planetRadius * 0.45, 0, 0, 2 * Math.PI);
+    detailCtx.strokeStyle = 'rgba(210, 180, 140, 0.6)';
+    detailCtx.lineWidth = 6;
+    detailCtx.stroke();
+    detailCtx.beginPath();
+    detailCtx.ellipse(0, 0, planetRadius * 1.7, planetRadius * 0.38, 0, 0, 2 * Math.PI);
+    detailCtx.strokeStyle = 'rgba(180, 150, 120, 0.4)';
+    detailCtx.lineWidth = 4;
+    detailCtx.stroke();
+    detailCtx.beginPath();
+    detailCtx.ellipse(0, 0, planetRadius * 2.2, planetRadius * 0.5, 0, 0, 2 * Math.PI);
+    detailCtx.strokeStyle = 'rgba(190, 160, 130, 0.3)';
+    detailCtx.lineWidth = 3;
+    detailCtx.stroke();
+    detailCtx.restore();
+  }
+
+  // Draw moons with logarithmic distance scaling
+  detailMoonPositions = [];
+
+  detailMoons.forEach(function(moon, idx) {
+    // Calculate orbit radius using logarithmic scaling
+    let orbitRadius;
+    if (moonCount === 1) {
+      orbitRadius = (minOrbitRadius + maxOrbitRadius) / 2;
+    } else {
+      const logDist = Math.log(moon.distanceKm);
+      const normalizedDist = (logDist - logMin) / logRange;
+      orbitRadius = minOrbitRadius + normalizedDist * (maxOrbitRadius - minOrbitRadius);
+    }
+
+    // Draw orbit path
+    detailCtx.beginPath();
+    detailCtx.arc(cx, cy, orbitRadius, 0, 2 * Math.PI);
+    detailCtx.strokeStyle = 'rgba(138, 43, 226, 0.15)';
+    detailCtx.lineWidth = 1;
+    detailCtx.stroke();
+
+    // Calculate moon position
+    const angularSpeed = (2 * Math.PI) / (moon.periodDays * 60) * moonSpeed;
+    moon.angle += angularSpeed;
+
+    const mx = cx + orbitRadius * Math.cos(moon.angle);
+    const my = cy + orbitRadius * Math.sin(moon.angle);
+
+    let moonRadius = 4 + (moonCount > 4 ? 2 : 4) * (1 - idx * 0.05);
+    moonRadius = Math.max(3, Math.min(moonRadius, 8));
+
+    // Draw moon shadow
+    detailCtx.beginPath();
+    detailCtx.arc(mx + 1, my + 1, moonRadius, 0, 2 * Math.PI);
+    detailCtx.fillStyle = 'rgba(0,0,0,0.3)';
+    detailCtx.fill();
+
+    // Draw moon
+    const mGrad = detailCtx.createRadialGradient(
+      mx - moonRadius * 0.3, my - moonRadius * 0.3, 0,
+      mx, my, moonRadius
+    );
+    mGrad.addColorStop(0, lightenColor(moon.color, 30));
+    mGrad.addColorStop(1, moon.color);
+    detailCtx.beginPath();
+    detailCtx.arc(mx, my, moonRadius, 0, 2 * Math.PI);
+    detailCtx.fillStyle = mGrad;
+    detailCtx.fill();
+
+    // Moon label
+    detailCtx.fillStyle = '#d0c0e8';
+    detailCtx.font = '10px Segoe UI, sans-serif';
+    detailCtx.textAlign = 'center';
+    detailCtx.fillText(moon.name.split('(')[0].trim(), mx, my - moonRadius - 6);
+
+    // Hover highlight
+    if (hoveredMoon && hoveredMoon.key === moon.key) {
+      detailCtx.beginPath();
+      detailCtx.arc(mx, my, moonRadius + 3, 0, 2 * Math.PI);
+      detailCtx.strokeStyle = 'rgba(240, 147, 251, 0.7)';
+      detailCtx.lineWidth = 2;
+      detailCtx.stroke();
+    }
+
+    detailMoonPositions.push({
+      moon: moon,
+      x: mx,
+      y: my,
+      radius: moonRadius
+    });
+  });
+
+  // Planet label
+  detailCtx.fillStyle = '#f0e0ff';
+  detailCtx.font = 'bold 16px Segoe UI, sans-serif';
+  detailCtx.textAlign = 'center';
+  detailCtx.shadowColor = 'rgba(240, 147, 251, 0.8)';
+  detailCtx.shadowBlur = 6;
+  detailCtx.fillText(window.detailPlanet.name, cx, cy + planetRadius + 25);
+  detailCtx.shadowColor = 'transparent';
+  detailCtx.shadowBlur = 0;
+
+  // No moons message
+  if (moonCount === 0) {
+    detailCtx.fillStyle = 'rgba(183, 148, 246, 0.6)';
+    detailCtx.font = '14px Segoe UI, sans-serif';
+    detailCtx.textAlign = 'center';
+    detailCtx.fillText('No known moons', cx, cy + planetRadius + 50);
+  }
+
+  detailTime++;
+  detailAnimId = requestAnimationFrame(animateDetail);
+}
+
+function getMoonAtPosition(mx, my) {
+  for (let i = detailMoonPositions.length - 1; i >= 0; i--) {
+    const mp = detailMoonPositions[i];
+    const dx = mx - mp.x;
+    const dy = my - mp.y;
+    const hitRadius = Math.max(mp.radius + 5, 10);
+    if (dx * dx + dy * dy <= hitRadius * hitRadius) {
+      return mp;
+    }
+  }
+  return null;
+}
+
+function showMoonDetailCard(mp, clientX, clientY) {
+  const moon = mp.moon;
+  const moonShortName = moon.name.split('(')[0].trim();
+  moonDetailCard.querySelector('.moon-name').textContent = moon.name;
+  moonDetailCard.querySelector('[data-field="diameter"]').textContent = moon.diameter;
+  moonDetailCard.querySelector('[data-field="distance"]').textContent = moon.distanceStr;
+  moonDetailCard.querySelector('[data-field="period"]').textContent = moon.orbitalPeriod;
+  moonDetailCard.querySelector('.moon-fun-fact').textContent = moon.funFact;
+  moonDetailCard.querySelector('.moon-click-hint').textContent = 'Click ' + moonShortName + ' to learn more';
+
+  const areaRect = detailViewContainer.querySelector('.detail-planet-area').getBoundingClientRect();
+  let cardX = clientX - areaRect.left + 15;
+  let cardY = clientY - areaRect.top - 30;
+
+  const cardW = 220;
+  const cardH = 220;
+  if (cardX + cardW > areaRect.width - 10) cardX = clientX - areaRect.left - cardW - 15;
+  if (cardY < 10) cardY = 10;
+  if (cardY + cardH > areaRect.height - 10) cardY = areaRect.height - cardH - 10;
+
+  moonDetailCard.style.left = cardX + 'px';
+  moonDetailCard.style.top = cardY + 'px';
+  moonDetailCard.classList.add('visible');
+}
+
+detailCanvas.addEventListener('mousemove', function(e) {
+  const rect = detailCanvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+
+  const mp = getMoonAtPosition(mx, my);
+  if (mp) {
+    hoveredMoon = mp.moon;
+    detailCanvas.style.cursor = 'pointer';
+    showMoonDetailCard(mp, e.clientX, e.clientY);
+  } else {
+    hoveredMoon = null;
+    detailCanvas.style.cursor = 'default';
+    moonDetailCard.classList.remove('visible');
+  }
+});
+
+detailCanvas.addEventListener('mouseleave', function() {
+  hoveredMoon = null;
+  detailCanvas.style.cursor = 'default';
+  moonDetailCard.classList.remove('visible');
+});
+
+/* Moon click -> pre-fill question box and auto-ask */
+detailCanvas.addEventListener('click', function(e) {
+  const rect = detailCanvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+
+  const mp = getMoonAtPosition(mx, my);
+  if (mp) {
+    const moonName = mp.moon.name.split('(')[0].trim();
+    const questionInput = document.getElementById('planetQuestionInput');
+    if (questionInput) {
+      questionInput.value = 'tell me about ' + moonName;
+      questionInput.focus();
+      // Trigger the AI question automatically
+      if (typeof window.triggerPlanetQuestion === 'function') {
+        window.triggerPlanetQuestion();
+      }
+    }
+  }
+});
+
+moonSpeedSlider.addEventListener('input', function(e) {
+  moonSpeed = parseFloat(e.target.value);
+  moonSpeedValue.textContent = moonSpeed.toFixed(1) + 'x';
+});
+
+backToSystem.addEventListener('click', function() {
+  closeDetailView();
+});
+
+/* Planet click -> detail view */
+canvas.addEventListener("click", function(e) {
+  if (inDetailView) return;
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const pp = getPlanetAtPosition(mx, my);
+  if (pp) {
+    openDetailView(pp.planet);
+  }
+});
+
+// Listen for viewer panel resize
+const viewerPanel = document.getElementById('viewerPanel');
+if (viewerPanel) {
+  const resizeObserver = new ResizeObserver(function() {
+    if (inDetailView) {
+      resizeDetailCanvas();
+    }
+  });
+  resizeObserver.observe(viewerPanel);
+}
+
+animate();
+</script>
+
+
+<script id="tutorial-links">document.addEventListener('click',function(e){if(e.target.classList.contains('tutorial-link')){e.preventDefault();const message=e.target.getAttribute('data-message');const chatInput=document.getElementById('chatInput');if(chatInput&&message){chatInput.value=message;chatInput.focus()}}});</script>
+<script id="solar-ai-question">
+(function() {
+  const questionInput = document.getElementById('solarQuestion');
+  const answerBox = document.getElementById('solarAnswer');
+  
+  // Conversation history (max 5 pairs)
+  let conversationHistory = [];
+  const MAX_HISTORY = 5;
+
+  function formatHistory() {
+    if (conversationHistory.length === 0) return '';
+    let historyStr = '\n<CONVERSATION_HISTORY>\n';
+    conversationHistory.forEach((pair, i) => {
+      historyStr += `User: ${pair.question}\nAssistant: ${pair.answer}\n\n`;
+    });
+    historyStr += '</CONVERSATION_HISTORY>\n';
+    return historyStr;
+  }
+
+  async function askQuestion() {
+    const question = questionInput.value.trim();
+    if (!question) return;
+
+    questionInput.disabled = true;
+    answerBox.innerHTML = '<em>Thinking...</em>';
+
+    try {
+      const historyContext = formatHistory();
+      const prompt = `You're an expert on the solar system.\n\n<INSTRUCTION>\nYou can return markdown but avoid using # headings.\n</INSTRUCTION>${historyContext}\n<QUESTION>\n${question}`;
+      const result = await synthos.generate.completion({ prompt });
+      answerBox.innerHTML = marked.parse(result.answer);
+      
+      // Add to history
+      conversationHistory.push({ question: question, answer: result.answer });
+      if (conversationHistory.length > MAX_HISTORY) {
+        conversationHistory.shift();
+      }
+    } catch (err) {
+      answerBox.innerHTML = '<span style="color: #ff6b6b;">Error: Could not get answer.</span>';
+    } finally {
+      questionInput.disabled = false;
+      questionInput.value = '';
+      questionInput.focus();
+    }
+  }
+
+  questionInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') askQuestion();
+  });
+})();
+</script><script id="planet-detail-ai-question">
+(function() {
+  const questionInput = document.getElementById('planetQuestionInput');
+  const answerBox = document.getElementById('planetAnswerBox');
+
+  if (!questionInput || !answerBox) return;
+
+  // Conversation history per planet (max 5 pairs)
+  let conversationHistory = [];
+  let currentPlanetKey = null;
+  const MAX_HISTORY = 5;
+
+  function formatHistory() {
+    if (conversationHistory.length === 0) return '';
+    let historyStr = '\n<CONVERSATION_HISTORY>\n';
+    conversationHistory.forEach((pair, i) => {
+      historyStr += `User: ${pair.question}\nAssistant: ${pair.answer}\n\n`;
+    });
+    historyStr += '</CONVERSATION_HISTORY>\n';
+    return historyStr;
+  }
+
+  async function askPlanetQuestion() {
+    const question = questionInput.value.trim();
+    if (!question) return;
+    if (!window.detailPlanet) {
+      answerBox.innerHTML = '<span style="color: #ff6b6b;">No planet selected.</span>';
+      return;
+    }
+
+    // Reset history if planet changed
+    if (currentPlanetKey !== window.detailPlanet.key) {
+      conversationHistory = [];
+      currentPlanetKey = window.detailPlanet.key;
+    }
+
+    questionInput.disabled = true;
+    answerBox.innerHTML = '<em>Thinking...</em>';
+
+    try {
+      const planetName = window.detailPlanet.name;
+      const historyContext = formatHistory();
+      const prompt = `You're an expert on the solar system. The user is viewing ${planetName} and has a question about it.\n\n<INSTRUCTION>\nYou can return markdown but avoid using # headings.\n</INSTRUCTION>${historyContext}\n<QUESTION>\n${question}`;
+      const result = await synthos.generate.completion({ prompt });
+      answerBox.innerHTML = marked.parse(result.answer);
+      
+      // Add to history
+      conversationHistory.push({ question: question, answer: result.answer });
+      if (conversationHistory.length > MAX_HISTORY) {
+        conversationHistory.shift();
+      }
+    } catch (err) {
+      answerBox.innerHTML = '<span style="color: #ff6b6b;">Error: Could not get answer.</span>';
+    } finally {
+      questionInput.disabled = false;
+      questionInput.value = '';
+      questionInput.focus();
+    }
+  }
+
+  // Expose function globally so moon click can trigger it
+  window.triggerPlanetQuestion = askPlanetQuestion;
+
+  questionInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') askPlanetQuestion();
+  });
+})();
+</script><script id="page-helpers" src="/api/page-helpers.js?v=2" data-locked="true"></script><script id="page-script" src="/api/page-script.js?v=2" data-locked="true"></script></body></html>

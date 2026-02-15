@@ -173,7 +173,7 @@ export function normalizePageName(name: string|undefined): string|undefined {
     return typeof name == 'string' && name.length > 0 ? name.replace(/[^a-z0-9\-_\[\]\(\)\{\}@#\$%&]/gi, '_').toLowerCase() : undefined;
 }
 
-export async function savePageState(pagesFolder: string, name: string, content: string, title?: string): Promise<void> {
+export async function savePageState(pagesFolder: string, name: string, content: string, title?: string, categories?: string[]): Promise<void> {
     _pages[name] = content;
     const pageFolder = path.join(pagesFolder, 'pages', name);
     await ensureFolderExists(pageFolder);
@@ -185,7 +185,7 @@ export async function savePageState(pagesFolder: string, name: string, content: 
         const now = new Date().toISOString();
         const metadata: PageMetadata = {
             title: title ?? '',
-            categories: [],
+            categories: categories ?? [],
             pinned: false,
             createdDate: now,
             lastModified: now,
