@@ -64,6 +64,7 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
                     title: '',
                     categories: [],
                     pinned: false,
+                    showInAll: true,
                     createdDate: '',
                     lastModified: '',
                     pageVersion: 0,
@@ -100,6 +101,10 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
                 res.status(400).json({ error: 'mode must be "unlocked" or "locked"' });
                 return;
             }
+            if ('showInAll' in body && typeof body.showInAll !== 'boolean') {
+                res.status(400).json({ error: 'showInAll must be a boolean' });
+                return;
+            }
 
             // Load existing metadata (or defaults)
             const existing = await loadPageMetadata(config.pagesFolder, name, config.requiredPagesFolder);
@@ -107,6 +112,7 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
                 title: existing?.title ?? '',
                 categories: existing?.categories ?? [],
                 pinned: existing?.pinned ?? false,
+                showInAll: existing?.showInAll ?? true,
                 createdDate: existing?.createdDate ?? '',
                 lastModified: existing?.lastModified ?? '',
                 pageVersion: existing?.pageVersion ?? 0,
@@ -117,6 +123,7 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
             if ('title' in body) metadata.title = body.title;
             if ('categories' in body) metadata.categories = body.categories;
             if ('pinned' in body) metadata.pinned = body.pinned;
+            if ('showInAll' in body) metadata.showInAll = body.showInAll;
             if ('mode' in body) metadata.mode = body.mode;
 
             // Auto-set lastModified
@@ -158,6 +165,7 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
                     title: '',
                     categories: [],
                     pinned: false,
+                    showInAll: true,
                     createdDate: '',
                     lastModified: '',
                     pageVersion: 0,

@@ -13,6 +13,7 @@ export interface PageInfo {
     title: string;
     categories: string[];
     pinned: boolean;
+    showInAll: boolean;    // true = visible in "All" filter, false = only in category filters
     createdDate: string;   // ISO 8601, empty string if unknown
     lastModified: string;  // ISO 8601, empty string if unknown
     pageVersion: number;   // integer, 0 = pre-versioning
@@ -56,6 +57,7 @@ export function parseMetadata(parsed: Record<string, unknown>): PageMetadata {
         title: typeof parsed.title === 'string' ? parsed.title : '',
         categories: Array.isArray(parsed.categories) ? parsed.categories : [],
         pinned: typeof parsed.pinned === 'boolean' ? parsed.pinned : false,
+        showInAll: typeof parsed.showInAll === 'boolean' ? parsed.showInAll : true,
         createdDate: typeof parsed.createdDate === 'string' ? parsed.createdDate : '',
         lastModified: typeof parsed.lastModified === 'string' ? parsed.lastModified : '',
         pageVersion: typeof parsed.pageVersion === 'number' ? parsed.pageVersion
@@ -74,6 +76,7 @@ const DEFAULT_METADATA: PageMetadata = {
     title: '',
     categories: [],
     pinned: false,
+    showInAll: true,
     createdDate: '',
     lastModified: '',
     pageVersion: 0,
@@ -116,6 +119,7 @@ export async function listPages(pagesFolder: string, fallbackPagesFolder: string
                 title,
                 categories,
                 pinned: false,
+                showInAll: true,
                 createdDate: '',
                 lastModified: '',
                 pageVersion: 1,
@@ -136,6 +140,7 @@ export async function listPages(pagesFolder: string, fallbackPagesFolder: string
                 title: metadata?.title ?? '',
                 categories: metadata?.categories ?? ['System'],
                 pinned: metadata?.pinned ?? true,
+                showInAll: metadata?.showInAll ?? true,
                 createdDate: metadata?.createdDate ?? '',
                 lastModified: metadata?.lastModified ?? '',
                 pageVersion: metadata?.pageVersion ?? 0,
@@ -187,6 +192,7 @@ export async function savePageState(pagesFolder: string, name: string, content: 
             title: title ?? '',
             categories: categories ?? [],
             pinned: false,
+            showInAll: true,
             createdDate: now,
             lastModified: now,
             pageVersion: PAGE_VERSION,
@@ -247,6 +253,7 @@ export async function copyPage(
         title,
         categories,
         pinned: false,
+        showInAll: true,
         createdDate: now,
         lastModified: now,
         pageVersion: PAGE_VERSION,

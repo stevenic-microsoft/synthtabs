@@ -213,6 +213,7 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
                 title,
                 categories,
                 pinned: false,
+                showInAll: true,
                 createdDate: new Date().toISOString(),
                 lastModified: new Date().toISOString(),
                 pageVersion: PAGE_VERSION,
