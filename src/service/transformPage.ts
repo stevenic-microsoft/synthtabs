@@ -57,28 +57,31 @@ export async function transformPage(args: TransformPageArgs): Promise<AgentCompl
     try {
         // 2. Build prompt
         const scripts = await listScripts(pagesFolder);
-        const serverScripts = scripts.length > 0 ? `<SERVER_SCRIPTS>\n${scripts}\n\n` : '';
+        const serverScripts = `<SERVER_SCRIPTS>\n${scripts || ''}`;
+        const currentPage = `<CURRENT_PAGE>\n${annotatedHtml}`;
 
         // Build theme context block
-        let themeBlock = '';
+        let themeBlock = '<THEME>\n';
         if (args.themeInfo) {
             const { mode, colors } = args.themeInfo;
             const colorList = Object.entries(colors)
                 .map(([name, value]) => `  --${name}: ${value}`)
                 .join('\n');
-            themeBlock = `<THEME>\nMode: ${mode}\nCSS custom properties (use instead of hardcoded values):\n${colorList}\n\nShared shell classes (pre-styled by theme, do not redefine):\n  .chat-panel — Left sidebar container (30% width)\n  .chat-header — Chat panel title bar\n  .chat-messages — Scrollable message container\n  .chat-message — Individual message wrapper\n  .link-group — Navigation links row (Save, Pages, Reset)\n  .chat-input — Message text input\n  .chat-submit — Send button\n  .viewer-panel — Right content area (70% width)\n  .loading-overlay — Full-screen loading overlay\n  .spinner — Animated loading spinner\n\nPage title bars: To align with the chat header, apply these styles:\n  min-height: var(--header-min-height);\n  padding: var(--header-padding-vertical) var(--header-padding-horizontal);\n  line-height: var(--header-line-height);\n  display: flex; align-items: center; justify-content: center; box-sizing: border-box;\n\nFull-viewer mode: For games, animations, or full-screen content, add class "full-viewer" to the viewer-panel element to remove its padding.\n\nChat panel behaviours (auto-injected via page script — do NOT recreate in page code):\n  The server injects page-v2.js after transformation. It provides:\n  - Form submit handler: sets action to window.location.pathname, shows #loadingOverlay, disables inputs\n  - Save/Reset link handlers (#saveLink, #resetLink)\n  - Chat scroll to bottom (#chatMessages)\n  - Chat toggle button (.chat-toggle) — created dynamically if not in markup\n  - .chat-input-wrapper — wraps #chatInput with a brainstorm icon button\n  - Brainstorm modal (#brainstormModal) — LLM-powered brainstorm UI, created dynamically\n  - Focus management — keeps keyboard input directed to #chatInput\n\n  Do NOT:\n  - Create your own form submit handler, toggle button, or input wrapper\n  - Modify or replace .chat-panel, .chat-header, .link-group, #chatForm, or .chat-toggle\n  - INSERT new <script> blocks that duplicate existing ones — when fixing JavaScript, UPDATE or REPLACE the existing script's nodeId instead. Always give inline scripts a unique id attribute.\n  - Set the form action attribute (page-v2.js sets it dynamically)\n  - Include these CSS rules (in the theme): #loadingOverlay position, .chat-submit:disabled, .chat-input:disabled\n\n  To add chat messages: use insert with parentId of #chatMessages and position "append".\n  #chatMessages is the only unlocked element inside .chat-panel.\n\nThe <html> element has class "${mode}-mode". Always add .light-mode CSS overrides for any page-specific styles so the page works in both light and dark themes, unless the user has explicitly requested a very specific color scheme.\n\n`;
+            themeBlock += `Mode: ${mode}\nCSS custom properties (use instead of hardcoded values):\n${colorList}\n\nShared shell classes (pre-styled by theme, do not redefine):\n  .chat-panel — Left sidebar container (30% width)\n  .chat-header — Chat panel title bar\n  .chat-messages — Scrollable message container\n  .chat-message — Individual message wrapper\n  .link-group — Navigation links row (Save, Pages, Reset)\n  .chat-input — Message text input\n  .chat-submit — Send button\n  .viewer-panel — Right content area (70% width)\n  .loading-overlay — Full-screen loading overlay\n  .spinner — Animated loading spinner\n\nPage title bars: To align with the chat header, apply these styles:\n  min-height: var(--header-min-height);\n  padding: var(--header-padding-vertical) var(--header-padding-horizontal);\n  line-height: var(--header-line-height);\n  display: flex; align-items: center; justify-content: center; box-sizing: border-box;\n\nFull-viewer mode: For games, animations, or full-screen content, add class "full-viewer" to the viewer-panel element to remove its padding.\n\nChat panel behaviours (auto-injected via page script — do NOT recreate in page code):\n  The server injects page-v2.js after transformation. It provides:\n  - Form submit handler: sets action to window.location.pathname, shows #loadingOverlay, disables inputs\n  - Save/Reset link handlers (#saveLink, #resetLink)\n  - Chat scroll to bottom (#chatMessages)\n  - Chat toggle button (.chat-toggle) — created dynamically if not in markup\n  - .chat-input-wrapper — wraps #chatInput with a brainstorm icon button\n  - Brainstorm modal (#brainstormModal) — LLM-powered brainstorm UI, created dynamically\n  - Focus management — keeps keyboard input directed to #chatInput\n\n  Do NOT:\n  - Create your own form submit handler, toggle button, or input wrapper\n  - Modify or replace .chat-panel, .chat-header, .link-group, #chatForm, or .chat-toggle\n  - INSERT new <script> blocks that duplicate existing ones — when fixing JavaScript, UPDATE or REPLACE the existing script's nodeId instead. Always give inline scripts a unique id attribute.\n  - Set the form action attribute (page-v2.js sets it dynamically)\n  - Include these CSS rules (in the theme): #loadingOverlay position, .chat-submit:disabled, .chat-input:disabled\n\n  To add chat messages: use insert with parentId of #chatMessages and position "append".\n  #chatMessages is the only unlocked element inside .chat-panel.\n\nThe <html> element has class "${mode}-mode". Always add .light-mode CSS overrides for any page-specific styles so the page works in both light and dark themes, unless the user has explicitly requested a very specific color scheme.`;
         }
 
+        const systemMessage = [currentPage, serverAPIs, serverScripts, themeBlock, messageFormat].join('\n\n');
         const system: SystemMessage = {
             role: 'system',
-            content: `<CURRENT_PAGE>\n${annotatedHtml}\n\n<SERVER_APIS>\n${serverAPIs}\n\n${serverScripts}${themeBlock}<USER_MESSAGE>\n${message}`
+            content: systemMessage
         };
 
-        const modelInstr = args.modelInstructions ? `\n\n<MODEL_INSTRUCTIONS>\n${args.modelInstructions}` : '';
-        const userInstr = args.instructions ? `\n\n<INSTRUCTIONS>\n${args.instructions}` : '';
+        const userInstr = args.instructions || '';
+        const modelInstr = args.modelInstructions || '';
+        const instructions = [userInstr, modelInstr, transformInstr].filter(s => s.trim() !== '').join('\n');
         const prompt: UserMessage = {
             role: 'user',
-            content: `${goal}${userInstr}${modelInstr}`
+            content: `<USER_MESSAGE>\n${message}\n\n<INSTRUCTIONS>\n${instructions}`
         };
 
         // 3. Call model
@@ -114,7 +117,7 @@ export async function transformPage(args: TransformPageArgs): Promise<AgentCompl
 
                 const repairPrompt: UserMessage = {
                     role: 'user',
-                    content: repairGoal
+                    content: repairUSER_MESSAGE
                 };
 
                 const repairMaxTokens = Math.min(maxTokens, 4096);
@@ -468,25 +471,42 @@ export function parseChangeList(response: string): ChangeList {
 // Prompt constants
 // ---------------------------------------------------------------------------
 
-const goal =
-`Generate changes to the web page based on the users message.
-Append the users message and a brief response from the AI to the chat panel.
-Maintain the full conversation history in the chat panel unless asked to clear it.
-Any details or visualizations should be rendered to the viewer panel.
-The basic layout structure of the page needs to be maintained.
-The following selectors identify protected infrastructure elements — do NOT update, replace, or delete them:
-  .chat-panel, .chat-header, .link-group, #chatForm, #chatInput, .chat-submit, .chat-toggle, #thoughts
-You may still insert new elements as siblings near protected elements.
-You're free to write any additional CSS or JavaScript to enhance the page.
-When fixing bugs in existing <script> blocks, UPDATE or REPLACE the script element — do NOT insert a duplicate. Duplicate scripts cause declaration errors.
-Always assign a unique, descriptive id attribute to every <script> block you create or update (e.g. id="note-logic", id="chart-renderer"). Reserved system IDs you must NOT use: page-info, page-helpers, page-script, error.
-Use the synthos.* helper functions (available globally) for all server API calls instead of raw fetch().
-Write an explication of your reasoning or any hidden thoughts to the thoughts div.
-If the user asks to create something like an app, tool, game, or ui create it in the viewer panel.
-If the user asks to draw something use canvas to draw it in the viewer panel.
-The viewer panel can be resized by the user, so for animations, games, and presentations always add the "full-viewer" class to the viewer-panel element and ensure content stays centered and uses the maximum available space (use 100% width/height, flexbox centering, or viewport-relative sizing as appropriate).
+const messageFormat =
+`<MESSAGE_FORMAT>
+<div class="chat-message"><p><strong>{SynthOS: | User:}</strong> {message contents}</p></div>
+`
 
-IMPORTANT: Each element in the CURRENT_PAGE has a data-node-id attribute.
+const transformInstr =
+`Apply the users <USER_MESSAGE> to the .viewerPanel of the <CURRENT_PAGE> by generating a list of changes in JSON format.
+Never remove any element that has a data-locked attribute. You may modfiy the inner text of a data-locked element or any of its unlocked child elements.
+
+If the <USER_MESSAGE> involves clearning the chat history, remove all .chat-message elements inside the #chatMessages container except for the first SynthOS: message. You may modify that message contents if requested.
+If there's no <USER_MESSAGE> add a SynthOS: message to the chat with aasking the user what they would like to do.
+If there is a <USER_MESSAGE> but the intent is unclear, add a User: message with the <USER_MESSAGE> to the chat and add a SynthOS: message asking the user for clarification on their intent.
+If there is a <USER_MESSAGE> with clear intent, add a User: message with the <USER_MESSAGE> to the chat and add a SynthOS: message explaining your change or answering their question.
+If a <USER_MESSAGE> is overly long, summarize the User: message.
+
+When updating the .viewerPanel you may alse add/remove script & style blocks to the header unless they're data-locked.
+You may add/remove new script blocks to the body but all script & style blocks should have a unique id.
+You may modify the contents of a data-locked script block but may not remove it.
+
+Every <CURRENT_PAGE> has hidden data-locked "thoughts" and "instructions" divs.
+The instruction div, if pressent, contains custom <INSTRUCTIONS> for that page that should be followed in addition to these general instructions. You may modify the instructions div if needed (e.g. to add new instructions or update existing ones), but do not remove it. Add it if it's missing though.
+The thoughts block is for your internal use only — you can write anything in there to help you reason through the user's request, but it is not visible to the user. You can also use it to keep track of any relevant state or information that may be useful across multiple turns.
+If the <USER_MESSAGE> indicates that a change didn't work, use your thoughts to diagnose the problem before fixing the issue.
+
+The <MESSAGE_FORMAT> section provides the HTML structure for chat messages in the chat panel. Use this format when generating new messages to ensure they display correctly.
+The <SERVER_APIS> section provides a list of available server APIs and helper functions you can call from injected scripts. You should use the synthos.* helper functions for any server API calls instead of raw fetch().
+The <SERVER_SCRIPTS> section provides a list of available scripts you can call from injected scripts. These are user-created scripts stored on the server that can be executed by calling synthos.scripts.run(id, variables).
+The <THEME> section provides details on the current theme's color scheme and shared shell classes to help you generate theme-aware pages that fit seamlessly into the user experience.
+The viewer panel can be resized by the user, so for animations, games, and presentations should always add the ",full-viewer" class to the viewer-panel element and ensure content stays centered and uses the maximum available space (use 100% width/height, flexbox centering, or viewport-relative sizing as appropriate).
+window.themeInfo is available and has a structure like this: { mode: 'light' | 'dark', colors: { primary: '#hex', secondary: '#hex', background: '#hex', text: '#hex', ... } }. Use these colors instead of hardcoded values to ensure your page works with the user's selected theme and any custom themes they may have. You can also use the shared shell classes defined in the theme info for consistent styling of common elements like the chat panel and header.
+
+Do not add duplicate script blocks with the same logic! Consolidate inline scrips if needed and double check that variables and functions are defined in the correct order.
+
+Each element in the CURRENT_PAGE has a data-node-id attribute. Don't use the id attribute for targeting nodes (reserve it for scripts and styles) — use data-node-id.
+If you're trying to assign an id to script or style block, use "replace" not "update".
+Your first operation should always be an update to your thoughts block, where you can reason through the user's request and plan your changes before applying them to the page.
 Return a JSON array of change operations to apply to the page. Do NOT return the full HTML page.
 
 Each operation must be one of:
@@ -509,7 +529,8 @@ Return ONLY the JSON array. Example:
 ]`;
 
 const serverAPIs =
-`GET /api/data/:page/:table
+`<SERVER_APIS>
+GET /api/data/:page/:table
 description: Retrieve all rows from a page-scoped table (tables are stored per-page). Supports pagination via query params.
 query params: limit (number, optional) — max rows to return; offset (number, optional, default 0) — rows to skip
 response (without limit): Array of JSON rows [{ id: string, ... }]
@@ -580,7 +601,7 @@ PAGE HELPERS (available globally as window.synthos):
   synthos.search.web(query, opts?)      — POST /api/search/web  (opts: { count?, country?, freshness? })
 All methods return Promises. Prefer these helpers over raw fetch().`;
 
-const repairGoal =
+const repairUSER_MESSAGE =
 `Some change operations from the previous response failed because the target nodes no longer exist in the page (they were removed or replaced by earlier operations in the same batch).
 
 Below is the CURRENT state of the page after the successful operations were applied, followed by the list of operations that failed and why.

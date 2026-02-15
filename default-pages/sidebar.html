@@ -1,31 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<!DOCTYPE html><html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SynthOS</title>
     <script src="/api/theme-info.js"></script>
     <link rel="stylesheet" href="/api/theme.css">
-    <style>
-        /* Page Specific Styles - Sidebar */
-        .sidebar-panel { width: 100%; max-width: 800px; position: relative; z-index: 1; }
-        .sidebar-title { font-size: 1.8em; font-weight: 700; background: linear-gradient(90deg, var(--accent-primary), var(--accent-tertiary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; border-bottom: 2px solid var(--border-color); padding-bottom: 0.3em; margin-bottom: 1em; text-shadow: 0 0 30px var(--accent-glow); }
-        .sidebar-content { background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; box-shadow: 0 4px 20px var(--accent-glow); }
-        .sidebar-content p { color: rgba(224, 224, 224, 0.9); line-height: 1.7; margin-bottom: 1em; }
-        .sidebar-content p:last-child { margin-bottom: 0; }
-        .sidebar-section { margin-top: 1.2em; padding-top: 1em; border-top: 1px solid var(--border-color); }
-        .sidebar-section-title { font-size: 1.2em; font-weight: 600; background: linear-gradient(90deg, var(--accent-primary), var(--accent-tertiary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.6em; }
-        .sidebar-list { margin: 0 0 1em 20px; }
-        .sidebar-list li { margin-bottom: 0.4em; color: rgba(224, 224, 224, 0.85); }
-        .sidebar-list li::marker { color: var(--accent-tertiary); }
-        .sidebar-quote { margin: 1em 0; padding: 12px 20px; border-left: 4px solid var(--accent-secondary); background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); border-radius: 0 10px 10px 0; font-style: italic; color: var(--text-secondary); }
-        .sidebar-code { background: rgba(138, 43, 226, 0.25); padding: 3px 7px; border-radius: 5px; font-family: 'Fira Code', 'Courier New', monospace; color: var(--accent-tertiary); border: 1px solid rgba(240, 147, 251, 0.2); font-size: 0.9em; }
-        .sidebar-link { color: var(--accent-tertiary); text-decoration: none; border-bottom: 1px solid transparent; transition: all 0.3s; }
-        .sidebar-link:hover { border-bottom-color: var(--accent-tertiary); text-shadow: 0 0 10px var(--accent-glow); }
-        /* Light-mode overrides */
-        .light-mode .sidebar-content p { color: rgba(45, 38, 64, 0.9); }
-        .light-mode .sidebar-list li { color: rgba(45, 38, 64, 0.85); }
-    </style>
+    <style>.sidebar-panel{width:100%;max-width:800px;position:relative;z-index:1}.sidebar-title{font-size:1.8em;font-weight:700;background:linear-gradient(90deg,var(--accent-primary),var(--accent-tertiary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;border-bottom:2px solid var(--border-color);padding-bottom:.3em;margin-bottom:1em;text-shadow:0 0 30px var(--accent-glow)}.sidebar-content{background:linear-gradient(135deg,rgba(102,126,234,.1) 0,rgba(118,75,162,.1) 100%);border:1px solid var(--border-color);border-radius:12px;padding:20px;box-shadow:0 4px 20px var(--accent-glow)}.sidebar-content p{color:rgba(224,224,224,.9);line-height:1.7;margin-bottom:1em}.sidebar-content p:last-child{margin-bottom:0}.sidebar-section{margin-top:1.2em;padding-top:1em;border-top:1px solid var(--border-color)}.sidebar-section-title{font-size:1.2em;font-weight:600;background:linear-gradient(90deg,var(--accent-primary),var(--accent-tertiary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.6em}.sidebar-list{margin:0 0 1em 20px}.sidebar-list li{margin-bottom:.4em;color:rgba(224,224,224,.85)}.sidebar-list li::marker{color:var(--accent-tertiary)}.sidebar-quote{margin:1em 0;padding:12px 20px;border-left:4px solid var(--accent-secondary);background:linear-gradient(135deg,rgba(102,126,234,.15) 0,rgba(118,75,162,.15) 100%);border-radius:0 10px 10px 0;font-style:italic;color:var(--text-secondary)}.sidebar-code{background:rgba(138,43,226,.25);padding:3px 7px;border-radius:5px;font-family:'Fira Code','Courier New',monospace;color:var(--accent-tertiary);border:1px solid rgba(240,147,251,.2);font-size:.9em}.sidebar-link{color:var(--accent-tertiary);text-decoration:none;border-bottom:1px solid transparent;transition:.3s}.sidebar-link:hover{border-bottom-color:var(--accent-tertiary);text-shadow:0 0 10px var(--accent-glow)}.light-mode .sidebar-content p{color:rgba(45,38,64,.9)}.light-mode .sidebar-list li{color:rgba(45,38,64,.85)}</style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
     <script id="page-info" src="/api/page-info.js?page=sidebar"></script>
 </head>
@@ -55,7 +34,7 @@
                     <div class="sidebar-section-title">Features</div>
                     <ul class="sidebar-list">
                         <li>Gradient text headings</li>
-                        <li>Glowing borders & shadows</li>
+                        <li>Glowing borders &amp; shadows</li>
                         <li>Consistent color palette</li>
                     </ul>
                 </div>
@@ -63,8 +42,9 @@
         </div>
         <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     </div>
-    <div id="thoughts" style="display: none;">Restyled the sidebar to match the markdown content styles - using gradient text for titles, the same border/glow effects, blockquote styling, and list formatting. Kept CSS compact by reusing variables and combining selectors where possible.</div>
+    <div id="instructions" style="display: none;" data-locked=""></div>
+    <div id="thoughts" style="display: none;" data-locked=""></div>
 <script id="page-helpers" src="/api/page-helpers.js?v=2"></script>
 <script id="page-script" src="/api/page-script.js?v=2"></script>
-</body>
-</html>
+
+</body></html>

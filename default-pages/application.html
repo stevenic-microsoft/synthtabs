@@ -1,51 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
+<!DOCTYPE html><html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SynthOS - {Application Title}</title>
     <script src="/api/theme-info.js"></script>
     <link rel="stylesheet" href="/api/theme.css">
-    <style>
-        /* Page Specific Styles */
-        .application-title {
-            font-size: 22px;
-            font-weight: 700;
-            min-height: var(--header-min-height);
-            padding: var(--header-padding-vertical) var(--header-padding-horizontal);
-            line-height: var(--header-line-height);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-sizing: border-box;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            color: white;
-            border-radius: 12px 12px 0 0;
-            width: 100%;
-            max-width: 800px;
-            box-shadow: 0 6px 25px var(--accent-glow);
-        }
-
-        .application-content {
-            font-size: 14px;
-            color: rgba(224, 224, 224, 0.8);
-            padding: 20px;
-            flex-grow: 1;
-            width: 100%;
-            max-width: 800px;
-            background: rgba(15, 15, 35, 0.8);
-            border-radius: 0 0 12px 12px;
-            border: 1px solid rgba(138, 43, 226, 0.2);
-            border-top: none;
-        }
-
-        /* Light-mode overrides */
-        .light-mode .application-content {
-            color: rgba(45, 38, 64, 0.8);
-            background: rgba(255, 255, 255, 0.8);
-        }
-    </style>
+    <style>.application-title{font-size:22px;font-weight:700;min-height:var(--header-min-height);padding:var(--header-padding-vertical) var(--header-padding-horizontal);line-height:var(--header-line-height);display:flex;align-items:center;justify-content:center;box-sizing:border-box;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;border-radius:12px 12px 0 0;width:100%;max-width:800px;box-shadow:0 6px 25px var(--accent-glow)}.application-content{font-size:14px;color:rgba(224,224,224,.8);padding:20px;flex-grow:1;width:100%;max-width:800px;background:rgba(15,15,35,.8);border-radius:0 0 12px 12px;border:1px solid rgba(138,43,226,.2);border-top:none}.light-mode .application-content{color:rgba(45,38,64,.8);background:rgba(255,255,255,.8)}</style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.0/mermaid.min.js"></script>
@@ -75,14 +34,10 @@
         <div class="application-content" style="max-width: none;">{Application Content}</div>
         <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     </div>
-    <div id="thoughts" style="display: none;">The user wants the application containers to span the full width of the
-        viewer panel. I've removed the max-width: 800px constraint from both the application-title and
-        application-content elements by setting max-width: none inline. The viewer panel already has padding
-        (var(--viewer-padding)), so the application will naturally respect that padding while filling the available
-        width.</div>
-
+    <div id="instructions" style="display: none;" data-locked=""></div>
+    <div id="thoughts" style="display: none;" data-locked=""></div>
 <script id="page-helpers" src="/api/page-helpers.js?v=2"></script>
 <script id="page-script" src="/api/page-script.js?v=2"></script>
-</body>
 
-</html>
+
+</body></html>

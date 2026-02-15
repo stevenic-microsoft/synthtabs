@@ -1,25 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<!DOCTYPE html><html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SynthOS - Split Panel Application</title>
     <script src="/api/theme-info.js"></script>
     <link rel="stylesheet" href="/api/theme.css">
-    <style>
-        /* Page Specific Styles - Split Application */
-        .application-panel { width: 100%; max-width: 900px; height: calc(100vh - 50px); display: flex; flex-direction: column; position: relative; z-index: 1; border-radius: 15px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: 0 0 40px var(--accent-glow); }
-        .application-header { font-size: 18px; font-weight: 600; padding: 14px 20px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; text-align: center; text-shadow: 0 2px 8px rgba(0,0,0,0.3); letter-spacing: 1px; }
-        .application-content { flex: 1; display: flex; flex-direction: column; background: rgba(15, 15, 35, 0.6); overflow: hidden; }
-        .application-top, .application-bottom { flex-basis: 50%; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; }
-        .application-top { background: linear-gradient(180deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%); border-bottom: none; }
-        .application-bottom { background: linear-gradient(180deg, rgba(118, 75, 162, 0.05) 0%, rgba(240, 147, 251, 0.1) 100%); }
-        .application-top p, .application-bottom p { color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
-        .panel-title { font-size: 14px; font-weight: 600; color: var(--accent-tertiary); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); text-transform: uppercase; letter-spacing: 1px; }
-        .splitter { height: 8px; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary)); cursor: row-resize; flex-shrink: 0; position: relative; transition: all 0.2s; }
-        .splitter::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; }
-        .splitter:hover { background: linear-gradient(90deg, var(--accent-tertiary), var(--accent-secondary), var(--accent-primary)); box-shadow: 0 0 15px var(--accent-glow); }
-    </style>
+    <style>.application-panel{width:100%;max-width:900px;height:calc(100vh - 50px);display:flex;flex-direction:column;position:relative;z-index:1;border-radius:15px;overflow:hidden;border:1px solid var(--border-color);box-shadow:0 0 40px var(--accent-glow)}.application-header{font-size:18px;font-weight:600;padding:14px 20px;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;text-align:center;text-shadow:0 2px 8px rgba(0,0,0,.3);letter-spacing:1px}.application-content{flex:1;display:flex;flex-direction:column;background:rgba(15,15,35,.6);overflow:hidden}.application-bottom,.application-top{flex-basis:50%;padding:20px;overflow-y:auto;display:flex;flex-direction:column}.application-top{background:linear-gradient(180deg,rgba(102,126,234,.1) 0,rgba(118,75,162,.05) 100%);border-bottom:none}.application-bottom{background:linear-gradient(180deg,rgba(118,75,162,.05) 0,rgba(240,147,251,.1) 100%)}.application-bottom p,.application-top p{color:var(--text-secondary);font-size:14px;line-height:1.6}.panel-title{font-size:14px;font-weight:600;color:var(--accent-tertiary);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border-color);text-transform:uppercase;letter-spacing:1px}.splitter{height:8px;background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary),var(--accent-tertiary));cursor:row-resize;flex-shrink:0;position:relative;transition:.2s}.splitter::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:4px;background:rgba(255,255,255,.3);border-radius:2px}.splitter:hover{background:linear-gradient(90deg,var(--accent-tertiary),var(--accent-secondary),var(--accent-primary));box-shadow:0 0 15px var(--accent-glow)}</style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
     <script id="page-info" src="/api/page-info.js?page=split-application"></script>
 </head>
@@ -56,23 +41,10 @@
         </div>
         <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     </div>
-    <div id="thoughts" style="display: none;">User requested styling the split application with the page's Nebula Dusk theme while keeping CSS compact. I've applied gradient backgrounds, glowing borders, themed scrollbars, and a visually appealing splitter with hover effects. The CSS is consolidated and uses the existing CSS variables for consistency.</div>
-    <script id="splitter-logic">
-        const splitter = document.getElementById('splitter');
-        const topPanel = document.querySelector('.application-top');
-        const bottomPanel = document.querySelector('.application-bottom');
-        let isDragging = false;
-
-        splitter.addEventListener('mousedown', () => { isDragging = true; document.body.style.cursor = 'row-resize'; });
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const rect = document.querySelector('.application-content').getBoundingClientRect();
-            const pct = ((e.clientY - rect.top) / rect.height) * 100;
-            if (pct > 10 && pct < 90) { topPanel.style.flexBasis = `${pct}%`; bottomPanel.style.flexBasis = `${100-pct}%`; }
-        });
-        document.addEventListener('mouseup', () => { isDragging = false; document.body.style.cursor = 'default'; });
-    </script>
+    <div id="instructions" style="display: none;" data-locked=""></div>
+    <div id="thoughts" style="display: none;" data-locked=""></div>
+    <script id="splitter-logic">const splitter=document.getElementById("splitter"),topPanel=document.querySelector(".application-top"),bottomPanel=document.querySelector(".application-bottom");let isDragging=!1;splitter.addEventListener("mousedown",()=>{isDragging=!0,document.body.style.cursor="row-resize"}),document.addEventListener("mousemove",e=>{if(!isDragging)return;const rect=document.querySelector(".application-content").getBoundingClientRect(),pct=(e.clientY-rect.top)/rect.height*100;pct>10&&pct<90&&(topPanel.style.flexBasis=`${pct}%`,bottomPanel.style.flexBasis=100-pct+"%")}),document.addEventListener("mouseup",()=>{isDragging=!1,document.body.style.cursor="default"});</script>
 <script id="page-helpers" src="/api/page-helpers.js?v=2"></script>
 <script id="page-script" src="/api/page-script.js?v=2"></script>
-</body>
-</html>
+
+</body></html>
