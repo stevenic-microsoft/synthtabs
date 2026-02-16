@@ -22,6 +22,13 @@ export async function createCompletePrompt(pagesFolder: string, use: 'builder' |
     const apiKey = entry.configuration.apiKey;
     if (entry.provider === 'Anthropic') {
         modelInstance = anthropic({apiKey, model});
+    } else if (entry.provider === 'FireworksAI') {
+        // Map short model names to Fireworks full model paths
+        const fireworksModelMap: Record<string, string> = {
+            'glm-5': 'accounts/fireworks/models/glm-5',
+        };
+        const fireworksModel = fireworksModelMap[model] || model;
+        modelInstance = openai({apiKey, model: fireworksModel, baseURL: 'https://api.fireworks.ai/inference/v1'});
     } else {
         modelInstance = openai({apiKey, model});
     }

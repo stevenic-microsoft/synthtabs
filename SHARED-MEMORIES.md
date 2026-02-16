@@ -96,4 +96,4 @@ Shared chat panel behaviours are now served via **versioned page scripts** (`pag
 - LLM prompt (`transformPage.ts`) lists all `synthos.*` methods and instructs the model to prefer them over raw `fetch()`.
 
 ## Models Supported
-Claude (Opus/Sonnet/Haiku) and GPT (5.2/5 mini/5 nano). Model prefix `claude-` routes to Anthropic, `gpt-` routes to OpenAI. All models use a single `transformPage` pipeline that returns delta-based JSON change operations. Provider-specific prompt tuning is handled by `getModelInstructions()` in `src/service/modelInstructions.ts`.
+Claude (Opus/Sonnet/Haiku), GPT (5.2/5 mini/5 nano), and FireworksAI (glm-5). Model prefix `claude-` routes to Anthropic, `gpt-` routes to OpenAI, `glm-` routes to FireworksAI. FireworksAI uses the OpenAI-compatible API via `baseURL` override; short model names (e.g. `glm-5`) are mapped to full Fireworks paths (e.g. `accounts/fireworks/models/glm-5`) in `createCompletePrompt.ts`. All models use a single `transformPage` pipeline that returns delta-based JSON change operations. Provider-specific prompt tuning is handled by `getModelInstructions()` in `src/service/modelInstructions.ts`.

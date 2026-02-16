@@ -130,6 +130,6 @@ dist
 .pnp.*
 
 .synthos
-.synthos-save
+.synthos-*
 CLAUDE.md
 CLAUDE-PLAN.md

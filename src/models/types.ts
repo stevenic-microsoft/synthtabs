@@ -1,4 +1,4 @@
-export type ProviderName = 'Anthropic' | 'OpenAI';
+export type ProviderName = 'Anthropic' | 'OpenAI' | 'FireworksAI';
 
 export interface ProviderConfig {
     apiKey: string;

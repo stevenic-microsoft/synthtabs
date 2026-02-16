@@ -18,7 +18,16 @@ export const OpenAIProvider: Provider = {
     }
 };
 
-export const PROVIDERS: Provider[] = [AnthropicProvider, OpenAIProvider];
+export const FireworksAIProvider: Provider = {
+    name: 'FireworksAI',
+    builderModels: ['glm-5'],
+    chatModels: ['glm-5'],
+    detectModel(model: string): boolean {
+        return model.startsWith('glm-') || model.includes('fireworks');
+    }
+};
+
+export const PROVIDERS: Provider[] = [AnthropicProvider, OpenAIProvider, FireworksAIProvider];
 
 export function getProvider(name: ProviderName): Provider {
     const provider = PROVIDERS.find(p => p.name === name);
