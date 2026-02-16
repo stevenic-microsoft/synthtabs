@@ -2,6 +2,7 @@ import { AgentArgs, AgentCompletion, SystemMessage, UserMessage } from "agentm-c
 import { listScripts } from "../scripts";
 import * as cheerio from "cheerio";
 import { ThemeInfo } from "../themes";
+import { CONNECTOR_REGISTRY, ConnectorsConfig, ConnectorOAuthConfig } from "../connectors";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -19,6 +20,8 @@ export interface TransformPageArgs extends AgentArgs {
     themeInfo?: ThemeInfo;
     /** Page mode. */
     mode?: 'unlocked' | 'locked';
+    /** User's configured connectors (from settings). */
+    configuredConnectors?: ConnectorsConfig;
 }
 
 export type ChangeOp =
@@ -71,7 +74,36 @@ export async function transformPage(args: TransformPageArgs): Promise<AgentCompl
             themeBlock += `Mode: ${mode}\nCSS custom properties (use instead of hardcoded values):\n${colorList}\n\nShared shell classes (pre-styled by theme, do not redefine):\n  .chat-panel — Left sidebar container (30% width)\n  .chat-header — Chat panel title bar\n  .chat-messages — Scrollable message container\n  .chat-message — Individual message wrapper\n  .link-group — Navigation links row (Save, Pages, Reset)\n  .chat-input — Message text input\n  .chat-submit — Send button\n  .viewer-panel — Right content area (70% width)\n  .loading-overlay — Full-screen loading overlay\n  .spinner — Animated loading spinner\n\nPage title bars: To align with the chat header, apply these styles:\n  min-height: var(--header-min-height);\n  padding: var(--header-padding-vertical) var(--header-padding-horizontal);\n  line-height: var(--header-line-height);\n  display: flex; align-items: center; justify-content: center; box-sizing: border-box;\n\nFull-viewer mode: For games, animations, or full-screen content, add class "full-viewer" to the viewer-panel element to remove its padding.\n\nChat panel behaviours (auto-injected via page script — do NOT recreate in page code):\n  The server injects page-v2.js after transformation. It provides:\n  - Form submit handler: sets action to window.location.pathname, shows #loadingOverlay, disables inputs\n  - Save/Reset link handlers (#saveLink, #resetLink)\n  - Chat scroll to bottom (#chatMessages)\n  - Chat toggle button (.chat-toggle) — created dynamically if not in markup\n  - .chat-input-wrapper — wraps #chatInput with a brainstorm icon button\n  - Brainstorm modal (#brainstormModal) — LLM-powered brainstorm UI, created dynamically\n  - Focus management — keeps keyboard input directed to #chatInput\n\n  Do NOT:\n  - Create your own form submit handler, toggle button, or input wrapper\n  - Modify or replace .chat-panel, .chat-header, .link-group, #chatForm, or .chat-toggle\n  - INSERT new <script> blocks that duplicate existing ones — when fixing JavaScript, UPDATE or REPLACE the existing script's nodeId instead. Always give inline scripts a unique id attribute.\n  - Set the form action attribute (page-v2.js sets it dynamically)\n  - Include these CSS rules (in the theme): #loadingOverlay position, .chat-submit:disabled, .chat-input:disabled\n\n  To add chat messages: use insert with parentId of #chatMessages and position "append".\n  #chatMessages is the only unlocked element inside .chat-panel.\n\nThe <html> element has class "${mode}-mode". Always add .light-mode CSS overrides for any page-specific styles so the page works in both light and dark themes, unless the user has explicitly requested a very specific color scheme.`;
         }
 
-        const systemMessage = [currentPage, serverAPIs, serverScripts, themeBlock, messageFormat].join('\n\n');
+        // Build configured-connectors block
+        let connectorsBlock = '';
+        if (args.configuredConnectors) {
+            const entries = Object.entries(args.configuredConnectors)
+                .filter(([, cfg]) => cfg.enabled && cfg.apiKey);
+            if (entries.length > 0) {
+                const blocks = entries.map(([id, cfg]) => {
+                    const def = CONNECTOR_REGISTRY.find(d => d.id === id);
+                    if (!def) return `- ${id}`;
+                    let block = `- ${def.name} (id: "${id}", category: ${def.category})\n  Base URL: ${def.baseUrl}`;
+                    if (def.hints) {
+                        block += `\n  Usage:\n${def.hints.split('\n').map(l => '    ' + l).join('\n')}`;
+                    }
+                    // Append dynamic OAuth context
+                    if (def.authStrategy === 'oauth2') {
+                        const oauthCfg = cfg as ConnectorOAuthConfig;
+                        block += '\n  Auth: The proxy attaches the access token automatically. Do NOT pass access_token in body or query params.';
+                        if (oauthCfg.userId) {
+                            block += `\n  User ID: ${oauthCfg.userId} — use this directly in API paths (e.g. /${oauthCfg.userId}/media).`;
+                        } else {
+                            block += '\n  User ID: Not yet resolved. Call GET /me/accounts to discover it, then GET /{page-id}?fields=instagram_business_account to get the IG user ID.';
+                        }
+                    }
+                    return block;
+                });
+                connectorsBlock = `<CONFIGURED_CONNECTORS>\nThe user has configured and enabled these connectors:\n${blocks.join('\n\n')}\n\nYou may use synthos.connectors.call(connector, method, path, opts) to call them.\nIMPORTANT: Before making any connector call, ALWAYS check that the connector is configured first using synthos.connectors.list(). If the connector is not configured, show the user a friendly message with a link to the Settings > Connectors page (/settings?tab=connectors) so they can set it up.\nDo NOT hardcode API keys. The connector proxy attaches authentication automatically.`;
+            }
+        }
+
+        const systemMessage = [currentPage, serverAPIs, serverScripts, connectorsBlock, themeBlock, messageFormat].filter(s => s).join('\n\n');
         const system: SystemMessage = {
             role: 'system',
             content: systemMessage
@@ -672,9 +704,22 @@ request: { [key: string]: string }
 response: string
 
 POST /api/search/web
-description: Search the web using Brave Search (must be enabled in Settings > Services)
+description: Search the web using Brave Search (must be enabled in Settings > Connectors)
 request: { query: string, count?: number, country?: string, freshness?: string }
 response: { results: [{ title: string, url: string, description: string }] }
+
+GET /api/connectors
+description: List available connectors (REST API proxies). Supports ?category=X and ?id=X filters.
+response: [{ id: string, name: string, category: string, configured: boolean }]
+
+GET /api/connectors/:id
+description: Get full detail for a connector including its definition and configuration status
+response: { id, name, category, description, baseUrl, authStrategy, authKey, fields, configured, enabled, hasKey }
+
+POST /api/connectors (proxy call)
+description: Proxy a request through a configured connector. The connector attaches auth automatically.
+request: { connector: string, method: string, path: string, headers?: object, body?: any, query?: object }
+response: Upstream API response (JSON or text)
 
 PAGE HELPERS (available globally as window.synthos):
   synthos.data.list(table, opts?)       — GET /api/data/:page/:table  (auto-scoped to current page; opts: { limit?, offset? } — when limit is set, returns { items, total, offset, limit, hasMore })
@@ -689,6 +734,8 @@ PAGE HELPERS (available globally as window.synthos):
   synthos.pages.update(name, metadata)  — POST /api/pages/:name
   synthos.pages.remove(name)            — DELETE /api/pages/:name
   synthos.search.web(query, opts?)      — POST /api/search/web  (opts: { count?, country?, freshness? })
+  synthos.connectors.call(connector, method, path, opts?) — POST /api/connectors  (proxy call; opts: { headers?, body?, query? })
+  synthos.connectors.list(opts?)        — GET /api/connectors  (opts: { category?, id? })
 All methods return Promises. Prefer these helpers over raw fetch().`;
 
 const repairUSER_MESSAGE =

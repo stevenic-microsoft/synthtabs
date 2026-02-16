@@ -4,7 +4,7 @@
     <title>SynthOS - Settings</title>
     <script id="theme-info" src="/api/theme-info.js" data-locked="true"></script>
     <link id="theme-css" rel="stylesheet" href="/api/theme.css" data-locked="true">
-    <style>.settings-title{font-size:22px;font-weight:700;min-height:var(--header-min-height);padding:var(--header-padding-vertical) var(--header-padding-horizontal);line-height:var(--header-line-height);display:flex;align-items:center;justify-content:center;box-sizing:border-box;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;border-radius:12px 12px 0 0;width:100%;box-shadow:0 6px 25px var(--accent-glow);letter-spacing:2px;text-shadow:0 2px 10px rgba(0,0,0,.3)}.settings-container{display:flex;flex-direction:column;width:100%;flex-grow:1;background:rgba(15,15,35,.8);border-radius:0 0 12px 12px;border:1px solid rgba(138,43,226,.2);border-top:none;overflow:hidden}.accordion-section{display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;border-bottom:1px solid var(--border-color)}.accordion-section:last-child{border-bottom:none}.accordion-section.active{flex-shrink:1;flex-grow:1;min-height:0}.accordion-header{display:flex;justify-content:space-between;align-items:center;width:100%;padding:16px 25px;background:none;border:none;color:var(--text-primary);font-size:15px;font-weight:600;cursor:pointer;transition:background .3s;letter-spacing:.5px;flex-shrink:0}.accordion-header:hover{background:rgba(138,43,226,.05)}.accordion-section.active .accordion-header{background:rgba(138,43,226,.08)}.accordion-chevron{font-size:11px;color:var(--text-secondary);transition:transform .3s}.accordion-section.active .accordion-chevron{transform:rotate(180deg)}.accordion-body{display:none;flex-direction:column;flex-grow:1;min-height:0;overflow:hidden}.accordion-section.active .accordion-body{display:flex}.accordion-content{display:flex;flex-direction:column;gap:15px;overflow-y:auto;padding:20px 25px;flex-grow:1}.button-row{display:flex;justify-content:flex-end;padding:15px 25px;border-top:1px solid var(--border-color);flex-shrink:0}.apply-btn{padding:12px 30px;border:none;border-radius:12px;font-size:15px;background:linear-gradient(135deg,var(--accent-primary) 0,var(--accent-secondary) 50%,var(--accent-tertiary) 100%);color:#fff;cursor:pointer;transition:.3s;font-weight:600;letter-spacing:1px;box-shadow:0 4px 20px rgba(102,126,234,.4)}.apply-btn:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(102,126,234,.6)}.apply-btn:active{transform:translateY(0)}.form-group{display:flex;flex-direction:column;width:100%}.form-group label{display:block;margin-bottom:8px;color:var(--text-secondary);font-weight:600;font-size:14px}.form-group input,.form-group select,.form-group textarea{width:100%;padding:14px 18px;border-radius:12px;border:1px solid var(--border-color);background:rgba(15,15,35,.8);color:var(--text-primary);font-size:14px;transition:.3s;box-shadow:inset 0 2px 10px rgba(0,0,0,.3)}.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:0;border-color:rgba(183,148,246,.6);box-shadow:inset 0 2px 10px rgba(0,0,0,.3),0 0 20px var(--accent-glow)}.form-group input::placeholder,.form-group textarea::placeholder{color:rgba(183,148,246,.5)}.form-group textarea{resize:vertical;min-height:100px}.form-group select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23b794f6' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 15px center}.form-group select option{background:var(--bg-tertiary);color:var(--text-primary);padding:10px}.info-text{color:rgba(183,148,246,.7);font-size:13px;line-height:1.6;text-align:center;padding:15px;background:rgba(15,15,35,.4);border-radius:10px;border:1px solid var(--border-color)}.info-text a{color:var(--accent-tertiary);text-decoration:none;transition:.3s;font-weight:500}.info-text a:hover{color:var(--text-secondary);text-shadow:0 0 10px var(--accent-glow)}.config-required-banner{padding:12px 20px;background:rgba(255,180,50,.12);border:1px solid rgba(255,180,50,.3);border-radius:10px;color:rgba(255,200,100,.9);font-size:13px;font-weight:500;text-align:center;line-height:1.5}.model-card{border:1px solid var(--border-color);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:12px;background:rgba(15,15,35,.3)}.model-card-title{font-size:14px;font-weight:700;color:var(--text-primary);letter-spacing:.5px;margin:0}.filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}.filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border-color);background:0 0;color:var(--text-secondary);font-size:13px;cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0}.filter-btn:hover{border-color:var(--accent-primary);color:var(--accent-primary)}.filter-btn.active{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;border-color:transparent}.services-grid{display:grid;grid-template-columns:1fr;gap:12px}.service-card{border-radius:12px;border:1px solid var(--border-color);background:rgba(15,15,35,.5);padding:18px;transition:.3s}.service-card:hover{border-color:rgba(138,43,226,.3)}.service-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.service-card-name{font-size:15px;font-weight:600;color:var(--text-primary)}.service-card-category{font-size:11px;color:var(--text-secondary);background:rgba(138,43,226,.15);padding:2px 8px;border-radius:10px}.service-card-desc{font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px}.service-card-fields{display:flex;flex-direction:column;gap:8px}.service-card-fields input{width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border-color);background:rgba(15,15,35,.8);color:var(--text-primary);font-size:13px;transition:.3s;box-shadow:inset 0 2px 8px rgba(0,0,0,.2)}.service-card-fields input:focus{outline:0;border-color:rgba(183,148,246,.6);box-shadow:inset 0 2px 8px rgba(0,0,0,.2),0 0 15px var(--accent-glow)}.service-card-fields input::placeholder{color:rgba(183,148,246,.5)}.toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0}.toggle-switch input{opacity:0;width:0;height:0}.toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(100,100,100,.4);border-radius:24px;transition:.3s}.toggle-slider:before{content:"";position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}.toggle-switch input:checked+.toggle-slider{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary))}.toggle-switch input:checked+.toggle-slider:before{transform:translateX(20px)}.light-mode .settings-container{background:rgba(255,255,255,.8)}.light-mode .accordion-header:hover{background:rgba(118,75,162,.05)}.light-mode .accordion-section.active .accordion-header{background:rgba(118,75,162,.06)}.light-mode .form-group input,.light-mode .form-group select,.light-mode .form-group textarea{background:rgba(255,255,255,.8);box-shadow:inset 0 2px 10px rgba(118,75,162,.05)}.light-mode .form-group input:focus,.light-mode .form-group select:focus,.light-mode .form-group textarea:focus{box-shadow:inset 0 2px 10px rgba(118,75,162,.05),0 0 20px var(--accent-glow)}.light-mode .form-group input::placeholder,.light-mode .form-group textarea::placeholder{color:rgba(107,79,138,.5)}.light-mode .info-text{color:rgba(107,79,138,.7);background:rgba(255,255,255,.4)}.light-mode .config-required-banner{background:rgba(200,150,50,.1);border-color:rgba(200,150,50,.3);color:rgba(160,120,30,.9)}.light-mode .model-card{background:rgba(255,255,255,.3)}.light-mode .service-card{background:rgba(255,255,255,.5)}.light-mode .service-card-fields input{background:rgba(255,255,255,.8);box-shadow:inset 0 2px 8px rgba(118,75,162,.05)}.light-mode .service-card-fields input:focus{box-shadow:inset 0 2px 8px rgba(118,75,162,.05),0 0 15px var(--accent-glow)}.light-mode .service-card-fields input::placeholder{color:rgba(107,79,138,.5)}.model-card.disabled{opacity:0.35;pointer-events:none;user-select:none;transition:opacity .3s}.wizard-hidden{display:none !important}.more-settings-link{display:inline-block;color:var(--accent-tertiary);font-size:13px;cursor:pointer;text-decoration:none;padding:4px 0;transition:.3s;user-select:none}.more-settings-link:hover{color:var(--text-secondary);text-shadow:0 0 10px var(--accent-glow)}.light-mode .model-card.disabled{opacity:0.35}.accordion-section.disabled .accordion-header{opacity:0.35;pointer-events:none;cursor:default}.apply-btn:disabled{opacity:0.35;pointer-events:none;cursor:default}</style>
+    <style>.settings-title{font-size:22px;font-weight:700;min-height:var(--header-min-height);padding:var(--header-padding-vertical) var(--header-padding-horizontal);line-height:var(--header-line-height);display:flex;align-items:center;justify-content:center;box-sizing:border-box;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;border-radius:12px 12px 0 0;width:100%;box-shadow:0 6px 25px var(--accent-glow);letter-spacing:2px;text-shadow:0 2px 10px rgba(0,0,0,.3)}.settings-container{display:flex;flex-direction:column;width:100%;flex-grow:1;background:rgba(15,15,35,.8);border-radius:0 0 12px 12px;border:1px solid rgba(138,43,226,.2);border-top:none;overflow:hidden}.accordion-section{display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;border-bottom:1px solid var(--border-color)}.accordion-section:last-child{border-bottom:none}.accordion-section.active{flex-shrink:1;flex-grow:1;min-height:0}.accordion-header{display:flex;justify-content:space-between;align-items:center;width:100%;padding:16px 25px;background:none;border:none;color:var(--text-primary);font-size:15px;font-weight:600;cursor:pointer;transition:background .3s;letter-spacing:.5px;flex-shrink:0}.accordion-header:hover{background:rgba(138,43,226,.05)}.accordion-section.active .accordion-header{background:rgba(138,43,226,.08)}.accordion-chevron{font-size:11px;color:var(--text-secondary);transition:transform .3s}.accordion-section.active .accordion-chevron{transform:rotate(180deg)}.accordion-body{display:none;flex-direction:column;flex-grow:1;min-height:0;overflow:hidden}.accordion-section.active .accordion-body{display:flex}.accordion-content{display:flex;flex-direction:column;gap:15px;overflow-y:auto;padding:20px 25px;flex-grow:1}.button-row{display:flex;justify-content:flex-end;padding:15px 25px;border-top:1px solid var(--border-color);flex-shrink:0}.apply-btn{padding:12px 30px;border:none;border-radius:12px;font-size:15px;background:linear-gradient(135deg,var(--accent-primary) 0,var(--accent-secondary) 50%,var(--accent-tertiary) 100%);color:#fff;cursor:pointer;transition:.3s;font-weight:600;letter-spacing:1px;box-shadow:0 4px 20px rgba(102,126,234,.4)}.apply-btn:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(102,126,234,.6)}.apply-btn:active{transform:translateY(0)}.form-group{display:flex;flex-direction:column;width:100%}.form-group label{display:block;margin-bottom:8px;color:var(--text-secondary);font-weight:600;font-size:14px}.form-group input,.form-group select,.form-group textarea{width:100%;padding:14px 18px;border-radius:12px;border:1px solid var(--border-color);background:rgba(15,15,35,.8);color:var(--text-primary);font-size:14px;transition:.3s;box-shadow:inset 0 2px 10px rgba(0,0,0,.3)}.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:0;border-color:rgba(183,148,246,.6);box-shadow:inset 0 2px 10px rgba(0,0,0,.3),0 0 20px var(--accent-glow)}.form-group input::placeholder,.form-group textarea::placeholder{color:rgba(183,148,246,.5)}.form-group textarea{resize:vertical;min-height:100px}.form-group select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23b794f6' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 15px center}.form-group select option{background:var(--bg-tertiary);color:var(--text-primary);padding:10px}.info-text{color:rgba(183,148,246,.7);font-size:13px;line-height:1.6;text-align:center;padding:15px;background:rgba(15,15,35,.4);border-radius:10px;border:1px solid var(--border-color)}.info-text a{color:var(--accent-tertiary);text-decoration:none;transition:.3s;font-weight:500}.info-text a:hover{color:var(--text-secondary);text-shadow:0 0 10px var(--accent-glow)}.config-required-banner{padding:12px 20px;background:rgba(255,180,50,.12);border:1px solid rgba(255,180,50,.3);border-radius:10px;color:rgba(255,200,100,.9);font-size:13px;font-weight:500;text-align:center;line-height:1.5}.model-card{border:1px solid var(--border-color);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:12px;background:rgba(15,15,35,.3)}.model-card-title{font-size:14px;font-weight:700;color:var(--text-primary);letter-spacing:.5px;margin:0}.filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}.filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border-color);background:0 0;color:var(--text-secondary);font-size:13px;cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0}.filter-btn:hover{border-color:var(--accent-primary);color:var(--accent-primary)}.filter-btn.active{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;border-color:transparent}.services-grid{display:grid;grid-template-columns:1fr;gap:12px}.service-card{border-radius:12px;border:1px solid var(--border-color);background:rgba(15,15,35,.5);padding:18px;transition:.3s}.service-card:hover{border-color:rgba(138,43,226,.3)}.service-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.service-card-name{font-size:15px;font-weight:600;color:var(--text-primary)}.service-card-category{font-size:11px;color:var(--text-secondary);background:rgba(138,43,226,.15);padding:2px 8px;border-radius:10px}.service-card-desc{font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px}.service-card-fields{display:flex;flex-direction:column;gap:8px}.service-card-fields input{width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border-color);background:rgba(15,15,35,.8);color:var(--text-primary);font-size:13px;transition:.3s;box-shadow:inset 0 2px 8px rgba(0,0,0,.2)}.service-card-fields input:focus{outline:0;border-color:rgba(183,148,246,.6);box-shadow:inset 0 2px 8px rgba(0,0,0,.2),0 0 15px var(--accent-glow)}.service-card-fields input::placeholder{color:rgba(183,148,246,.5)}.toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0}.toggle-switch input{opacity:0;width:0;height:0}.toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(100,100,100,.4);border-radius:24px;transition:.3s}.toggle-slider:before{content:"";position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}.toggle-switch input:checked+.toggle-slider{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary))}.toggle-switch input:checked+.toggle-slider:before{transform:translateX(20px)}.light-mode .settings-container{background:rgba(255,255,255,.8)}.light-mode .accordion-header:hover{background:rgba(118,75,162,.05)}.light-mode .accordion-section.active .accordion-header{background:rgba(118,75,162,.06)}.light-mode .form-group input,.light-mode .form-group select,.light-mode .form-group textarea{background:rgba(255,255,255,.8);box-shadow:inset 0 2px 10px rgba(118,75,162,.05)}.light-mode .form-group input:focus,.light-mode .form-group select:focus,.light-mode .form-group textarea:focus{box-shadow:inset 0 2px 10px rgba(118,75,162,.05),0 0 20px var(--accent-glow)}.light-mode .form-group input::placeholder,.light-mode .form-group textarea::placeholder{color:rgba(107,79,138,.5)}.light-mode .info-text{color:rgba(107,79,138,.7);background:rgba(255,255,255,.4)}.light-mode .config-required-banner{background:rgba(200,150,50,.1);border-color:rgba(200,150,50,.3);color:rgba(160,120,30,.9)}.light-mode .model-card{background:rgba(255,255,255,.3)}.light-mode .service-card{background:rgba(255,255,255,.5)}.light-mode .service-card-fields input{background:rgba(255,255,255,.8);box-shadow:inset 0 2px 8px rgba(118,75,162,.05)}.light-mode .service-card-fields input:focus{box-shadow:inset 0 2px 8px rgba(118,75,162,.05),0 0 15px var(--accent-glow)}.light-mode .service-card-fields input::placeholder{color:rgba(107,79,138,.5)}.model-card.disabled{opacity:0.35;pointer-events:none;user-select:none;transition:opacity .3s}.wizard-hidden{display:none !important}.more-settings-link{display:inline-block;color:var(--accent-tertiary);font-size:13px;cursor:pointer;text-decoration:none;padding:4px 0;transition:.3s;user-select:none}.more-settings-link:hover{color:var(--text-secondary);text-shadow:0 0 10px var(--accent-glow)}.light-mode .model-card.disabled{opacity:0.35}.accordion-section.disabled .accordion-header{opacity:0.35;pointer-events:none;cursor:default}.apply-btn:disabled{opacity:0.35;pointer-events:none;cursor:default}.connector-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}.connector-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 12px;border-radius:14px;border:1px solid var(--border-color);background:linear-gradient(160deg,rgba(30,30,60,.6),rgba(20,20,50,.8));cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s;gap:8px}.connector-tile:hover{transform:translateY(-3px);box-shadow:0 6px 20px var(--accent-glow);border-color:var(--accent-primary)}.connector-tile.configured{background:linear-gradient(160deg,rgba(60,30,90,.6),rgba(40,20,70,.8));border-color:var(--accent-secondary);box-shadow:0 2px 12px var(--accent-glow)}.connector-tile-name{font-size:14px;font-weight:600;color:var(--text-primary)}.connector-category{font-size:11px;color:var(--text-secondary);background:rgba(138,43,226,.15);padding:2px 8px;border-radius:10px}.search-input{flex:1;min-width:100px;padding:6px 14px;border-radius:20px;border:1px solid var(--border-color);background:rgba(15,15,35,.8);color:var(--text-primary);font-size:13px;transition:.3s}.search-input:focus{outline:0;border-color:rgba(183,148,246,.6)}.search-input::placeholder{color:rgba(183,148,246,.5)}.filter-buttons-container{display:flex;gap:8px;flex-wrap:nowrap}.conn-modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:1000}.conn-modal-content{background:rgba(20,20,50,.95);border:1px solid var(--border-color);border-radius:16px;padding:28px;max-width:420px;width:90%;display:flex;flex-direction:column;gap:16px;box-shadow:0 8px 40px rgba(0,0,0,.5)}.conn-modal-title{font-size:18px;font-weight:700;color:var(--text-primary)}.conn-modal-desc{font-size:13px;color:var(--text-secondary);line-height:1.5}.conn-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}.conn-modal-btn{padding:12px 24px;border:none;border-radius:12px;font-size:14px;background:linear-gradient(135deg,var(--accent-primary) 0,var(--accent-secondary) 50%,var(--accent-tertiary) 100%);color:#fff;cursor:pointer;transition:.3s;font-weight:600;letter-spacing:.5px;box-shadow:0 4px 20px rgba(102,126,234,.4)}.conn-modal-btn:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(102,126,234,.6)}.conn-modal-btn.cancel{background:rgba(100,100,100,.4);box-shadow:none}.conn-modal-btn.cancel:hover{background:rgba(100,100,100,.6);transform:translateY(-1px)}.conn-modal-btn.remove{background:rgba(180,50,50,.6);box-shadow:none}.conn-modal-btn.remove:hover{background:rgba(200,60,60,.8);transform:translateY(-1px)}.light-mode .connector-tile{background:linear-gradient(160deg,rgba(240,235,255,.8),rgba(250,248,255,.9))}.light-mode .connector-tile.configured{background:linear-gradient(160deg,rgba(220,200,255,.8),rgba(235,220,255,.9))}.light-mode .search-input{background:rgba(255,255,255,.8)}.light-mode .search-input::placeholder{color:rgba(107,79,138,.5)}.light-mode .conn-modal-content{background:rgba(250,248,255,.98)}</style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.0/mermaid.min.js"></script>
@@ -134,21 +134,68 @@
                 </div>
             </div>
 
-            <div class="accordion-section" data-section="features">
+            <div class="accordion-section" data-section="connectors">
                 <button class="accordion-header">
-                    <span>Additional Features</span>
+                    <span>Connectors</span>
                     <span class="accordion-chevron">&#9662;</span>
                 </button>
                 <div class="accordion-body">
                     <div class="accordion-content">
-                        <div class="filter-bar" id="serviceFilterBar"></div>
-                        <div class="services-grid" id="servicesGrid"></div>
+                        <div class="filter-bar" id="connectorFilterBar">
+                            <div class="filter-buttons-container" id="connectorFilterButtons"></div>
+                            <input type="text" class="search-input" id="connectorSearch" placeholder="Search connectors...">
+                        </div>
+                        <div class="connector-grid" id="connectorGrid"></div>
                     </div>
                 </div>
             </div>
 
         </div>
         <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
+    </div>
+    <div class="conn-modal-overlay" id="connectorModal" style="display:none;">
+        <div class="conn-modal-content">
+            <div class="conn-modal-title" id="connectorModalTitle"></div>
+            <div class="conn-modal-desc" id="connectorModalDesc"></div>
+            <div id="connectorApiKeyGroup" class="form-group">
+                <label for="connectorApiKey">API Key</label>
+                <input type="password" id="connectorApiKey" placeholder="Enter your API key">
+            </div>
+            <div id="connectorOAuthGroup" style="display:none;">
+                <div id="connectorOAuthStatus" style="margin-bottom:12px;font-size:13px;line-height:1.5;"></div>
+                <div id="connectorOAuthModeToggle" style="display:flex;gap:8px;margin-bottom:12px;">
+                    <button class="filter-btn active" id="oauthModeManual">Manual Token</button>
+                    <button class="filter-btn" id="oauthModeApp">OAuth App</button>
+                </div>
+                <div id="connectorManualGroup">
+                    <div class="form-group" style="margin-bottom:10px;">
+                        <label for="oauth-field-accessToken">Access Token</label>
+                        <input type="password" id="oauth-field-accessToken" placeholder="Paste token from Graph API Explorer">
+                    </div>
+                    <div class="form-group" style="margin-bottom:10px;">
+                        <label for="oauth-field-userId">IG User ID <span style="color:var(--text-secondary);font-weight:400;">(optional)</span></label>
+                        <input type="text" id="oauth-field-userId" placeholder="Instagram Business Account ID">
+                    </div>
+                </div>
+                <div id="connectorAppGroup" style="display:none;">
+                    <div class="form-group" id="connectorOAuthFields"></div>
+                    <button class="conn-modal-btn" id="connectorConnectBtn" style="width:100%;margin-bottom:8px;">Connect with OAuth</button>
+                </div>
+                <button class="conn-modal-btn remove" id="connectorDisconnectBtn" style="width:100%;display:none;">Disconnect</button>
+            </div>
+            <div class="form-group" style="flex-direction:row;align-items:center;gap:12px;">
+                <label for="connectorEnabled" style="margin-bottom:0;">Enabled</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="connectorEnabled">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="conn-modal-actions">
+                <button class="conn-modal-btn" id="connectorSaveBtn">Save</button>
+                <button class="conn-modal-btn cancel" id="connectorCancelBtn">Cancel</button>
+                <button class="conn-modal-btn remove" id="connectorRemoveBtn">Remove</button>
+            </div>
+        </div>
     </div>
     <div id="instructionsHidden" style="display: none;" data-locked="true"></div>
     <div id="thoughts" style="display: none;" data-locked="true"></div>
@@ -184,113 +231,247 @@ document.querySelectorAll('.accordion-header').forEach(function(header) {
 // --- URL param: open requested tab ---
 var params = new URLSearchParams(window.location.search);
 var tabParam = params.get('tab');
-if (tabParam && ['general', 'models', 'features'].indexOf(tabParam) !== -1) {
+if (tabParam && ['general', 'models', 'connectors'].indexOf(tabParam) !== -1) {
     openSection(tabParam);
 }
 
-// --- Services logic ---
-var serviceRegistry = [], serviceConfigs = {}, activeServiceCategory = 'All';
+// --- Connectors logic ---
+var connectorList = [], activeConnectorCategory = 'All', currentConnectorId = null;
 
-function renderServiceFilterBar() {
-    var bar = document.getElementById('serviceFilterBar');
-    bar.innerHTML = '';
+function loadConnectors() {
+    fetch('/api/connectors').then(function(r) { return r.json(); }).then(function(list) {
+        connectorList = list;
+        renderConnectorFilterBar();
+        renderConnectorGrid();
+    });
+}
+
+function renderConnectorFilterBar() {
+    var container = document.getElementById('connectorFilterButtons');
+    container.innerHTML = '';
     var cats = new Set();
-    serviceRegistry.forEach(function(s) { cats.add(s.category); });
+    connectorList.forEach(function(c) { cats.add(c.category); });
     var sorted = Array.from(cats).sort();
     ['All'].concat(sorted).forEach(function(cat) {
         var btn = document.createElement('button');
-        btn.className = 'filter-btn' + (activeServiceCategory === cat ? ' active' : '');
+        btn.className = 'filter-btn' + (activeConnectorCategory === cat ? ' active' : '');
         btn.textContent = cat;
         btn.addEventListener('click', function() {
-            activeServiceCategory = cat;
-            renderServiceFilterBar();
-            renderServiceCards();
+            activeConnectorCategory = cat;
+            renderConnectorFilterBar();
+            renderConnectorGrid();
         });
-        bar.appendChild(btn);
+        container.appendChild(btn);
     });
 }
 
-function renderServiceCards() {
-    var grid = document.getElementById('servicesGrid');
+function renderConnectorGrid() {
+    var grid = document.getElementById('connectorGrid');
+    var searchTerm = (document.getElementById('connectorSearch').value || '').toLowerCase();
     grid.innerHTML = '';
-    serviceRegistry.filter(function(s) {
-        return activeServiceCategory === 'All' || s.category === activeServiceCategory;
-    }).forEach(function(def) {
-        var cfg = serviceConfigs[def.id] || {};
-        var card = document.createElement('div');
-        card.className = 'service-card';
-        card.dataset.serviceId = def.id;
+    connectorList.filter(function(c) {
+        if (activeConnectorCategory !== 'All' && c.category !== activeConnectorCategory) return false;
+        if (searchTerm && c.name.toLowerCase().indexOf(searchTerm) === -1) return false;
+        return true;
+    }).forEach(function(c) {
+        var tile = document.createElement('div');
+        tile.className = 'connector-tile' + (c.configured ? ' configured' : '');
+        tile.addEventListener('click', function() { openConnectorModal(c.id); });
 
-        var header = document.createElement('div');
-        header.className = 'service-card-header';
+        var name = document.createElement('div');
+        name.className = 'connector-tile-name';
+        name.textContent = c.name;
 
-        var nameRow = document.createElement('div');
-        nameRow.style.display = 'flex';
-        nameRow.style.alignItems = 'center';
-        nameRow.style.gap = '8px';
+        var cat = document.createElement('div');
+        cat.className = 'connector-category';
+        cat.textContent = c.category;
 
-        var nameEl = document.createElement('span');
-        nameEl.className = 'service-card-name';
-        nameEl.textContent = def.name;
-
-        var catEl = document.createElement('span');
-        catEl.className = 'service-card-category';
-        catEl.textContent = def.category;
-
-        nameRow.appendChild(nameEl);
-        nameRow.appendChild(catEl);
-
-        var toggle = document.createElement('label');
-        toggle.className = 'toggle-switch';
-        var checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.checked = !!cfg.enabled;
-        checkbox.dataset.serviceId = def.id;
-        checkbox.dataset.field = 'enabled';
-        var slider = document.createElement('span');
-        slider.className = 'toggle-slider';
-        toggle.appendChild(checkbox);
-        toggle.appendChild(slider);
-
-        header.appendChild(nameRow);
-        header.appendChild(toggle);
-        card.appendChild(header);
-
-        var desc = document.createElement('div');
-        desc.className = 'service-card-desc';
-        desc.textContent = def.description;
-        card.appendChild(desc);
-
-        var fields = document.createElement('div');
-        fields.className = 'service-card-fields';
-        def.fields.forEach(function(f) {
-            var input = document.createElement('input');
-            input.type = f.type;
-            input.placeholder = cfg.hasKey ? '(key saved — leave blank to keep)' : f.label;
-            input.dataset.serviceId = def.id;
-            input.dataset.field = f.name;
-            fields.appendChild(input);
-        });
-        card.appendChild(fields);
-        grid.appendChild(card);
+        tile.appendChild(name);
+        tile.appendChild(cat);
+        grid.appendChild(tile);
     });
 }
 
-function collectServicesConfig() {
-    var config = {};
-    serviceRegistry.forEach(function(def) {
-        var card = document.querySelector('.service-card[data-service-id="' + def.id + '"]');
-        if (card) {
-            var enabled = card.querySelector('input[data-field="enabled"]');
-            var entry = { apiKey: '', enabled: !!enabled && enabled.checked };
-            def.fields.forEach(function(f) {
-                var input = card.querySelector('input[data-field="' + f.name + '"]');
-                if (input) entry[f.name] = input.value;
+var currentConnectorDetail = null;
+
+function openConnectorModal(id) {
+    currentConnectorId = id;
+    fetch('/api/connectors/' + encodeURIComponent(id)).then(function(r) { return r.json(); }).then(function(detail) {
+        currentConnectorDetail = detail;
+        document.getElementById('connectorModalTitle').textContent = detail.name;
+        document.getElementById('connectorModalDesc').textContent = detail.description;
+        document.getElementById('connectorEnabled').checked = detail.enabled;
+        document.getElementById('connectorRemoveBtn').style.display = (detail.configured || detail.hasKey) ? '' : 'none';
+
+        var isOAuth = detail.authStrategy === 'oauth2';
+        document.getElementById('connectorApiKeyGroup').style.display = isOAuth ? 'none' : '';
+        document.getElementById('connectorOAuthGroup').style.display = isOAuth ? '' : 'none';
+
+        if (isOAuth) {
+            // Render OAuth App fields (App ID, App Secret)
+            var fieldsContainer = document.getElementById('connectorOAuthFields');
+            fieldsContainer.innerHTML = '';
+            (detail.fields || []).forEach(function(f) {
+                var wrap = document.createElement('div');
+                wrap.className = 'form-group';
+                wrap.style.marginBottom = '10px';
+                var lbl = document.createElement('label');
+                lbl.textContent = f.label;
+                lbl.setAttribute('for', 'oauth-field-' + f.name);
+                var inp = document.createElement('input');
+                inp.type = f.type;
+                inp.id = 'oauth-field-' + f.name;
+                inp.placeholder = detail.hasKey ? '(saved — leave blank to keep)' : 'Enter ' + f.label;
+                wrap.appendChild(lbl);
+                wrap.appendChild(inp);
+                fieldsContainer.appendChild(wrap);
             });
-            config[def.id] = entry;
+
+            // Reset manual token fields
+            document.getElementById('oauth-field-accessToken').value = '';
+            document.getElementById('oauth-field-accessToken').placeholder = detail.connected ? '(token saved — leave blank to keep)' : 'Paste token from Graph API Explorer';
+            document.getElementById('oauth-field-userId').value = '';
+            document.getElementById('oauth-field-userId').placeholder = detail.connected ? (detail.accountName || 'Instagram Business Account ID') : 'Instagram Business Account ID';
+
+            // Default to manual mode
+            setOAuthMode('manual');
+
+            // Show connected status
+            var statusEl = document.getElementById('connectorOAuthStatus');
+            var disconnectBtn = document.getElementById('connectorDisconnectBtn');
+            var modeToggle = document.getElementById('connectorOAuthModeToggle');
+            if (detail.connected) {
+                var displayName = detail.accountName || detail.name;
+                statusEl.innerHTML = '<span style="color:var(--accent-tertiary);">Connected as <strong>' + displayName + '</strong></span>';
+                statusEl.style.display = '';
+                disconnectBtn.style.display = '';
+                modeToggle.style.display = 'none';
+            } else {
+                statusEl.innerHTML = '';
+                statusEl.style.display = 'none';
+                disconnectBtn.style.display = 'none';
+                modeToggle.style.display = 'flex';
+            }
+        } else {
+            document.getElementById('connectorApiKey').value = '';
+            document.getElementById('connectorApiKey').placeholder = detail.hasKey ? '(key saved — leave blank to keep)' : 'Enter your API key';
+        }
+
+        document.getElementById('connectorModal').style.display = 'flex';
+    });
+}
+
+var currentOAuthMode = 'manual';
+
+function setOAuthMode(mode) {
+    currentOAuthMode = mode;
+    document.getElementById('connectorManualGroup').style.display = mode === 'manual' ? '' : 'none';
+    document.getElementById('connectorAppGroup').style.display = mode === 'app' ? '' : 'none';
+    document.getElementById('oauthModeManual').className = 'filter-btn' + (mode === 'manual' ? ' active' : '');
+    document.getElementById('oauthModeApp').className = 'filter-btn' + (mode === 'app' ? ' active' : '');
+}
+
+document.getElementById('oauthModeManual').addEventListener('click', function() { setOAuthMode('manual'); });
+document.getElementById('oauthModeApp').addEventListener('click', function() { setOAuthMode('app'); });
+
+function closeConnectorModal() {
+    document.getElementById('connectorModal').style.display = 'none';
+    currentConnectorId = null;
+}
+
+document.getElementById('connectorCancelBtn').addEventListener('click', closeConnectorModal);
+
+document.getElementById('connectorModal').addEventListener('click', function(e) {
+    if (e.target === this) closeConnectorModal();
+});
+
+document.getElementById('connectorSaveBtn').addEventListener('click', function() {
+    if (!currentConnectorId) return;
+    var isOAuth = currentConnectorDetail && currentConnectorDetail.authStrategy === 'oauth2';
+    var body;
+    if (isOAuth) {
+        body = { enabled: document.getElementById('connectorEnabled').checked };
+        if (currentOAuthMode === 'manual') {
+            // Manual token entry
+            var token = document.getElementById('oauth-field-accessToken').value;
+            if (token) body.accessToken = token;
+            var uid = document.getElementById('oauth-field-userId').value;
+            if (uid) body.userId = uid;
+        } else {
+            // OAuth app credentials
+            (currentConnectorDetail.fields || []).forEach(function(f) {
+                var el = document.getElementById('oauth-field-' + f.name);
+                if (el && el.value) body[f.name] = el.value;
+            });
+        }
+    } else {
+        body = {
+            apiKey: document.getElementById('connectorApiKey').value,
+            enabled: document.getElementById('connectorEnabled').checked
+        };
+    }
+    fetch('/api/connectors/' + encodeURIComponent(currentConnectorId), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    }).then(function(r) {
+        if (r.ok) { closeConnectorModal(); loadConnectors(); }
+    });
+});
+
+document.getElementById('connectorConnectBtn').addEventListener('click', function() {
+    if (!currentConnectorId || !currentConnectorDetail) return;
+    // Save credentials first, then redirect to authorize
+    var body = { enabled: true };
+    (currentConnectorDetail.fields || []).forEach(function(f) {
+        var el = document.getElementById('oauth-field-' + f.name);
+        if (el && el.value) body[f.name] = el.value;
+    });
+    fetch('/api/connectors/' + encodeURIComponent(currentConnectorId), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    }).then(function(r) {
+        if (r.ok) {
+            window.location.href = '/api/connectors/' + encodeURIComponent(currentConnectorId) + '/authorize';
         }
     });
-    return config;
+});
+
+document.getElementById('connectorDisconnectBtn').addEventListener('click', function() {
+    if (!currentConnectorId) return;
+    fetch('/api/connectors/' + encodeURIComponent(currentConnectorId), { method: 'DELETE' }).then(function(r) {
+        if (r.ok) { closeConnectorModal(); loadConnectors(); }
+    });
+});
+
+document.getElementById('connectorRemoveBtn').addEventListener('click', function() {
+    if (!currentConnectorId) return;
+    fetch('/api/connectors/' + encodeURIComponent(currentConnectorId), { method: 'DELETE' }).then(function(r) {
+        if (r.ok) { closeConnectorModal(); loadConnectors(); }
+    });
+});
+
+document.getElementById('connectorSearch').addEventListener('input', renderConnectorGrid);
+
+// Detect OAuth success/error from URL params
+var connectedParam = params.get('connected');
+var errorParam = params.get('error');
+if (connectedParam) {
+    // Open the connectors tab and show success
+    openSection('connectors');
+    setTimeout(function() { openConnectorModal(connectedParam); }, 500);
+    // Clean URL
+    var cleanUrl = new URL(window.location);
+    cleanUrl.searchParams.delete('connected');
+    history.replaceState(null, '', cleanUrl);
+}
+if (errorParam) {
+    openSection('connectors');
+    alert('OAuth error: ' + errorParam);
+    var cleanUrl2 = new URL(window.location);
+    cleanUrl2.searchParams.delete('error');
+    history.replaceState(null, '', cleanUrl2);
 }
 
 // --- Save logic ---
@@ -337,21 +518,13 @@ function saveAllSettings() {
         models: models,
         features: []
     };
-    var servicesBody = collectServicesConfig();
 
-    Promise.all([
-        fetch('/api/settings', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        }),
-        fetch('/api/services', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(servicesBody)
-        })
-    ]).then(function(responses) {
-        if (responses.every(function(r) { return r.ok || r.redirected; })) {
+    fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    }).then(function(response) {
+        if (response.ok || response.redirected) {
             if (wizardActive) {
                 window.location.href = '/builder?firstRun=true';
             } else {
@@ -543,11 +716,9 @@ var isConfigured = false;
 
 Promise.all([
     fetch('/api/settings').then(function(r) { return r.json(); }),
-    fetch('/api/themes').then(function(r) { return r.json(); }),
-    fetch('/api/services/registry').then(function(r) { return r.json(); }),
-    fetch('/api/services').then(function(r) { return r.json(); })
+    fetch('/api/themes').then(function(r) { return r.json(); })
 ]).then(function(results) {
-    var data = results[0], themes = results[1], registry = results[2], configs = results[3];
+    var data = results[0], themes = results[1];
 
     // Store providers data
     providersData = data.providers || [];
@@ -589,10 +760,7 @@ Promise.all([
     }).join('');
     document.getElementById('theme').value = currentTheme;
 
-    serviceRegistry = registry;
-    serviceConfigs = configs;
-    renderServiceFilterBar();
-    renderServiceCards();
+    loadConnectors();
 
     var isFirstRun = params.get('firstRun') === '1';
 
@@ -635,7 +803,7 @@ Promise.all([
 
         // Disable other accordion tabs
         document.querySelector('.accordion-section[data-section="general"]').classList.add('disabled');
-        document.querySelector('.accordion-section[data-section="features"]').classList.add('disabled');
+        document.querySelector('.accordion-section[data-section="connectors"]').classList.add('disabled');
 
         // Clear any existing values so wizard starts fresh
         document.getElementById('provider-builder').value = '';

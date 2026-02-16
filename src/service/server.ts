@@ -3,6 +3,7 @@ import { usePageRoutes } from './usePageRoutes';
 import { useApiRoutes } from './useApiRoutes';
 import { SynthOSConfig } from '../init';
 import { useDataRoutes } from './useDataRoutes';
+import { useConnectorRoutes } from './useConnectorRoutes';
 import { cyan, yellow, formatTime } from './debugLog';
 
 export function server(config: SynthOSConfig): Application {
@@ -31,6 +32,9 @@ export function server(config: SynthOSConfig): Application {
 
     // API routes
     useApiRoutes(config, app);
+
+    // Connector routes
+    useConnectorRoutes(config, app);
 
     // Data routes
     useDataRoutes(config, app);

@@ -37,6 +37,7 @@ export interface SettingsV2 {
     models: ModelEntry[];
     features: string[];
     services?: ServicesConfig;
+    connectors?: ServicesConfig;
 }
 
 export const DefaultSettings: SettingsV2 = {
@@ -61,7 +62,8 @@ export const DefaultSettings: SettingsV2 = {
         },
     ],
     features: [],
-    services: {}
+    services: {},
+    connectors: {}
 };
 
 /**
@@ -159,7 +161,16 @@ export async function loadSettings(folder: string): Promise<SettingsV2> {
         }
     }
 
-    return {...DefaultSettings, ..._settings, models: _settings?.models ?? DefaultSettings.models};
+    const merged = {...DefaultSettings, ..._settings, models: _settings?.models ?? DefaultSettings.models};
+
+    // Auto-migrate: copy services into connectors if connectors is empty
+    const connectors = merged.connectors ?? {};
+    const services = merged.services ?? {};
+    if (Object.keys(connectors).length === 0 && Object.keys(services).length > 0) {
+        merged.connectors = { ...services };
+    }
+
+    return merged;
 }
 
 export async function saveSettings(folder: string, settings: Partial<SettingsV2>): Promise<void> {

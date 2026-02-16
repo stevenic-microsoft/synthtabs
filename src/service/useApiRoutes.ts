@@ -618,7 +618,7 @@ ${context}
             }
 
             const settings = await loadSettings(config.pagesFolder);
-            const braveConfig = settings.services?.['brave-search'];
+            const braveConfig = settings.connectors?.['brave-search'] ?? settings.services?.['brave-search'];
             if (!braveConfig || !braveConfig.enabled || !braveConfig.apiKey) {
                 res.status(400).json({ error: 'Brave Search is not configured or not enabled. Add your API key in Settings > Services.' });
                 return;

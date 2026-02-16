@@ -289,7 +289,8 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
             const theme = settings.theme;
             const themeInfo = await loadThemeInfo(theme ?? 'nebula-dusk', config);
             const modelInstructions = getModelInstructions(builder.provider);
-            const result = await transformPage({ pagesFolder, pageState, message, maxTokens, instructions, modelInstructions, completePrompt, themeInfo });
+            const configuredConnectors = settings.connectors;
+            const result = await transformPage({ pagesFolder, pageState, message, maxTokens, instructions, modelInstructions, completePrompt, themeInfo, configuredConnectors });
             if (result.completed) {
                 const { html, changeCount } = result.value!;
                 if (config.debug) {

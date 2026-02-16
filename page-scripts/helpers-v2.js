@@ -94,6 +94,28 @@
                 }
                 return _json('POST', '/api/search/web', body);
             }
+        },
+
+        connectors: {
+            call: function(connector, method, path, opts) {
+                var body = { connector: connector, method: method, path: path };
+                if (opts) {
+                    if (opts.headers) body.headers = opts.headers;
+                    if (opts.body) body.body = opts.body;
+                    if (opts.query) body.query = opts.query;
+                }
+                return _json('POST', '/api/connectors', body);
+            },
+            list: function(opts) {
+                var url = '/api/connectors';
+                var params = [];
+                if (opts) {
+                    if (opts.category) params.push('category=' + encodeURIComponent(opts.category));
+                    if (opts.id) params.push('id=' + encodeURIComponent(opts.id));
+                }
+                if (params.length) url += '?' + params.join('&');
+                return _json('GET', url);
+            }
         }
     };
 })();
