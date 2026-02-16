@@ -56,9 +56,10 @@ const V1_TO_V2_SYSTEM_PROMPT = `You are a code migration tool. You convert Synth
 
 ## Rules — What to REMOVE
 
-1. **Shared CSS rules** — Remove ALL CSS rules for these selectors (they are now in theme.css):
+1. **Shared CSS rules** — Remove CSS rules that match these selectors **exactly** (they are now in theme.css):
    \`*\`, \`body\`, \`.chat-panel\`, \`.chat-header\`, \`.chat-messages\`, \`.chat-message\` (and descendants like \`.chat-message p\`, \`.chat-message strong\`, \`.chat-message pre\`, \`.chat-message code\`, \`.chat-message a\`), \`.link-group\`, \`.link-group a\`, \`form\`, \`.chat-input\`, \`.chat-submit\`, \`.loading-overlay\`, \`.spinner\`, \`.viewer-panel\`, \`#loadingOverlay\`, \`.chat-submit:disabled\`, \`.chat-input:disabled\`
    Also remove any \`@keyframes spin\` and scrollbar pseudo-element rules (\`::-webkit-scrollbar\`, \`::-webkit-scrollbar-track\`, \`::-webkit-scrollbar-thumb\`).
+   **Important:** Only remove rules matching these selectors exactly. Do NOT remove pseudo-element variants (\`.viewer-panel::before\`, \`.viewer-panel::after\`), pseudo-class variants (\`.chat-input:focus\`, \`.chat-submit:hover\`), or any other compound selectors that extend the shared selectors — those are page-specific styles and must be preserved. Also preserve any \`@keyframes\` referenced by page-specific rules (e.g. if a page has \`.viewer-panel::before\` using a custom animation, keep that \`@keyframes\`).
 
 2. **Shared inline JS** — Remove these specific code blocks from \`<script>\` tags:
    - \`document.getElementById('chatInput').focus()\` line

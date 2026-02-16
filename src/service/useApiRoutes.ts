@@ -1,6 +1,6 @@
 import path from "path";
 import { listPages, loadPageMetadata, PageMetadata, savePageMetadata, REQUIRED_PAGES, deletePage, copyPage, loadPageState, savePageState, PAGE_VERSION } from "../pages";
-import { checkIfExists, deleteFile, loadFile } from "../files";
+import { checkIfExists, copyFile, deleteFile, loadFile } from "../files";
 import {getModelEntry, loadSettings, saveSettings, ServicesConfig } from "../settings";
 import { Application } from 'express';
 import { SynthOSConfig } from "../init";
@@ -689,9 +689,11 @@ ${context}
             // Save upgraded HTML to v2 folder structure
             await savePageState(config.pagesFolder, name, migratedHtml);
 
-            // Delete legacy flat file if it exists
+            // Move legacy flat file to .migrated folder instead of deleting
             const flatPath = path.join(config.pagesFolder, `${name}.html`);
             if (await checkIfExists(flatPath)) {
+                const migratedFolder = path.join(config.pagesFolder, '.migrated');
+                await copyFile(flatPath, migratedFolder);
                 await deleteFile(flatPath);
             }
 
