@@ -3,7 +3,7 @@ import { Provider, ProviderName } from './types';
 export const AnthropicProvider: Provider = {
     name: 'Anthropic',
     builderModels: ['claude-opus-4-6', 'claude-sonnet-4-5'],
-    chatModels: ['claude-haiku-4-5', 'claude-sonnet-4-5'],
+    chatModels: ['claude-sonnet-4-5','claude-haiku-4-5'],
     detectModel(model: string): boolean {
         return model.startsWith('claude-');
     }
@@ -14,7 +14,7 @@ export const OpenAIProvider: Provider = {
     builderModels: ['gpt-5.2', 'gpt-5.2-codex'],
     chatModels: ['gpt-5-nano', 'gpt-5-mini', 'gpt-4.1'],
     detectModel(model: string): boolean {
-        return model.startsWith('gpt-') || model.startsWith('GPT-');
+        return model.startsWith('gpt-');
     }
 };
 
