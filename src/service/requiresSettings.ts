@@ -1,7 +1,7 @@
-import { hasConfiguredSettings, loadSettings, Settings } from "../settings";
+import { hasConfiguredSettings, loadSettings, SettingsV2 } from "../settings";
 
 
-export async function requiresSettings(res: any, folder: string, cb: (settings: Settings) => Promise<void>) {
+export async function requiresSettings(res: any, folder: string, cb: (settings: SettingsV2) => Promise<void>) {
     try {
         // Ensure settings configured
         const isConfigured = await hasConfiguredSettings(folder);

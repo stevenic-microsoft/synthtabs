@@ -1,5 +1,5 @@
 import { loadPageMetadata, loadPageState, normalizePageName, PAGE_VERSION, REQUIRED_PAGES, savePageMetadata, savePageState, updatePageState } from "../pages";
-import { hasConfiguredSettings, loadSettings } from "../settings";
+import { getModelEntry, hasConfiguredSettings, loadSettings } from "../settings";
 import { Application } from 'express';
 import { transformPage } from "./transformPage";
 import { getModelInstructions } from "./modelInstructions";
@@ -100,7 +100,7 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
         const { page } = req.params;
         const isConfigured = await hasConfiguredSettings(config.pagesFolder);
         if (!isConfigured && page !== 'settings') {
-            res.redirect('/settings');
+            res.redirect('/settings?firstRun=1');
             return;
         }
 
@@ -134,7 +134,7 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
         const { page } = req.params;
         const isConfigured = await hasConfiguredSettings(config.pagesFolder);
         if (!isConfigured) {
-            res.redirect('/settings');
+            res.redirect('/settings?firstRun=1');
             return;
         }
 
@@ -253,7 +253,7 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
             }
 
             // Create model instance
-            const innerCompletePrompt = await createCompletePrompt(config.pagesFolder, req.body.model);
+            const innerCompletePrompt = await createCompletePrompt(config.pagesFolder, 'builder', req.body.model);
             const debugVerbose = config.debugPageUpdates;
             let inputChars = 0;
             let outputChars = 0;
@@ -282,9 +282,13 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
 
             // Transform and cache updated page
             const pagesFolder = config.pagesFolder;
-            const { maxTokens, instructions, model, theme } = await loadSettings(config.pagesFolder);
+            const settings = await loadSettings(config.pagesFolder);
+            const builder = getModelEntry(settings, 'builder');
+            const { configuration, instructions } = builder;
+            const maxTokens = configuration.maxTokens;
+            const theme = settings.theme;
             const themeInfo = await loadThemeInfo(theme ?? 'nebula-dusk', config);
-            const modelInstructions = getModelInstructions(model);
+            const modelInstructions = getModelInstructions(builder.provider);
             const result = await transformPage({ pagesFolder, pageState, message, maxTokens, instructions, modelInstructions, completePrompt, themeInfo });
             if (result.completed) {
                 const { html, changeCount } = result.value!;

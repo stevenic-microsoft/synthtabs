@@ -162,6 +162,259 @@
 #planetAnswerBox strong {
   color: #f093fb;
 }
+</style><style id="settings-modal-styles">
+.settings-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.settings-overlay.active {
+  display: flex;
+}
+.settings-modal {
+  background: rgba(15, 15, 35, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(138, 43, 226, 0.4);
+  border-radius: 16px;
+  padding: 28px 32px;
+  width: 420px;
+  max-width: 90vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  color: #fff;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.5);
+}
+.settings-modal h2 {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  background: linear-gradient(135deg, #f093fb, #667eea);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.settings-section {
+  margin-bottom: 20px;
+}
+.settings-section label {
+  display: block;
+  color: #b794f6;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.settings-section select,
+.settings-section input[type="radio"] {
+  accent-color: #f093fb;
+}
+.settings-section select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(138, 43, 226, 0.3);
+  background: rgba(255,255,255,0.1);
+  color: #e0d0f0;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  appearance: auto;
+}
+.settings-section select option {
+  background: #1a1a3a;
+  color: #e0d0f0;
+}
+.settings-section select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 10px rgba(102,126,234,0.3);
+}
+.settings-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.settings-radio-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.settings-radio-item:hover {
+  background: rgba(255,255,255,0.1);
+}
+.settings-radio-item label {
+  margin: 0;
+  font-weight: 400;
+  cursor: pointer;
+  color: #d0c0e8;
+}
+.settings-radio-item input[type="radio"] {
+  margin: 0;
+}
+.settings-btn-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+.settings-btn {
+  padding: 10px 28px;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.settings-btn-save {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+}
+.settings-btn-save:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(102,126,234,0.5);
+}
+.settings-btn-cancel {
+  background: rgba(255,255,255,0.1);
+  color: #b794f6;
+  border: 1px solid rgba(138,43,226,0.3);
+}
+.settings-btn-cancel:hover {
+  background: rgba(255,255,255,0.15);
+}
+.settings-description {
+  font-size: 11px;
+  color: rgba(183,148,246,0.7);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+.light-mode .settings-modal {
+  background: rgba(15, 15, 35, 0.95) !important;
+}
+</style><style id="settings-optgroup-styles">
+#settingsAudience optgroup {
+  background: #3a3a4a;
+  color: #e0d0f0;
+  font-weight: 600;
+}
+#settingsAudience option {
+  background: #1a1a3a;
+  color: #e0d0f0;
+}
+.light-mode #settingsAudience optgroup {
+  background: #3a3a4a;
+  color: #e0d0f0;
+}
+.light-mode #settingsAudience option {
+  background: #1a1a3a;
+  color: #e0d0f0;
+}
+</style><style id="time-readout-styles">
+.time-readout {
+  color: #b794f6;
+  font-size: 11px;
+  margin-top: 6px;
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.time-readout-paused {
+  display: none;
+  color: #ff6b6b;
+  font-weight: 600;
+  font-size: 11px;
+}
+.time-readout.paused .time-readout-paused {
+  display: inline;
+}
+.ff-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+.ff-input {
+  width: 80px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(138, 43, 226, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: #b794f6;
+  font-size: 11px;
+  box-sizing: border-box;
+}
+.ff-input::placeholder { color: rgba(183, 148, 246, 0.5); }
+.ff-btn {
+  padding: 4px 10px;
+  border: 1px solid rgba(138, 43, 226, 0.3);
+  border-radius: 8px;
+  background: linear-gradient(135deg, #667eea 0, #764ba2 100%);
+  color: #fff;
+  cursor: pointer;
+  font-size: 11px;
+  white-space: nowrap;
+  transition: 0.2s;
+}
+.ff-btn:hover:not(:disabled) {
+  box-shadow: 0 0 10px rgba(102, 126, 234, 0.4);
+}
+.ff-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.pause-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(138, 43, 226, 0.3);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.1);
+  color: #f093fb;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.2s;
+  vertical-align: middle;
+  margin-left: 8px;
+  padding: 0;
+  line-height: 1;
+}
+.pause-btn:hover {
+  background: rgba(255,255,255,0.2);
+  box-shadow: 0 0 10px rgba(240, 147, 251, 0.3);
+}
+.pause-btn.paused {
+  color: #667eea;
+  border-color: rgba(102, 126, 234, 0.5);
+}
+.pause-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.speed-row {
+  display: flex;
+  align-items: center;
+}
+.speed-row input[type="range"] {
+  flex: 1;
+}
+.light-mode .time-readout {
+  color: #b794f6;
+}
+.light-mode .pause-btn {
+  border-color: rgba(138, 43, 226, 0.3);
+  background: rgba(255,255,255,0.1);
+  color: #f093fb;
+}
 </style></head>
 <body>
     <div class="chat-panel" data-locked="true">
@@ -223,7 +476,18 @@
     </div>
   <div id="moonSpeedControl" class="moon-speed-control" style="display: none; position: absolute; top: 20px; left: 20px; z-index: 100; background: rgba(15, 15, 35, 0.6); padding: 15px 20px; border-radius: 15px; border: 1px solid rgba(138, 43, 226, 0.3);">
       <label style="color: #b794f6; font-size: 13px; display: block; margin-bottom: 8px;">Moon Orbit Speed: <span id="moonSpeedValue">1x</span></label>
-      <input type="range" id="moonSpeedSlider" min="0" max="20" step="0.5" value="1" style="width: 150px; accent-color: #f093fb;">
+      <div class="speed-row">
+        <input type="range" id="moonSpeedSlider" min="0" max="20" step="0.5" value="1" style="width: 150px; accent-color: #f093fb;">
+        <button class="pause-btn" id="moonPauseBtn" title="Pause/Play">⏸</button>
+      </div>
+      <div class="time-readout" id="moonTimeReadout">
+        <span class="time-readout-speed" id="moonTimeSpeed">~1 days / sec</span>
+        <span class="time-readout-paused" id="moonTimePaused">Paused</span>
+      </div>
+      <div class="ff-row" id="moonFfRow" style="display: none;">
+        <input type="number" id="moonFfDays" class="ff-input" placeholder="Days..." min="1" step="1">
+        <button class="ff-btn" id="moonFfBtn" disabled>Fast Forward ⏩</button>
+      </div>
     </div></div>
   <div class="detail-sidebar" id="detailSidebar" style="width: 340px; min-width: 340px; background: rgba(15, 15, 35, 0.95); border-left: 1px solid rgba(138, 43, 226, 0.3); padding: 20px; display: flex; flex-direction: column; gap: 12px; overflow: hidden;">
     <button class="back-button" id="backToSystem">← Back to System</button>
@@ -246,22 +510,94 @@
 </div></div>
         <div class="speed-control">
             <label>Simulation Speed: <span id="speedValue">1x</span></label>
-            <input type="range" id="speedSlider" min="0.0" max="10" step="0.1" value="1">
+            <div class="speed-row">
+              <input type="range" id="speedSlider" min="0.0" max="10" step="0.1" value="1" style="width: 150px; accent-color: #f093fb;">
+              <button class="pause-btn" id="pauseBtn" title="Pause/Play">⏸</button>
+            </div>
+            <div class="time-readout" id="mainTimeReadout">
+              <span class="time-readout-speed" id="mainTimeSpeed">~60 days / sec</span>
+              <span class="time-readout-paused" id="mainTimePaused">Paused</span>
+            </div>
+            <div class="ff-row" id="mainFfRow" style="display: none;">
+              <input type="number" id="mainFfDays" class="ff-input" placeholder="Days..." min="1" step="1">
+              <button class="ff-btn" id="mainFfBtn" disabled>Fast Forward ⏩</button>
+            </div>
         </div>
-        <div class="info-panel" id="infoPanel" style="width: 336px; height: 384px; overflow: hidden; background: rgba(15, 15, 35, 0.6); display: flex; flex-direction: column; padding-bottom: 10px; box-sizing: border-box;"><h3 style="margin: 0 0 10px 0; flex-shrink: 0;">Solar Explorer</h3>
+        <div class="info-panel" id="infoPanel" style="width: 336px; height: 384px; background: rgba(15, 15, 35, 0.6); display: flex; flex-direction: column; padding: 20px; padding-bottom: 10px; box-sizing: border-box;"><h3 style="margin: 0 0 10px 0; flex-shrink: 0;">Solar Explorer</h3>
 <input type="text" id="solarQuestion" placeholder="Ask about the solar system..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(138, 43, 226, 0.3); background: rgba(255, 255, 255, 0.1); color: #b794f6; font-size: 13px; box-sizing: border-box; margin-bottom: 10px; flex-shrink: 0;">
 
-<div id="solarAnswer" style="flex: 1; min-height: 0; overflow-y: auto; padding: 10px; background: rgba(0, 0, 0, 0.2); border-radius: 8px; font-size: 12px; line-height: 1.5; color: #b794f6;"></div></div>
+<div id="solarAnswer" style="flex: 1 1 0; min-height: 0; overflow-y: auto; padding: 10px; background: rgba(0, 0, 0, 0.2); border-radius: 8px; font-size: 12px; line-height: 1.5; color: #b794f6;"></div></div>
         <div class="controls">
             <button id="toggleOrbits" class="active">Show Orbits</button>
             <button id="toggleLabels" class="active">Show Labels</button>
             <button id="toggleAsteroids">Show Asteroids</button>
             <button id="resetView">Reset View</button>
+            <button id="openSettings">⚙️ Settings</button>
         </div>
         <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
+    <div id="settingsOverlay" class="settings-overlay">
+  <div class="settings-modal">
+    <h2>⚙️ Explorer Settings</h2>
+    
+    <div class="settings-section">
+      <label>Target Audience</label>
+      <select id="settingsAudience">
+        <optgroup label="By Age Group">
+          <option value="ages-5-7">Ages 5–7 (Early Elementary)</option>
+          <option value="ages-8-10">Ages 8–10 (Upper Elementary)</option>
+          <option value="ages-11-13">Ages 11–13 (Middle School)</option>
+          <option value="ages-14-17">Ages 14–17 (High School)</option>
+          <option value="ages-18-plus">Ages 18+ (Adult General)</option>
+        </optgroup>
+        <optgroup label="By Expertise">
+          <option value="casual">Casual Learner</option>
+          <option value="hobbyist" selected="">Hobbyist / Enthusiast</option>
+          <option value="student-undergrad">Undergraduate Student</option>
+          <option value="student-grad">Graduate Student</option>
+          <option value="educator">Educator / Teacher</option>
+          <option value="academic">Academic / Researcher</option>
+          <option value="professional">Professional Astronomer</option>
+        </optgroup>
+      </select>
+      <div class="settings-description">Controls the complexity, vocabulary, and depth of AI responses.</div>
     </div>
+
+    <div class="settings-section">
+      <label>Temperature Units</label>
+      <div class="settings-radio-group">
+        <div class="settings-radio-item">
+          <input type="radio" name="tempUnit" id="tempC" value="C" checked="">
+          <label for="tempC">Celsius (°C)</label>
+        </div>
+        <div class="settings-radio-item">
+          <input type="radio" name="tempUnit" id="tempF" value="F">
+          <label for="tempF">Fahrenheit (°F)</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <label>Distance Units</label>
+      <div class="settings-radio-group">
+        <div class="settings-radio-item">
+          <input type="radio" name="distUnit" id="distKm" value="km" checked="">
+          <label for="distKm">Kilometers (km)</label>
+        </div>
+        <div class="settings-radio-item">
+          <input type="radio" name="distUnit" id="distMi" value="miles">
+          <label for="distMi">Miles (mi)</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-btn-row">
+      <button class="settings-btn settings-btn-cancel" id="settingsCancel">Cancel</button>
+      <button class="settings-btn settings-btn-save" id="settingsSave">Save Settings</button>
+    </div>
+  </div>
+</div></div>
     <div id="instructions" style="display: none;" data-locked="true"></div>
-    <div id="thoughts" style="display: none;" data-locked="true"></div>
+    <div id="thoughts" style="display: none;" data-locked="true">U</div>
     <script id="solar-sim">
 const container = document.getElementById("solarSystem");
 const canvas = document.createElement("canvas");
@@ -275,6 +611,10 @@ let showOrbits = true;
 let showLabels = true;
 let showAsteroids = false;
 let time = 0;
+let mainPaused = false;
+let moonPausedState = false;
+let mainFfRemaining = 0;
+let moonFfRemaining = 0;
 
 const planetDetailsData = JSON.parse(document.getElementById('planet-details').textContent);
 
@@ -301,6 +641,141 @@ let detailTime = 0;
 let moonSpeed = 1;
 let hoveredMoon = null;
 let detailAnimId = null;
+
+// FPS tracking for accurate time readout
+let lastFrameTime = performance.now();
+let currentFps = 60;
+let fpsSmoothing = 0.95;
+
+function updateFps() {
+  const now = performance.now();
+  const delta = now - lastFrameTime;
+  lastFrameTime = now;
+  if (delta > 0) {
+    const instantFps = 1000 / delta;
+    currentFps = fpsSmoothing * currentFps + (1 - fpsSmoothing) * instantFps;
+  }
+}
+
+function formatSimTime(daysPerSec) {
+  if (daysPerSec < 0.01) return 'Paused';
+  if (daysPerSec < 1) {
+    return '~' + Math.round(daysPerSec * 24) + ' hours / sec';
+  }
+  if (daysPerSec < 365) {
+    return '~' + Math.round(daysPerSec) + ' days / sec';
+  }
+  const years = daysPerSec / 365;
+  return '~' + years.toFixed(1) + ' years / sec';
+}
+
+// Throttle readout updates to ~1 per second
+let lastReadoutUpdate = 0;
+const READOUT_INTERVAL = 1000;
+
+function updateMainTimeReadout(force) {
+  const el = document.getElementById('mainTimeReadout');
+  const speedEl = document.getElementById('mainTimeSpeed');
+  const ffRow = document.getElementById('mainFfRow');
+  if (!el || !speedEl) return;
+  el.classList.toggle('paused', mainPaused);
+  if (ffRow) ffRow.style.display = mainPaused ? 'flex' : 'none';
+  if (mainPaused && !force) return;
+  const now = performance.now();
+  if (!force && now - lastReadoutUpdate < READOUT_INTERVAL) return;
+  lastReadoutUpdate = now;
+  const daysPerSec = currentFps * simulationSpeed;
+  speedEl.textContent = formatSimTime(daysPerSec);
+}
+
+let lastMoonReadoutUpdate = 0;
+
+function updateMoonTimeReadout(force) {
+  const el = document.getElementById('moonTimeReadout');
+  const speedEl = document.getElementById('moonTimeSpeed');
+  const ffRow = document.getElementById('moonFfRow');
+  if (!el || !speedEl) return;
+  el.classList.toggle('paused', moonPausedState);
+  if (ffRow) ffRow.style.display = moonPausedState ? 'flex' : 'none';
+  if (moonPausedState && !force) return;
+  const now = performance.now();
+  if (!force && now - lastMoonReadoutUpdate < READOUT_INTERVAL) return;
+  lastMoonReadoutUpdate = now;
+  const daysPerSec = currentFps * moonSpeed / 60;
+  speedEl.textContent = formatSimTime(daysPerSec);
+}
+
+/* === Orbital State Helpers for AI Context === */
+
+window.getSystemOrbitalState = function() {
+  const state = {
+    simulationSpeed: simulationSpeed,
+    simulationTimeDirection: timeDirection > 0 ? 'forward' : 'reverse',
+    simulationPaused: mainPaused,
+    simulationTicks: time,
+    planets: []
+  };
+
+  planets.forEach(function(planet) {
+    const meanAnomaly = (2 * Math.PI) / (365 * planet.period) * time * simulationSpeed;
+    const e = planet.eccentricity;
+    const trueAnomaly = meanAnomaly + 2 * e * Math.sin(meanAnomaly);
+    let angleDeg = ((trueAnomaly * 180 / Math.PI) % 360 + 360) % 360;
+    const r = planet.distance * (1 - e * e) / (1 + e * Math.cos(trueAnomaly));
+
+    state.planets.push({
+      name: planet.name,
+      angleDegrees: Math.round(angleDeg * 10) / 10,
+      relativeDistanceFromSun: Math.round(r * 10) / 10,
+      orbitalPeriodYears: planet.period
+    });
+  });
+
+  const closest = { pair: '', distance: Infinity };
+  for (let i = 0; i < state.planets.length; i++) {
+    for (let j = i + 1; j < state.planets.length; j++) {
+      const p1 = state.planets[i];
+      const p2 = state.planets[j];
+      const a1 = p1.angleDegrees * Math.PI / 180;
+      const a2 = p2.angleDegrees * Math.PI / 180;
+      const r1 = p1.relativeDistanceFromSun;
+      const r2 = p2.relativeDistanceFromSun;
+      const dx = r1 * Math.cos(a1) - r2 * Math.cos(a2);
+      const dy = r1 * Math.sin(a1) - r2 * Math.sin(a2);
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < closest.distance) {
+        closest.distance = Math.round(dist * 10) / 10;
+        closest.pair = p1.name + ' and ' + p2.name;
+      }
+    }
+  }
+  state.closestPair = closest;
+
+  return state;
+};
+
+window.getDetailOrbitalState = function() {
+  if (!inDetailView || !window.detailPlanet) return null;
+
+  const state = {
+    planet: window.detailPlanet.name,
+    moonAnimationSpeed: moonSpeed,
+    moonPaused: moonPausedState,
+    moons: []
+  };
+
+  detailMoons.forEach(function(moon) {
+    let angleDeg = ((moon.angle * 180 / Math.PI) % 360 + 360) % 360;
+    state.moons.push({
+      name: moon.name,
+      angleDegrees: Math.round(angleDeg * 10) / 10,
+      orbitalPeriodDays: moon.periodDays,
+      distanceKm: moon.distanceKm
+    });
+  });
+
+  return state;
+};
 
 function generateAsteroids() {
   asteroids = [];
@@ -337,7 +812,7 @@ function getOrbitalPosition(planet, t) {
 
 function drawOrbit(planet) {
   ctx.beginPath();
-  ctx.strokeStyle = "rgba(138, 43, 226, 0.2)";
+  ctx.strokeStyle = "rgba(138, 43, 226, 0.35)";
   ctx.lineWidth = 1;
   const a = planet.distance;
   const e = planet.eccentricity;
@@ -417,7 +892,9 @@ function drawPlanet(planet, pos) {
 function drawAsteroidBelt() {
   ctx.fillStyle = "rgba(150, 150, 150, 0.6)";
   asteroids.forEach(function(asteroid) {
-    asteroid.angle += asteroid.speed * simulationSpeed * timeDirection;
+    if (!mainPaused) {
+      asteroid.angle += asteroid.speed * simulationSpeed * timeDirection;
+    }
     const x = centerX + asteroid.distance * Math.cos(asteroid.angle);
     const y = centerY + asteroid.distance * Math.sin(asteroid.angle);
     ctx.beginPath();
@@ -474,6 +951,7 @@ function drawStars() {
 }
 
 function animate() {
+  updateFps();
   ctx.fillStyle = "rgba(10, 10, 25, 1)";
   ctx.fillRect(0, 0, width, height);
   drawStars();
@@ -502,7 +980,20 @@ function animate() {
     }
   }
 
-  time += timeDirection;
+  if (!mainPaused) {
+    time += timeDirection;
+    if (mainFfRemaining > 0) {
+      mainFfRemaining--;
+      if (mainFfRemaining <= 0) {
+        mainFfRemaining = 0;
+        mainPaused = true;
+        var pb = document.getElementById('pauseBtn');
+        pb.textContent = '▶'; pb.classList.add('paused'); pb.title = 'Play';
+        updateMainTimeReadout(true);
+      }
+    }
+  }
+  updateMainTimeReadout();
   if (!inDetailView) {
     requestAnimationFrame(animate);
   }
@@ -513,6 +1004,31 @@ generateStars();
 document.getElementById("speedSlider").addEventListener("input", function(e) {
   simulationSpeed = parseFloat(e.target.value);
   document.getElementById("speedValue").textContent = simulationSpeed.toFixed(1) + "x";
+  document.getElementById("pauseBtn").disabled = simulationSpeed === 0;
+  updateMainTimeReadout(true);
+});
+
+// Pause button for main view
+document.getElementById("pauseBtn").addEventListener("click", function() {
+  mainPaused = !mainPaused;
+  this.textContent = mainPaused ? '▶' : '⏸';
+  this.classList.toggle('paused', mainPaused);
+  this.title = mainPaused ? 'Play' : 'Pause';
+  updateMainTimeReadout(true);
+});
+
+// Fast-forward input/button for main view
+document.getElementById('mainFfDays').addEventListener('input', function() {
+  document.getElementById('mainFfBtn').disabled = !(parseFloat(this.value) > 0);
+});
+document.getElementById('mainFfBtn').addEventListener('click', function() {
+  var days = parseFloat(document.getElementById('mainFfDays').value);
+  if (!(days > 0) || simulationSpeed === 0) return;
+  mainFfRemaining = Math.ceil(days / simulationSpeed);
+  mainPaused = false;
+  var pb = document.getElementById('pauseBtn');
+  pb.textContent = '⏸'; pb.classList.remove('paused'); pb.title = 'Pause';
+  updateMainTimeReadout(true);
 });
 
 document.getElementById("toggleOrbits").addEventListener("click", function(e) {
@@ -534,8 +1050,18 @@ document.getElementById("resetView").addEventListener("click", function() {
   time = 0;
   simulationSpeed = 1;
   timeDirection = 1;
+  mainPaused = false;
+  mainFfRemaining = 0;
   document.getElementById("speedSlider").value = 1;
   document.getElementById("speedValue").textContent = "1x";
+  document.getElementById("pauseBtn").disabled = false;
+  const pauseBtn = document.getElementById("pauseBtn");
+  pauseBtn.textContent = '⏸';
+  pauseBtn.classList.remove('paused');
+  pauseBtn.title = 'Pause';
+  document.getElementById('mainFfDays').value = '';
+  document.getElementById('mainFfBtn').disabled = true;
+  updateMainTimeReadout(true);
 });
 
 /* Detail card hover logic */
@@ -562,7 +1088,7 @@ function showDetailCard(pp, mx, my) {
   detailCard.querySelector('.planet-icon').style.background = planet.color;
   detailCard.querySelector('.planet-name').textContent = data.name;
   detailCard.querySelector('[data-field="type"]').textContent = data.type;
-  detailCard.querySelector('[data-field="diameter"]').textContent = data.diameter;
+  detailCard.querySelector('[data-field="diameter"]').textContent = typeof window.convertDist === 'function' ? window.convertDist(data.diameter) : data.diameter;
   detailCard.querySelector('[data-field="moons"]').textContent = data.moons;
   detailCard.querySelector('[data-field="funFact"]').textContent = data.funFact;
 
@@ -625,8 +1151,6 @@ const detailCanvas = document.getElementById('detailCanvas');
 const detailCtx = detailCanvas.getContext('2d');
 const moonDetailCard = document.getElementById('moonDetailCard');
 const moonSpeedControl = document.getElementById('moonSpeedControl');
-const moonSpeedSlider = document.getElementById('moonSpeedSlider');
-const moonSpeedValue = document.getElementById('moonSpeedValue');
 const backToSystem = document.getElementById('backToSystem');
 
 let detailStars = [];
@@ -655,7 +1179,6 @@ function resizeDetailCanvas() {
   generateDetailStars(detailWidth, detailHeight);
 }
 
-// Moon color palette
 const moonColors = [
   '#c8c8c8', '#a0a0b0', '#d4c4a8', '#b8a898',
   '#e0d8c8', '#9898a8', '#c0b8a0', '#a8b0b8',
@@ -671,24 +1194,21 @@ function openDetailView(planetObj) {
   const data = planetDetailsData.planets[planetObj.key];
   if (!data) return;
 
-  // Populate sidebar elements directly
   document.getElementById('detailPlanetIcon').style.background = planetObj.color;
   document.getElementById('detailPlanetName').textContent = data.name;
   document.getElementById('detailType').textContent = data.type;
-  document.getElementById('detailDiameter').textContent = data.diameter;
-  document.getElementById('detailDistance').textContent = data.distance || '\u2014';
+  document.getElementById('detailDiameter').textContent = typeof window.convertDist === 'function' ? window.convertDist(data.diameter) : data.diameter;
+  document.getElementById('detailDistance').textContent = (typeof window.convertDist === 'function' && data.distance) ? window.convertDist(data.distance) : (data.distance || '\u2014');
   document.getElementById('detailOrbitalPeriod').textContent = data.orbitalPeriod || '\u2014';
   document.getElementById('detailDayLength').textContent = data.dayLength || '\u2014';
-  document.getElementById('detailSurfaceTemp').textContent = data.surfaceTemp || '\u2014';
+  document.getElementById('detailSurfaceTemp').textContent = (typeof window.convertTemp === 'function' && data.surfaceTemp) ? window.convertTemp(data.surfaceTemp) : (data.surfaceTemp || '\u2014');
   document.getElementById('detailMoons').textContent = data.moons;
 
-  // Clear the question input and answer box
   const questionInput = document.getElementById('planetQuestionInput');
   const answerBox = document.getElementById('planetAnswerBox');
   if (questionInput) questionInput.value = '';
   if (answerBox) answerBox.innerHTML = '';
 
-  // Build moon data with actual distances for proportional orbits
   detailMoons = [];
   if (data.moonData) {
     const moonKeys = Object.keys(data.moonData);
@@ -700,7 +1220,6 @@ function openDetailView(planetObj) {
       }
       if (isNaN(periodDays)) periodDays = 5;
 
-      // Get actual distance in km for proportional scaling
       let distanceKm = md.distanceKm || 500000;
 
       detailMoons.push({
@@ -718,7 +1237,6 @@ function openDetailView(planetObj) {
       });
     });
     
-    // Sort moons by distance for proper layering
     detailMoons.sort((a, b) => a.distanceKm - b.distanceKm);
     
     moonSpeedControl.style.display = 'block';
@@ -726,20 +1244,36 @@ function openDetailView(planetObj) {
     moonSpeedControl.style.display = 'none';
   }
 
-  // Show detail view
   detailViewContainer.classList.add('active');
 
-  // Hide main UI elements
   document.querySelector('.controls').style.display = 'none';
   document.querySelector('.speed-control').style.display = 'none';
   document.getElementById('infoPanel').style.display = 'none';
+
+  // Reset moon pause state
+  moonPausedState = false;
+  moonFfRemaining = 0;
+  const moonPauseBtn = document.getElementById('moonPauseBtn');
+  if (moonPauseBtn) {
+    moonPauseBtn.textContent = '⏸';
+    moonPauseBtn.classList.remove('paused');
+    moonPauseBtn.title = 'Pause';
+    moonPauseBtn.disabled = false;
+  }
+  var moonFfDaysEl = document.getElementById('moonFfDays');
+  if (moonFfDaysEl) { moonFfDaysEl.value = ''; }
+  var moonFfBtnEl = document.getElementById('moonFfBtn');
+  if (moonFfBtnEl) { moonFfBtnEl.disabled = true; }
 
   setTimeout(function() {
     resizeDetailCanvas();
     detailTime = 0;
     moonSpeed = 1;
-    moonSpeedSlider.value = 1;
-    moonSpeedValue.textContent = '1x';
+    const moonSpeedSlider = document.getElementById('moonSpeedSlider');
+    const moonSpeedValue = document.getElementById('moonSpeedValue');
+    if (moonSpeedSlider) moonSpeedSlider.value = 1;
+    if (moonSpeedValue) moonSpeedValue.textContent = '1x';
+    updateMoonTimeReadout(true);
     animateDetail();
   }, 50);
 }
@@ -750,11 +1284,11 @@ function closeDetailView() {
   detailMoons = [];
   detailMoonPositions = [];
   hoveredMoon = null;
+  moonPausedState = false;
   moonDetailCard.classList.remove('visible');
 
   detailViewContainer.classList.remove('active');
 
-  // Show main UI elements
   document.querySelector('.controls').style.display = 'flex';
   document.querySelector('.speed-control').style.display = 'block';
   document.getElementById('infoPanel').style.display = 'block';
@@ -764,23 +1298,21 @@ function closeDetailView() {
     detailAnimId = null;
   }
 
-  // Restart main animation
   animate();
 }
 
 function animateDetail() {
   if (!inDetailView) return;
+  updateFps();
 
   const w = detailCanvas.width;
   const h = detailCanvas.height;
   const cx = w / 2;
   const cy = h / 2;
 
-  // Clear
   detailCtx.fillStyle = '#0a0a19';
   detailCtx.fillRect(0, 0, w, h);
 
-  // Stars
   detailStars.forEach(function(star) {
     const twinkle = 0.8 + 0.2 * Math.sin(0.01 * detailTime + star.x);
     detailCtx.beginPath();
@@ -789,27 +1321,22 @@ function animateDetail() {
     detailCtx.fill();
   });
 
-  // Planet size - make it prominent
   const planetRadius = Math.min(w, h) * 0.08;
 
-  // Calculate orbit radii using logarithmic scaling for realistic proportions
   const moonCount = detailMoons.length;
   const minOrbitRadius = planetRadius + 30;
   const maxOrbitRadius = Math.min(w, h) * 0.46;
   
-  // Get min and max distances for scaling
   let minDist = Infinity, maxDist = 0;
   detailMoons.forEach(function(moon) {
     if (moon.distanceKm < minDist) minDist = moon.distanceKm;
     if (moon.distanceKm > maxDist) maxDist = moon.distanceKm;
   });
   
-  // Use logarithmic scaling for better visualization of distant moons
   const logMin = Math.log(minDist || 1);
   const logMax = Math.log(maxDist || 1);
   const logRange = logMax - logMin || 1;
 
-  // Draw planet glow
   const glowGrad = detailCtx.createRadialGradient(cx, cy, planetRadius * 0.8, cx, cy, planetRadius * 2.5);
   glowGrad.addColorStop(0, window.detailPlanet.color + '40');
   glowGrad.addColorStop(1, 'transparent');
@@ -818,7 +1345,6 @@ function animateDetail() {
   detailCtx.fillStyle = glowGrad;
   detailCtx.fill();
 
-  // Draw planet
   const pGrad = detailCtx.createRadialGradient(
     cx - planetRadius * 0.3, cy - planetRadius * 0.3, 0,
     cx, cy, planetRadius
@@ -831,7 +1357,6 @@ function animateDetail() {
   detailCtx.fillStyle = pGrad;
   detailCtx.fill();
 
-  // Saturn rings in detail view
   if (window.detailPlanet.name === 'Saturn') {
     detailCtx.save();
     detailCtx.translate(cx, cy);
@@ -854,11 +1379,9 @@ function animateDetail() {
     detailCtx.restore();
   }
 
-  // Draw moons with logarithmic distance scaling
   detailMoonPositions = [];
 
   detailMoons.forEach(function(moon, idx) {
-    // Calculate orbit radius using logarithmic scaling
     let orbitRadius;
     if (moonCount === 1) {
       orbitRadius = (minOrbitRadius + maxOrbitRadius) / 2;
@@ -868,16 +1391,16 @@ function animateDetail() {
       orbitRadius = minOrbitRadius + normalizedDist * (maxOrbitRadius - minOrbitRadius);
     }
 
-    // Draw orbit path
     detailCtx.beginPath();
     detailCtx.arc(cx, cy, orbitRadius, 0, 2 * Math.PI);
-    detailCtx.strokeStyle = 'rgba(138, 43, 226, 0.15)';
+    detailCtx.strokeStyle = 'rgba(138, 43, 226, 0.25)';
     detailCtx.lineWidth = 1;
     detailCtx.stroke();
 
-    // Calculate moon position
-    const angularSpeed = (2 * Math.PI) / (moon.periodDays * 60) * moonSpeed;
-    moon.angle += angularSpeed;
+    if (!moonPausedState) {
+      const angularSpeed = (2 * Math.PI) / (moon.periodDays * 60) * moonSpeed;
+      moon.angle += angularSpeed;
+    }
 
     const mx = cx + orbitRadius * Math.cos(moon.angle);
     const my = cy + orbitRadius * Math.sin(moon.angle);
@@ -885,13 +1408,11 @@ function animateDetail() {
     let moonRadius = 4 + (moonCount > 4 ? 2 : 4) * (1 - idx * 0.05);
     moonRadius = Math.max(3, Math.min(moonRadius, 8));
 
-    // Draw moon shadow
     detailCtx.beginPath();
     detailCtx.arc(mx + 1, my + 1, moonRadius, 0, 2 * Math.PI);
     detailCtx.fillStyle = 'rgba(0,0,0,0.3)';
     detailCtx.fill();
 
-    // Draw moon
     const mGrad = detailCtx.createRadialGradient(
       mx - moonRadius * 0.3, my - moonRadius * 0.3, 0,
       mx, my, moonRadius
@@ -903,13 +1424,11 @@ function animateDetail() {
     detailCtx.fillStyle = mGrad;
     detailCtx.fill();
 
-    // Moon label
     detailCtx.fillStyle = '#d0c0e8';
     detailCtx.font = '10px Segoe UI, sans-serif';
     detailCtx.textAlign = 'center';
     detailCtx.fillText(moon.name.split('(')[0].trim(), mx, my - moonRadius - 6);
 
-    // Hover highlight
     if (hoveredMoon && hoveredMoon.key === moon.key) {
       detailCtx.beginPath();
       detailCtx.arc(mx, my, moonRadius + 3, 0, 2 * Math.PI);
@@ -926,7 +1445,6 @@ function animateDetail() {
     });
   });
 
-  // Planet label
   detailCtx.fillStyle = '#f0e0ff';
   detailCtx.font = 'bold 16px Segoe UI, sans-serif';
   detailCtx.textAlign = 'center';
@@ -936,7 +1454,6 @@ function animateDetail() {
   detailCtx.shadowColor = 'transparent';
   detailCtx.shadowBlur = 0;
 
-  // No moons message
   if (moonCount === 0) {
     detailCtx.fillStyle = 'rgba(183, 148, 246, 0.6)';
     detailCtx.font = '14px Segoe UI, sans-serif';
@@ -945,6 +1462,17 @@ function animateDetail() {
   }
 
   detailTime++;
+  if (!moonPausedState && moonFfRemaining > 0) {
+    moonFfRemaining--;
+    if (moonFfRemaining <= 0) {
+      moonFfRemaining = 0;
+      moonPausedState = true;
+      var mpb = document.getElementById('moonPauseBtn');
+      if (mpb) { mpb.textContent = '▶'; mpb.classList.add('paused'); mpb.title = 'Play'; }
+      updateMoonTimeReadout(true);
+    }
+  }
+  updateMoonTimeReadout();
   detailAnimId = requestAnimationFrame(animateDetail);
 }
 
@@ -965,8 +1493,8 @@ function showMoonDetailCard(mp, clientX, clientY) {
   const moon = mp.moon;
   const moonShortName = moon.name.split('(')[0].trim();
   moonDetailCard.querySelector('.moon-name').textContent = moon.name;
-  moonDetailCard.querySelector('[data-field="diameter"]').textContent = moon.diameter;
-  moonDetailCard.querySelector('[data-field="distance"]').textContent = moon.distanceStr;
+  moonDetailCard.querySelector('[data-field="diameter"]').textContent = typeof window.convertDist === 'function' ? window.convertDist(moon.diameter) : moon.diameter;
+  moonDetailCard.querySelector('[data-field="distance"]').textContent = typeof window.convertDist === 'function' ? window.convertDist(moon.distanceStr) : moon.distanceStr;
   moonDetailCard.querySelector('[data-field="period"]').textContent = moon.orbitalPeriod;
   moonDetailCard.querySelector('.moon-fun-fact').textContent = moon.funFact;
   moonDetailCard.querySelector('.moon-click-hint').textContent = 'Click ' + moonShortName + ' to learn more';
@@ -1009,7 +1537,6 @@ detailCanvas.addEventListener('mouseleave', function() {
   moonDetailCard.classList.remove('visible');
 });
 
-/* Moon click -> pre-fill question box and auto-ask */
 detailCanvas.addEventListener('click', function(e) {
   const rect = detailCanvas.getBoundingClientRect();
   const mx = e.clientX - rect.left;
@@ -1022,7 +1549,6 @@ detailCanvas.addEventListener('click', function(e) {
     if (questionInput) {
       questionInput.value = 'tell me about ' + moonName;
       questionInput.focus();
-      // Trigger the AI question automatically
       if (typeof window.triggerPlanetQuestion === 'function') {
         window.triggerPlanetQuestion();
       }
@@ -1030,16 +1556,41 @@ detailCanvas.addEventListener('click', function(e) {
   }
 });
 
-moonSpeedSlider.addEventListener('input', function(e) {
+// Moon speed slider
+document.getElementById('moonSpeedSlider').addEventListener('input', function(e) {
   moonSpeed = parseFloat(e.target.value);
-  moonSpeedValue.textContent = moonSpeed.toFixed(1) + 'x';
+  document.getElementById('moonSpeedValue').textContent = moonSpeed.toFixed(1) + 'x';
+  document.getElementById('moonPauseBtn').disabled = moonSpeed === 0;
+  updateMoonTimeReadout(true);
+});
+
+// Moon pause button
+document.getElementById('moonPauseBtn').addEventListener('click', function() {
+  moonPausedState = !moonPausedState;
+  this.textContent = moonPausedState ? '▶' : '⏸';
+  this.classList.toggle('paused', moonPausedState);
+  this.title = moonPausedState ? 'Play' : 'Pause';
+  updateMoonTimeReadout(true);
+});
+
+// Fast-forward input/button for moon view
+document.getElementById('moonFfDays').addEventListener('input', function() {
+  document.getElementById('moonFfBtn').disabled = !(parseFloat(this.value) > 0);
+});
+document.getElementById('moonFfBtn').addEventListener('click', function() {
+  var days = parseFloat(document.getElementById('moonFfDays').value);
+  if (!(days > 0) || moonSpeed === 0) return;
+  moonFfRemaining = Math.ceil(days * 60 / moonSpeed);
+  moonPausedState = false;
+  var mpb = document.getElementById('moonPauseBtn');
+  if (mpb) { mpb.textContent = '⏸'; mpb.classList.remove('paused'); mpb.title = 'Pause'; }
+  updateMoonTimeReadout(true);
 });
 
 backToSystem.addEventListener('click', function() {
   closeDetailView();
 });
 
-/* Planet click -> detail view */
 canvas.addEventListener("click", function(e) {
   if (inDetailView) return;
   const rect = canvas.getBoundingClientRect();
@@ -1051,7 +1602,6 @@ canvas.addEventListener("click", function(e) {
   }
 });
 
-// Listen for viewer panel resize
 const viewerPanel = document.getElementById('viewerPanel');
 if (viewerPanel) {
   const resizeObserver = new ResizeObserver(function() {
@@ -1072,9 +1622,9 @@ animate();
   const questionInput = document.getElementById('solarQuestion');
   const answerBox = document.getElementById('solarAnswer');
   
-  // Conversation history (max 5 pairs)
+  // Conversation history (max 10 pairs)
   let conversationHistory = [];
-  const MAX_HISTORY = 5;
+  const MAX_HISTORY = 10;
 
   function formatHistory() {
     if (conversationHistory.length === 0) return '';
@@ -1086,6 +1636,25 @@ animate();
     return historyStr;
   }
 
+  function formatOrbitalContext() {
+    if (typeof window.getSystemOrbitalState !== 'function') return '';
+    const state = window.getSystemOrbitalState();
+    if (!state) return '';
+
+    let ctx = '\n<SIMULATION_STATE>\n';
+    ctx += 'Simulation speed: ' + state.simulationSpeed.toFixed(1) + 'x (time direction: ' + state.simulationTimeDirection + ')\n';
+    ctx += 'Current orbital positions (0° = right/3 o\'clock, angles increase counter-clockwise):\n';
+    state.planets.forEach(function(p) {
+      ctx += '  ' + p.name + ': ' + p.angleDegrees + '° from reference, relative distance from Sun: ' + p.relativeDistanceFromSun + ' units (orbital period: ' + p.orbitalPeriodYears + ' Earth years)\n';
+    });
+    if (state.closestPair) {
+      ctx += 'Currently closest pair: ' + state.closestPair.pair + ' (distance: ' + state.closestPair.distance + ' units apart)\n';
+    }
+    ctx += 'Note: These are scaled simulation positions. Distances are relative/proportional, not actual astronomical distances. Angles represent current orbital positions in the simulation.\n';
+    ctx += '</SIMULATION_STATE>\n';
+    return ctx;
+  }
+
   async function askQuestion() {
     const question = questionInput.value.trim();
     if (!question) return;
@@ -1095,7 +1664,9 @@ animate();
 
     try {
       const historyContext = formatHistory();
-      const prompt = `You're an expert on the solar system.\n\n<INSTRUCTION>\nYou can return markdown but avoid using # headings.\n</INSTRUCTION>${historyContext}\n<QUESTION>\n${question}`;
+      const orbitalContext = formatOrbitalContext();
+      const audienceContext = (typeof window.getAudiencePrompt === 'function') ? '\n' + window.getAudiencePrompt() : '';
+      const prompt = `You're an expert on the solar system. The user is viewing an interactive solar system simulation.\n\n<INSTRUCTION>\nYou can return markdown but avoid using # headings.${audienceContext}\nThe user can see the simulation and may ask questions about current positions of planets. Use the simulation state data to answer positional/relational questions. Make it clear when you're referring to the simulation vs. real life.\n</INSTRUCTION>${orbitalContext}${historyContext}\n<QUESTION>\n${question}`;
       const result = await synthos.generate.completion({ prompt });
       answerBox.innerHTML = marked.parse(result.answer);
       
@@ -1124,10 +1695,10 @@ animate();
 
   if (!questionInput || !answerBox) return;
 
-  // Conversation history per planet (max 5 pairs)
+  // Conversation history per planet (max 10 pairs)
   let conversationHistory = [];
   let currentPlanetKey = null;
-  const MAX_HISTORY = 5;
+  const MAX_HISTORY = 10;
 
   function formatHistory() {
     if (conversationHistory.length === 0) return '';
@@ -1137,6 +1708,27 @@ animate();
     });
     historyStr += '</CONVERSATION_HISTORY>\n';
     return historyStr;
+  }
+
+  function formatDetailOrbitalContext() {
+    if (typeof window.getDetailOrbitalState !== 'function') return '';
+    const state = window.getDetailOrbitalState();
+    if (!state) return '';
+
+    let ctx = '\n<SIMULATION_STATE>\n';
+    ctx += 'Viewing: ' + state.planet + ' detail view\n';
+    ctx += 'Moon animation speed: ' + state.moonAnimationSpeed.toFixed(1) + 'x\n';
+    if (state.moons.length > 0) {
+      ctx += 'Current moon orbital positions (0° = right/3 o\'clock, angles increase counter-clockwise):\n';
+      state.moons.forEach(function(m) {
+        ctx += '  ' + m.name + ': ' + m.angleDegrees + '° in orbit, distance: ' + m.distanceKm.toLocaleString() + ' km from ' + state.planet + ', orbital period: ' + m.orbitalPeriodDays.toFixed(2) + ' days\n';
+      });
+    } else {
+      ctx += 'This planet has no known moons displayed.\n';
+    }
+    ctx += 'Note: Moon positions are from the animated simulation. Angles represent current orbital positions.\n';
+    ctx += '</SIMULATION_STATE>\n';
+    return ctx;
   }
 
   async function askPlanetQuestion() {
@@ -1159,7 +1751,9 @@ animate();
     try {
       const planetName = window.detailPlanet.name;
       const historyContext = formatHistory();
-      const prompt = `You're an expert on the solar system. The user is viewing ${planetName} and has a question about it.\n\n<INSTRUCTION>\nYou can return markdown but avoid using # headings.\n</INSTRUCTION>${historyContext}\n<QUESTION>\n${question}`;
+      const orbitalContext = formatDetailOrbitalContext();
+      const audienceContext = (typeof window.getAudiencePrompt === 'function') ? '\n' + window.getAudiencePrompt() : '';
+      const prompt = `You're an expert on the solar system. The user is viewing ${planetName} in a detail view showing its moons orbiting around it.\n\n<INSTRUCTION>\nYou can return markdown but avoid using # headings.${audienceContext}\nThe user can see the moon simulation and may ask questions about current positions of moons. Use the simulation state data to answer positional/relational questions. Make it clear when you're referring to the simulation vs. real life.\n</INSTRUCTION>${orbitalContext}${historyContext}\n<QUESTION>\n${question}`;
       const result = await synthos.generate.completion({ prompt });
       answerBox.innerHTML = marked.parse(result.answer);
       
@@ -1183,5 +1777,180 @@ animate();
   questionInput.addEventListener('keypress', function(e) {
     if (e.key === 'Enter') askPlanetQuestion();
   });
+})();
+</script><script id="settings-manager">
+(function() {
+  const SETTINGS_TABLE = 'settings';
+  const SETTINGS_ID = 'user-prefs';
+
+  // Default settings
+  window.explorerSettings = {
+    audience: 'hobbyist',
+    tempUnit: 'C',
+    distUnit: 'km'
+  };
+
+  // Load settings from server
+  async function loadSettings() {
+    try {
+      const saved = await synthos.data.get(SETTINGS_TABLE, SETTINGS_ID);
+      if (saved) {
+        if (saved.audience) window.explorerSettings.audience = saved.audience;
+        if (saved.tempUnit) window.explorerSettings.tempUnit = saved.tempUnit;
+        if (saved.distUnit) window.explorerSettings.distUnit = saved.distUnit;
+      }
+    } catch (e) {
+      // No saved settings yet, use defaults
+    }
+  }
+
+  function applySettingsToUI() {
+    const s = window.explorerSettings;
+    const audienceSelect = document.getElementById('settingsAudience');
+    if (audienceSelect) audienceSelect.value = s.audience;
+
+    const tempRadio = document.querySelector('input[name="tempUnit"][value="' + s.tempUnit + '"]');
+    if (tempRadio) tempRadio.checked = true;
+
+    const distRadio = document.querySelector('input[name="distUnit"][value="' + s.distUnit + '"]');
+    if (distRadio) distRadio.checked = true;
+  }
+
+  async function saveSettings() {
+    const audience = document.getElementById('settingsAudience').value;
+    const tempUnit = document.querySelector('input[name="tempUnit"]:checked').value;
+    const distUnit = document.querySelector('input[name="distUnit"]:checked').value;
+
+    window.explorerSettings = { audience, tempUnit, distUnit };
+
+    try {
+      await synthos.data.save(SETTINGS_TABLE, {
+        id: SETTINGS_ID,
+        audience: audience,
+        tempUnit: tempUnit,
+        distUnit: distUnit
+      });
+    } catch (e) {
+      console.error('Failed to save settings:', e);
+    }
+  }
+
+  // Modal open/close
+  const overlay = document.getElementById('settingsOverlay');
+  const openBtn = document.getElementById('openSettings');
+  const cancelBtn = document.getElementById('settingsCancel');
+  const saveBtn = document.getElementById('settingsSave');
+
+  openBtn.addEventListener('click', async function() {
+    // Always reload from server when opening to ensure fresh data
+    await loadSettings();
+    applySettingsToUI();
+    overlay.classList.add('active');
+  });
+
+  cancelBtn.addEventListener('click', function() {
+    overlay.classList.remove('active');
+    applySettingsToUI(); // revert UI to saved
+  });
+
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) {
+      overlay.classList.remove('active');
+      applySettingsToUI();
+    }
+  });
+
+  saveBtn.addEventListener('click', async function() {
+    await saveSettings();
+    overlay.classList.remove('active');
+  });
+
+  // Helper to build audience instruction for prompts
+  window.getAudiencePrompt = function() {
+    const s = window.explorerSettings;
+    const audienceMap = {
+      'ages-5-7': 'a young child aged 5-7. Use very simple words, short sentences, fun comparisons, and excitement. Avoid technical jargon entirely.',
+      'ages-8-10': 'a child aged 8-10. Use simple but informative language, fun facts, and relatable comparisons. Keep explanations clear and engaging.',
+      'ages-11-13': 'a middle school student aged 11-13. Use age-appropriate scientific vocabulary, explain concepts clearly, and include interesting details.',
+      'ages-14-17': 'a high school student aged 14-17. Use proper scientific terminology with brief explanations, include quantitative details, and connect to broader concepts.',
+      'ages-18-plus': 'a general adult audience. Use clear scientific language, provide good detail, and assume basic science literacy.',
+      'casual': 'a casual learner who is curious but not deeply knowledgeable. Keep things accessible, interesting, and avoid overwhelming detail.',
+      'hobbyist': 'a space enthusiast or hobbyist. Include interesting technical details, comparisons, and deeper insights while remaining engaging.',
+      'student-undergrad': 'an undergraduate science student. Use proper scientific terminology, include quantitative data, and reference relevant physical processes.',
+      'student-grad': 'a graduate-level science student. Provide detailed technical information, reference current research where relevant, and discuss underlying physics.',
+      'educator': 'an educator or teacher. Provide accurate, well-structured information that could be used for teaching. Include key concepts and common misconceptions.',
+      'academic': 'an academic researcher. Provide detailed, precise scientific information with quantitative data. Reference current understanding and open questions in the field.',
+      'professional': 'a professional astronomer. Use full technical precision, include relevant observational data, current research findings, and discuss uncertainties.'
+    };
+    const audienceDesc = audienceMap[s.audience] || audienceMap['hobbyist'];
+
+    let unitInstructions = '';
+    if (s.tempUnit === 'F') {
+      unitInstructions += ' Use Fahrenheit (°F) for all temperatures.';
+    } else {
+      unitInstructions += ' Use Celsius (°C) for all temperatures.';
+    }
+    if (s.distUnit === 'miles') {
+      unitInstructions += ' Use miles for distances instead of kilometers.';
+    } else {
+      unitInstructions += ' Use kilometers for distances.';
+    }
+
+    return 'Your audience is ' + audienceDesc + unitInstructions;
+  };
+
+  // Load on init (fire and forget, but also apply to UI when done)
+  loadSettings().then(function() {
+    applySettingsToUI();
+  });
+})();
+</script><script id="unit-converters">
+(function() {
+  // Convert a temperature string from °C to °F
+  // Handles: "465°C", "-180°C to 430°C", "-89°C to 57°C"
+  function convertTempString(str, toUnit) {
+    if (!str || toUnit === 'C') return str;
+    // Replace all °C values with °F
+    return str.replace(/(-?[\d,.]+)\s*°C/g, function(match, num) {
+      const celsius = parseFloat(num.replace(/,/g, ''));
+      const fahrenheit = Math.round(celsius * 9 / 5 + 32);
+      return fahrenheit.toLocaleString() + '°F';
+    });
+  }
+
+  // Convert a distance/diameter string from km to miles
+  // Handles: "4,879 km", "57.9 million km", "1.43 billion km", "384,400 km"
+  function convertDistString(str, toUnit) {
+    if (!str || toUnit === 'km') return str;
+    const KM_TO_MI = 0.621371;
+    // Handle "X million km" or "X billion km"
+    const bigMatch = str.match(/^([\d,.]+)\s*(million|billion)\s*km$/i);
+    if (bigMatch) {
+      const val = parseFloat(bigMatch[1].replace(/,/g, ''));
+      const converted = (val * KM_TO_MI);
+      // Round to 1-2 decimal places
+      const rounded = converted < 10 ? converted.toFixed(2) : converted < 100 ? converted.toFixed(1) : Math.round(converted).toLocaleString();
+      return rounded + ' ' + bigMatch[2].toLowerCase() + ' mi';
+    }
+    // Handle plain "X km" or "X,XXX km"
+    const plainMatch = str.match(/^([\d,.]+)\s*km$/i);
+    if (plainMatch) {
+      const val = parseFloat(plainMatch[1].replace(/,/g, ''));
+      const converted = Math.round(val * KM_TO_MI);
+      return converted.toLocaleString() + ' mi';
+    }
+    return str;
+  }
+
+  // Apply conversions based on current settings
+  window.convertTemp = function(str) {
+    if (!window.explorerSettings) return str;
+    return convertTempString(str, window.explorerSettings.tempUnit);
+  };
+
+  window.convertDist = function(str) {
+    if (!window.explorerSettings) return str;
+    return convertDistString(str, window.explorerSettings.distUnit);
+  };
 })();
 </script><script id="page-helpers" src="/api/page-helpers.js?v=2" data-locked="true"></script><script id="page-script" src="/api/page-script.js?v=2" data-locked="true"></script></body></html>

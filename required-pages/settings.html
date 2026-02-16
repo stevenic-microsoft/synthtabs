@@ -4,7 +4,7 @@
     <title>SynthOS - Settings</title>
     <script id="theme-info" src="/api/theme-info.js" data-locked="true"></script>
     <link id="theme-css" rel="stylesheet" href="/api/theme.css" data-locked="true">
-    <style>.settings-title{font-size:22px;font-weight:700;min-height:var(--header-min-height);padding:var(--header-padding-vertical) var(--header-padding-horizontal);line-height:var(--header-line-height);display:flex;align-items:center;justify-content:center;box-sizing:border-box;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;border-radius:12px 12px 0 0;width:100%;max-width:800px;box-shadow:0 6px 25px var(--accent-glow);letter-spacing:2px;text-shadow:0 2px 10px rgba(0,0,0,.3)}.settings-container{display:flex;flex-direction:column;width:100%;max-width:800px;max-height:calc(100vh - 160px);background:rgba(15,15,35,.8);border-radius:0 0 12px 12px;border:1px solid rgba(138,43,226,.2);border-top:none;overflow:hidden}.tab-bar{display:flex;flex-shrink:0;border-bottom:1px solid var(--border-color)}.tab-btn{flex:1;padding:14px 20px;background:0 0;border:none;border-bottom:3px solid transparent;color:var(--text-secondary);font-size:14px;font-weight:600;cursor:pointer;transition:.3s;letter-spacing:.5px}.tab-btn:hover{color:var(--text-primary);background:rgba(138,43,226,.05)}.tab-btn.active{color:var(--text-primary);border-bottom-color:var(--accent-primary)}.tab-content{display:none;flex-direction:column;gap:15px;flex-grow:1;overflow-y:auto;padding:25px}.tab-content.active{display:flex}.form-group{display:flex;flex-direction:column;width:100%}.form-group label{display:block;margin-bottom:8px;color:var(--text-secondary);font-weight:600;font-size:14px}.form-group input,.form-group select,.form-group textarea{width:100%;padding:14px 18px;border-radius:12px;border:1px solid var(--border-color);background:rgba(15,15,35,.8);color:var(--text-primary);font-size:14px;transition:.3s;box-shadow:inset 0 2px 10px rgba(0,0,0,.3)}.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:0;border-color:rgba(183,148,246,.6);box-shadow:inset 0 2px 10px rgba(0,0,0,.3),0 0 20px var(--accent-glow)}.form-group input::placeholder,.form-group textarea::placeholder{color:rgba(183,148,246,.5)}.form-group textarea{resize:vertical;min-height:100px}.form-group select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23b794f6' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 15px center}.form-group select option{background:var(--bg-tertiary);color:var(--text-primary);padding:10px}.button-row{display:flex;justify-content:flex-end;padding:15px 25px;border-top:1px solid var(--border-color);flex-shrink:0}.update-btn{padding:12px 30px;border:none;border-radius:12px;font-size:15px;background:linear-gradient(135deg,var(--accent-primary) 0,var(--accent-secondary) 50%,var(--accent-tertiary) 100%);color:#fff;cursor:pointer;transition:.3s;font-weight:600;letter-spacing:1px;box-shadow:0 4px 20px rgba(102,126,234,.4)}.update-btn:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(102,126,234,.6)}.update-btn:active{transform:translateY(0)}.disabled{background:rgba(102,126,234,.2)!important;cursor:not-allowed!important;opacity:.6}.info-text{color:rgba(183,148,246,.7);font-size:13px;line-height:1.6;text-align:center;padding:15px;background:rgba(15,15,35,.4);border-radius:10px;border:1px solid var(--border-color)}.info-text a{color:var(--accent-tertiary);text-decoration:none;transition:.3s;font-weight:500}.info-text a:hover{color:var(--text-secondary);text-shadow:0 0 10px var(--accent-glow)}.filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}.filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border-color);background:0 0;color:var(--text-secondary);font-size:13px;cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0}.filter-btn:hover{border-color:var(--accent-primary);color:var(--accent-primary)}.filter-btn.active{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;border-color:transparent}.services-grid{display:grid;grid-template-columns:1fr;gap:12px}.service-card{border-radius:12px;border:1px solid var(--border-color);background:rgba(15,15,35,.5);padding:18px;transition:.3s}.service-card:hover{border-color:rgba(138,43,226,.3)}.service-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.service-card-name{font-size:15px;font-weight:600;color:var(--text-primary)}.service-card-category{font-size:11px;color:var(--text-secondary);background:rgba(138,43,226,.15);padding:2px 8px;border-radius:10px}.service-card-desc{font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px}.service-card-fields{display:flex;flex-direction:column;gap:8px}.service-card-fields input{width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border-color);background:rgba(15,15,35,.8);color:var(--text-primary);font-size:13px;transition:.3s;box-shadow:inset 0 2px 8px rgba(0,0,0,.2)}.service-card-fields input:focus{outline:0;border-color:rgba(183,148,246,.6);box-shadow:inset 0 2px 8px rgba(0,0,0,.2),0 0 15px var(--accent-glow)}.service-card-fields input::placeholder{color:rgba(183,148,246,.5)}.toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0}.toggle-switch input{opacity:0;width:0;height:0}.toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(100,100,100,.4);border-radius:24px;transition:.3s}.toggle-slider:before{content:"";position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}.toggle-switch input:checked+.toggle-slider{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary))}.toggle-switch input:checked+.toggle-slider:before{transform:translateX(20px)}.light-mode .settings-container{background:rgba(255,255,255,.8)}.light-mode .tab-btn{color:rgba(107,79,138,.7)}.light-mode .tab-btn:hover{background:rgba(118,75,162,.05);color:var(--text-primary)}.light-mode .tab-btn.active{color:var(--text-primary)}.light-mode .form-group input,.light-mode .form-group select,.light-mode .form-group textarea{background:rgba(255,255,255,.8);box-shadow:inset 0 2px 10px rgba(118,75,162,.05)}.light-mode .form-group input:focus,.light-mode .form-group select:focus,.light-mode .form-group textarea:focus{box-shadow:inset 0 2px 10px rgba(118,75,162,.05),0 0 20px var(--accent-glow)}.light-mode .form-group input::placeholder,.light-mode .form-group textarea::placeholder{color:rgba(107,79,138,.5)}.light-mode .info-text{color:rgba(107,79,138,.7);background:rgba(255,255,255,.4)}.light-mode .service-card{background:rgba(255,255,255,.5)}.light-mode .service-card-fields input{background:rgba(255,255,255,.8);box-shadow:inset 0 2px 8px rgba(118,75,162,.05)}.light-mode .service-card-fields input:focus{box-shadow:inset 0 2px 8px rgba(118,75,162,.05),0 0 15px var(--accent-glow)}.light-mode .service-card-fields input::placeholder{color:rgba(107,79,138,.5)}</style>
+    <style>.settings-title{font-size:22px;font-weight:700;min-height:var(--header-min-height);padding:var(--header-padding-vertical) var(--header-padding-horizontal);line-height:var(--header-line-height);display:flex;align-items:center;justify-content:center;box-sizing:border-box;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;border-radius:12px 12px 0 0;width:100%;box-shadow:0 6px 25px var(--accent-glow);letter-spacing:2px;text-shadow:0 2px 10px rgba(0,0,0,.3)}.settings-container{display:flex;flex-direction:column;width:100%;flex-grow:1;background:rgba(15,15,35,.8);border-radius:0 0 12px 12px;border:1px solid rgba(138,43,226,.2);border-top:none;overflow:hidden}.accordion-section{display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;border-bottom:1px solid var(--border-color)}.accordion-section:last-child{border-bottom:none}.accordion-section.active{flex-shrink:1;flex-grow:1;min-height:0}.accordion-header{display:flex;justify-content:space-between;align-items:center;width:100%;padding:16px 25px;background:none;border:none;color:var(--text-primary);font-size:15px;font-weight:600;cursor:pointer;transition:background .3s;letter-spacing:.5px;flex-shrink:0}.accordion-header:hover{background:rgba(138,43,226,.05)}.accordion-section.active .accordion-header{background:rgba(138,43,226,.08)}.accordion-chevron{font-size:11px;color:var(--text-secondary);transition:transform .3s}.accordion-section.active .accordion-chevron{transform:rotate(180deg)}.accordion-body{display:none;flex-direction:column;flex-grow:1;min-height:0;overflow:hidden}.accordion-section.active .accordion-body{display:flex}.accordion-content{display:flex;flex-direction:column;gap:15px;overflow-y:auto;padding:20px 25px;flex-grow:1}.button-row{display:flex;justify-content:flex-end;padding:15px 25px;border-top:1px solid var(--border-color);flex-shrink:0}.apply-btn{padding:12px 30px;border:none;border-radius:12px;font-size:15px;background:linear-gradient(135deg,var(--accent-primary) 0,var(--accent-secondary) 50%,var(--accent-tertiary) 100%);color:#fff;cursor:pointer;transition:.3s;font-weight:600;letter-spacing:1px;box-shadow:0 4px 20px rgba(102,126,234,.4)}.apply-btn:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(102,126,234,.6)}.apply-btn:active{transform:translateY(0)}.form-group{display:flex;flex-direction:column;width:100%}.form-group label{display:block;margin-bottom:8px;color:var(--text-secondary);font-weight:600;font-size:14px}.form-group input,.form-group select,.form-group textarea{width:100%;padding:14px 18px;border-radius:12px;border:1px solid var(--border-color);background:rgba(15,15,35,.8);color:var(--text-primary);font-size:14px;transition:.3s;box-shadow:inset 0 2px 10px rgba(0,0,0,.3)}.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:0;border-color:rgba(183,148,246,.6);box-shadow:inset 0 2px 10px rgba(0,0,0,.3),0 0 20px var(--accent-glow)}.form-group input::placeholder,.form-group textarea::placeholder{color:rgba(183,148,246,.5)}.form-group textarea{resize:vertical;min-height:100px}.form-group select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23b794f6' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 15px center}.form-group select option{background:var(--bg-tertiary);color:var(--text-primary);padding:10px}.info-text{color:rgba(183,148,246,.7);font-size:13px;line-height:1.6;text-align:center;padding:15px;background:rgba(15,15,35,.4);border-radius:10px;border:1px solid var(--border-color)}.info-text a{color:var(--accent-tertiary);text-decoration:none;transition:.3s;font-weight:500}.info-text a:hover{color:var(--text-secondary);text-shadow:0 0 10px var(--accent-glow)}.config-required-banner{padding:12px 20px;background:rgba(255,180,50,.12);border:1px solid rgba(255,180,50,.3);border-radius:10px;color:rgba(255,200,100,.9);font-size:13px;font-weight:500;text-align:center;line-height:1.5}.model-card{border:1px solid var(--border-color);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:12px;background:rgba(15,15,35,.3)}.model-card-title{font-size:14px;font-weight:700;color:var(--text-primary);letter-spacing:.5px;margin:0}.filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}.filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border-color);background:0 0;color:var(--text-secondary);font-size:13px;cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0}.filter-btn:hover{border-color:var(--accent-primary);color:var(--accent-primary)}.filter-btn.active{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;border-color:transparent}.services-grid{display:grid;grid-template-columns:1fr;gap:12px}.service-card{border-radius:12px;border:1px solid var(--border-color);background:rgba(15,15,35,.5);padding:18px;transition:.3s}.service-card:hover{border-color:rgba(138,43,226,.3)}.service-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.service-card-name{font-size:15px;font-weight:600;color:var(--text-primary)}.service-card-category{font-size:11px;color:var(--text-secondary);background:rgba(138,43,226,.15);padding:2px 8px;border-radius:10px}.service-card-desc{font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px}.service-card-fields{display:flex;flex-direction:column;gap:8px}.service-card-fields input{width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border-color);background:rgba(15,15,35,.8);color:var(--text-primary);font-size:13px;transition:.3s;box-shadow:inset 0 2px 8px rgba(0,0,0,.2)}.service-card-fields input:focus{outline:0;border-color:rgba(183,148,246,.6);box-shadow:inset 0 2px 8px rgba(0,0,0,.2),0 0 15px var(--accent-glow)}.service-card-fields input::placeholder{color:rgba(183,148,246,.5)}.toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0}.toggle-switch input{opacity:0;width:0;height:0}.toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(100,100,100,.4);border-radius:24px;transition:.3s}.toggle-slider:before{content:"";position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}.toggle-switch input:checked+.toggle-slider{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary))}.toggle-switch input:checked+.toggle-slider:before{transform:translateX(20px)}.light-mode .settings-container{background:rgba(255,255,255,.8)}.light-mode .accordion-header:hover{background:rgba(118,75,162,.05)}.light-mode .accordion-section.active .accordion-header{background:rgba(118,75,162,.06)}.light-mode .form-group input,.light-mode .form-group select,.light-mode .form-group textarea{background:rgba(255,255,255,.8);box-shadow:inset 0 2px 10px rgba(118,75,162,.05)}.light-mode .form-group input:focus,.light-mode .form-group select:focus,.light-mode .form-group textarea:focus{box-shadow:inset 0 2px 10px rgba(118,75,162,.05),0 0 20px var(--accent-glow)}.light-mode .form-group input::placeholder,.light-mode .form-group textarea::placeholder{color:rgba(107,79,138,.5)}.light-mode .info-text{color:rgba(107,79,138,.7);background:rgba(255,255,255,.4)}.light-mode .config-required-banner{background:rgba(200,150,50,.1);border-color:rgba(200,150,50,.3);color:rgba(160,120,30,.9)}.light-mode .model-card{background:rgba(255,255,255,.3)}.light-mode .service-card{background:rgba(255,255,255,.5)}.light-mode .service-card-fields input{background:rgba(255,255,255,.8);box-shadow:inset 0 2px 8px rgba(118,75,162,.05)}.light-mode .service-card-fields input:focus{box-shadow:inset 0 2px 8px rgba(118,75,162,.05),0 0 15px var(--accent-glow)}.light-mode .service-card-fields input::placeholder{color:rgba(107,79,138,.5)}.model-card.disabled{opacity:0.35;pointer-events:none;user-select:none;transition:opacity .3s}.wizard-hidden{display:none !important}.more-settings-link{display:inline-block;color:var(--accent-tertiary);font-size:13px;cursor:pointer;text-decoration:none;padding:4px 0;transition:.3s;user-select:none}.more-settings-link:hover{color:var(--text-secondary);text-shadow:0 0 10px var(--accent-glow)}.light-mode .model-card.disabled{opacity:0.35}.accordion-section.disabled .accordion-header{opacity:0.35;pointer-events:none;cursor:default}.apply-btn:disabled{opacity:0.35;pointer-events:none;cursor:default}</style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.0/mermaid.min.js"></script>
@@ -13,9 +13,14 @@
     <div class="chat-panel" data-locked="true">
         <div class="chat-header" data-locked="true">SynthOS</div>
         <div class="chat-messages" id="chatMessages" data-locked="true">
-            <div class="chat-message">
-                <p><strong>SynthOS:</strong> Please fill in all required fields in the settings form and click 'Update'. Ensure your OpenAI or Anthropic API Key is valid and select the model you wish to use.</p>
-                <p><code>Max Output Tokens</code> controls how large of a page that can be rendered and <code>Additional Instructions</code> can be used to provide further prompt instructions for how pages should be updated.</p>
+            <div class="chat-message" id="defaultGreeting">
+                <p><strong>SynthOS:</strong> Configure your settings below. Use the accordion sections to navigate between General settings, Model configuration (Page Builder &amp; Chat Completion), and Additional Features.</p>
+                <p>The <strong>Page Builder Model</strong> is used when building pages via chat. The <strong>Chat Model</strong> is used by pages that call <code>synthos.generate.completion()</code>.</p>
+            </div>
+            <div class="chat-message" id="firstRunGreeting" style="display:none;">
+                <p><strong>SynthOS:</strong> Welcome to SynthOS! We're glad you're here.</p>
+                <p>Before you can start building, we need to connect to an AI provider. Just pick your provider below, paste in your API key, and you'll be ready to go.</p>
+                <p>You can always come back to this page later to change your theme or enable additional features.</p>
             </div>
         </div>
         <div class="link-group" data-locked="true">
@@ -31,53 +36,638 @@
     <div class="viewer-panel" id="viewerPanel" style="justify-content: flex-start; align-items: stretch;">
         <div class="settings-title" style="max-width: none; border-radius: 12px 12px 0 0;">Settings</div>
         <div class="settings-container" style="max-width: none; border-radius: 0; max-height: none; flex-grow: 1;">
-            <div class="tab-bar">
-                <button class="tab-btn active" data-tab="models">Models</button>
-                <button class="tab-btn" data-tab="preferences">Preferences</button>
-                <button class="tab-btn" data-tab="services">Services</button>
-            </div>
-            <div class="tab-content active" id="tab-models">
-                <div class="form-group">
-                    <label for="serviceApiKey">Service API Key</label>
-                    <input type="password" id="serviceApiKey" placeholder="Enter your API Key" required="">
-                </div>
-                <div class="form-group">
-                    <label for="model">Model</label>
-                    <select id="model" required="">
-                        <option value="">Select a model</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="maxTokens">Max Output Tokens</label>
-                    <input type="number" id="maxTokens" placeholder="Enter max token count" required="">
-                </div>
-                <div class="form-group">
-                    <label for="instructions">Additional Instructions</label>
-                    <textarea id="instructions" placeholder="Enter any additional instructions"></textarea>
-                </div>
-                <p class="info-text">An API Key is required which can be generated from either <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI API Keys</a> or <a href="https://console.anthropic.com/settings/keys" target="_blank">Anthropic API Keys</a>.</p>
-            </div>
-            <div class="tab-content" id="tab-preferences">
-                <div class="form-group">
-                    <label for="theme">Theme</label>
-                    <select id="theme">
-                        <option value="">Loading themes...</option>
-                    </select>
+
+            <div class="accordion-section active" data-section="general">
+                <button class="accordion-header">
+                    <span>General</span>
+                    <span class="accordion-chevron">&#9662;</span>
+                </button>
+                <div class="accordion-body">
+                    <div class="accordion-content">
+                        <div class="form-group">
+                            <label for="theme">Theme</label>
+                            <select id="theme">
+                                <option value="">Loading themes...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="button-row">
+                        <button class="apply-btn" data-apply="general">Apply</button>
+                    </div>
                 </div>
             </div>
-            <div class="tab-content" id="tab-services">
-                <div class="filter-bar" id="serviceFilterBar"></div>
-                <div class="services-grid" id="servicesGrid"></div>
+
+            <div class="accordion-section" data-section="models">
+                <button class="accordion-header">
+                    <span>Page Building &amp; Chat</span>
+                    <span class="accordion-chevron">&#9662;</span>
+                </button>
+                <div class="accordion-body">
+                    <div class="accordion-content">
+                        <div id="configBanner" class="config-required-banner" style="display:none;">
+                            Model configuration is required before you can use SynthOS. Please fill in the Page Builder fields below and click Apply.
+                        </div>
+
+                        <div class="model-card" id="builderCard">
+                            <div class="model-card-title">Page Builder Model</div>
+                            <div class="form-group">
+                                <label for="provider-builder">Provider</label>
+                                <select id="provider-builder" required="">
+                                    <option value="">Select a provider</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="fg-apikey-builder">
+                                <label for="serviceApiKey-builder">API Key</label>
+                                <input type="password" id="serviceApiKey-builder" placeholder="Enter your API Key" required="">
+                                <div id="providerInstructions" class="info-text" style="display:none;margin-top:8px;"></div>
+                            </div>
+                            <div class="form-group" id="fg-model-builder">
+                                <label for="model-builder">Model</label>
+                                <select id="model-builder" required="">
+                                    <option value="">Select a model</option>
+                                </select>
+                            </div>
+                            <a id="moreSettingsLink" class="more-settings-link">&#9662; More settings</a>
+                            <div class="form-group" id="fg-maxTokens-builder">
+                                <label for="maxTokens-builder">Max Output Tokens</label>
+                                <input type="number" id="maxTokens-builder" placeholder="Enter max token count" required="">
+                            </div>
+                            <div class="form-group" id="fg-instructions-builder">
+                                <label for="instructions-builder">Additional Instructions</label>
+                                <textarea id="instructions-builder" placeholder="Enter any additional instructions"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="model-card" id="chatCard">
+                            <div class="model-card-title">Chat Model</div>
+                            <div class="form-group" id="fg-provider-chat">
+                                <label for="provider-chat">Provider</label>
+                                <select id="provider-chat" required="">
+                                    <option value="">Select a provider</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="fg-apikey-chat">
+                                <label for="serviceApiKey-chat">API Key</label>
+                                <input type="password" id="serviceApiKey-chat" placeholder="Enter your API Key" required="">
+                            </div>
+                            <div class="form-group" id="fg-model-chat">
+                                <label for="model-chat">Model</label>
+                                <select id="model-chat" required="">
+                                    <option value="">Select a model</option>
+                                </select>
+                            </div>
+                            <a id="moreSettingsLinkChat" class="more-settings-link">&#9662; More settings</a>
+                            <div class="form-group" id="fg-maxTokens-chat">
+                                <label for="maxTokens-chat">Max Output Tokens</label>
+                                <input type="number" id="maxTokens-chat" placeholder="Enter max token count" required="">
+                            </div>
+                            <div class="form-group" id="fg-instructions-chat">
+                                <label for="instructions-chat">Additional Instructions</label>
+                                <textarea id="instructions-chat" placeholder="Enter any additional instructions"></textarea>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="button-row">
+                        <button class="apply-btn" data-apply="models">Apply</button>
+                    </div>
+                </div>
             </div>
-            <div class="button-row">
-                <button class="update-btn" id="updateBtn">Update</button>
+
+            <div class="accordion-section" data-section="features">
+                <button class="accordion-header">
+                    <span>Additional Features</span>
+                    <span class="accordion-chevron">&#9662;</span>
+                </button>
+                <div class="accordion-body">
+                    <div class="accordion-content">
+                        <div class="filter-bar" id="serviceFilterBar"></div>
+                        <div class="services-grid" id="servicesGrid"></div>
+                    </div>
+                </div>
             </div>
+
         </div>
         <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     </div>
-    <div id="instructions" style="display: none;" data-locked="true"></div>
+    <div id="instructionsHidden" style="display: none;" data-locked="true"></div>
     <div id="thoughts" style="display: none;" data-locked="true"></div>
-    <script id="settings-logic">document.querySelectorAll(".tab-btn").forEach(btn=>{btn.addEventListener("click",()=>{document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active")),document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active")),btn.classList.add("active"),document.getElementById("tab-"+btn.dataset.tab).classList.add("active")})});var serviceRegistry=[],serviceConfigs={},activeServiceCategory="All";function renderServiceFilterBar(){var bar=document.getElementById("serviceFilterBar");bar.innerHTML="";var cats=new Set;serviceRegistry.forEach(function(s){cats.add(s.category)});var sorted=Array.from(cats).sort();["All"].concat(sorted).forEach(function(cat){var btn=document.createElement("button");btn.className="filter-btn"+(activeServiceCategory===cat?" active":""),btn.textContent=cat,btn.addEventListener("click",function(){activeServiceCategory=cat,renderServiceFilterBar(),renderServiceCards()}),bar.appendChild(btn)})}function renderServiceCards(){var grid=document.getElementById("servicesGrid");grid.innerHTML="",serviceRegistry.filter(function(s){return"All"===activeServiceCategory||s.category===activeServiceCategory}).forEach(function(def){var cfg=serviceConfigs[def.id]||{},card=document.createElement("div");card.className="service-card",card.dataset.serviceId=def.id;var header=document.createElement("div");header.className="service-card-header";var nameRow=document.createElement("div");nameRow.style.display="flex",nameRow.style.alignItems="center",nameRow.style.gap="8px";var nameEl=document.createElement("span");nameEl.className="service-card-name",nameEl.textContent=def.name;var catEl=document.createElement("span");catEl.className="service-card-category",catEl.textContent=def.category,nameRow.appendChild(nameEl),nameRow.appendChild(catEl);var toggle=document.createElement("label");toggle.className="toggle-switch";var checkbox=document.createElement("input");checkbox.type="checkbox",checkbox.checked=!!cfg.enabled,checkbox.dataset.serviceId=def.id,checkbox.dataset.field="enabled";var slider=document.createElement("span");slider.className="toggle-slider",toggle.appendChild(checkbox),toggle.appendChild(slider),header.appendChild(nameRow),header.appendChild(toggle),card.appendChild(header);var desc=document.createElement("div");desc.className="service-card-desc",desc.textContent=def.description,card.appendChild(desc);var fields=document.createElement("div");fields.className="service-card-fields",def.fields.forEach(function(f){var input=document.createElement("input");input.type=f.type,input.placeholder=cfg.hasKey?"(key saved — leave blank to keep)":f.label,input.dataset.serviceId=def.id,input.dataset.field=f.name,fields.appendChild(input)}),card.appendChild(fields),grid.appendChild(card)})}function collectServicesConfig(){var config={};return serviceRegistry.forEach(function(def){var card=document.querySelector('.service-card[data-service-id="'+def.id+'"]');if(card){var enabled=card.querySelector('input[data-field="enabled"]'),entry={apiKey:"",enabled:!!enabled&&enabled.checked};def.fields.forEach(function(f){var input=card.querySelector('input[data-field="'+f.name+'"]');input&&(entry[f.name]=input.value)}),config[def.id]=entry}}),config}let isConfigured=!1;Promise.all([fetch("/api/settings").then(r=>r.json()),fetch("/api/themes").then(r=>r.json()),fetch("/api/services/registry").then(r=>r.json()),fetch("/api/services").then(r=>r.json())]).then(([data,themes,registry,configs])=>{const serviceApiKey=data.serviceApiKey||"",model=data.model||"",maxTokens=data.maxTokens||"";isConfigured=serviceApiKey&&model&&maxTokens,document.getElementById("serviceApiKey").value=serviceApiKey,document.getElementById("model").innerHTML=data.availableModels.map(m=>`<option value="${m}">${m}</option>`).join(""),document.getElementById("model").value=model,document.getElementById("maxTokens").value=maxTokens,document.getElementById("instructions").value=data.instructions||"";const currentTheme=data.theme||"nebula-dusk";document.getElementById("theme").innerHTML=themes.map(t=>`<option value="${t}">${t}</option>`).join(""),document.getElementById("theme").value=currentTheme,serviceRegistry=registry,serviceConfigs=configs,renderServiceFilterBar(),renderServiceCards(),isConfigured||(document.getElementById("chatInput").disabled=!0,document.getElementById("chatInput").classList.add("disabled"))}).catch(error=>console.error("Error fetching settings:",error)),document.getElementById("updateBtn").addEventListener("click",()=>{const serviceApiKey=document.getElementById("serviceApiKey").value,model=document.getElementById("model").value,maxTokens=document.getElementById("maxTokens").value;if(!serviceApiKey||!model||!maxTokens)return void alert("Please fill in all required fields (API Key, Model, Max Output Tokens).");const body={serviceApiKey:serviceApiKey,model:model,maxTokens:maxTokens,instructions:document.getElementById("instructions").value,theme:document.getElementById("theme").value};var servicesBody=collectServicesConfig();Promise.all([fetch("/api/settings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),fetch("/api/services",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(servicesBody)})]).then(function(responses){responses.every(function(r){return r.ok||r.redirected})?window.location.reload():alert("Failed to save settings. Please try again.")}).catch(err=>{console.error("Error saving settings:",err),alert("Failed to save settings. Please try again.")})});</script>
+    <script id="settings-logic">
+// --- Accordion logic ---
+function openSection(sectionName) {
+    document.querySelectorAll('.accordion-section').forEach(function(s) {
+        s.classList.remove('active');
+    });
+    var target = document.querySelector('.accordion-section[data-section="' + sectionName + '"]');
+    if (target) target.classList.add('active');
+}
+
+document.querySelectorAll('.accordion-header').forEach(function(header) {
+    header.addEventListener('click', function() {
+        var section = header.closest('.accordion-section');
+        if (section.classList.contains('disabled')) return;
+        var sectionName = section.dataset.section;
+        var isActive = section.classList.contains('active');
+        document.querySelectorAll('.accordion-section').forEach(function(s) {
+            s.classList.remove('active');
+        });
+        if (!isActive) {
+            section.classList.add('active');
+            // Update URL without reload
+            var url = new URL(window.location);
+            url.searchParams.set('tab', sectionName);
+            history.replaceState(null, '', url);
+        }
+    });
+});
+
+// --- URL param: open requested tab ---
+var params = new URLSearchParams(window.location.search);
+var tabParam = params.get('tab');
+if (tabParam && ['general', 'models', 'features'].indexOf(tabParam) !== -1) {
+    openSection(tabParam);
+}
+
+// --- Services logic ---
+var serviceRegistry = [], serviceConfigs = {}, activeServiceCategory = 'All';
+
+function renderServiceFilterBar() {
+    var bar = document.getElementById('serviceFilterBar');
+    bar.innerHTML = '';
+    var cats = new Set();
+    serviceRegistry.forEach(function(s) { cats.add(s.category); });
+    var sorted = Array.from(cats).sort();
+    ['All'].concat(sorted).forEach(function(cat) {
+        var btn = document.createElement('button');
+        btn.className = 'filter-btn' + (activeServiceCategory === cat ? ' active' : '');
+        btn.textContent = cat;
+        btn.addEventListener('click', function() {
+            activeServiceCategory = cat;
+            renderServiceFilterBar();
+            renderServiceCards();
+        });
+        bar.appendChild(btn);
+    });
+}
+
+function renderServiceCards() {
+    var grid = document.getElementById('servicesGrid');
+    grid.innerHTML = '';
+    serviceRegistry.filter(function(s) {
+        return activeServiceCategory === 'All' || s.category === activeServiceCategory;
+    }).forEach(function(def) {
+        var cfg = serviceConfigs[def.id] || {};
+        var card = document.createElement('div');
+        card.className = 'service-card';
+        card.dataset.serviceId = def.id;
+
+        var header = document.createElement('div');
+        header.className = 'service-card-header';
+
+        var nameRow = document.createElement('div');
+        nameRow.style.display = 'flex';
+        nameRow.style.alignItems = 'center';
+        nameRow.style.gap = '8px';
+
+        var nameEl = document.createElement('span');
+        nameEl.className = 'service-card-name';
+        nameEl.textContent = def.name;
+
+        var catEl = document.createElement('span');
+        catEl.className = 'service-card-category';
+        catEl.textContent = def.category;
+
+        nameRow.appendChild(nameEl);
+        nameRow.appendChild(catEl);
+
+        var toggle = document.createElement('label');
+        toggle.className = 'toggle-switch';
+        var checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = !!cfg.enabled;
+        checkbox.dataset.serviceId = def.id;
+        checkbox.dataset.field = 'enabled';
+        var slider = document.createElement('span');
+        slider.className = 'toggle-slider';
+        toggle.appendChild(checkbox);
+        toggle.appendChild(slider);
+
+        header.appendChild(nameRow);
+        header.appendChild(toggle);
+        card.appendChild(header);
+
+        var desc = document.createElement('div');
+        desc.className = 'service-card-desc';
+        desc.textContent = def.description;
+        card.appendChild(desc);
+
+        var fields = document.createElement('div');
+        fields.className = 'service-card-fields';
+        def.fields.forEach(function(f) {
+            var input = document.createElement('input');
+            input.type = f.type;
+            input.placeholder = cfg.hasKey ? '(key saved — leave blank to keep)' : f.label;
+            input.dataset.serviceId = def.id;
+            input.dataset.field = f.name;
+            fields.appendChild(input);
+        });
+        card.appendChild(fields);
+        grid.appendChild(card);
+    });
+}
+
+function collectServicesConfig() {
+    var config = {};
+    serviceRegistry.forEach(function(def) {
+        var card = document.querySelector('.service-card[data-service-id="' + def.id + '"]');
+        if (card) {
+            var enabled = card.querySelector('input[data-field="enabled"]');
+            var entry = { apiKey: '', enabled: !!enabled && enabled.checked };
+            def.fields.forEach(function(f) {
+                var input = card.querySelector('input[data-field="' + f.name + '"]');
+                if (input) entry[f.name] = input.value;
+            });
+            config[def.id] = entry;
+        }
+    });
+    return config;
+}
+
+// --- Save logic ---
+function saveAllSettings() {
+    var builderApiKey = document.getElementById('serviceApiKey-builder').value;
+    var builderModel = document.getElementById('model-builder').value;
+    var builderMaxTokens = document.getElementById('maxTokens-builder').value;
+    var builderProvider = document.getElementById('provider-builder').value;
+
+    if (!builderProvider || !builderApiKey || !builderModel || !builderMaxTokens) {
+        alert('Please fill in all required Page Builder fields (Provider, API Key, Model, Max Output Tokens).');
+        openSection('models');
+        return;
+    }
+
+    var models = [
+        {
+            use: 'builder',
+            provider: builderProvider,
+            configuration: {
+                apiKey: builderApiKey,
+                model: builderModel,
+                maxTokens: builderMaxTokens
+            },
+            imageQuality: 'standard',
+            instructions: document.getElementById('instructions-builder').value
+        },
+        {
+            use: 'chat',
+            provider: document.getElementById('provider-chat').value,
+            configuration: {
+                apiKey: document.getElementById('serviceApiKey-chat').value,
+                model: document.getElementById('model-chat').value,
+                maxTokens: document.getElementById('maxTokens-chat').value
+            },
+            imageQuality: 'standard',
+            instructions: document.getElementById('instructions-chat').value
+        }
+    ];
+
+    var body = {
+        version: 2,
+        theme: document.getElementById('theme').value,
+        models: models,
+        features: []
+    };
+    var servicesBody = collectServicesConfig();
+
+    Promise.all([
+        fetch('/api/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        }),
+        fetch('/api/services', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(servicesBody)
+        })
+    ]).then(function(responses) {
+        if (responses.every(function(r) { return r.ok || r.redirected; })) {
+            if (wizardActive) {
+                window.location.href = '/builder?firstRun=true';
+            } else {
+                window.location.reload();
+            }
+        } else {
+            alert('Failed to save settings. Please try again.');
+        }
+    }).catch(function(err) {
+        console.error('Error saving settings:', err);
+        alert('Failed to save settings. Please try again.');
+    });
+}
+
+document.querySelectorAll('.apply-btn').forEach(function(btn) {
+    btn.addEventListener('click', saveAllSettings);
+});
+
+// --- Provider helpers ---
+var providersData = [];
+
+function populateProviderDropdowns() {
+    var providerOptions = providersData.map(function(p) {
+        return '<option value="' + p.name + '">' + p.name + '</option>';
+    }).join('');
+    document.getElementById('provider-builder').innerHTML = providerOptions;
+    document.getElementById('provider-chat').innerHTML = providerOptions;
+}
+
+function populateModelDropdown(use, providerName) {
+    var provider = providersData.find(function(p) { return p.name === providerName; });
+    if (!provider) return;
+    var models = use === 'builder' ? provider.builderModels : provider.chatModels;
+    var options = models.map(function(m) {
+        return '<option value="' + m + '">' + m + '</option>';
+    }).join('');
+    document.getElementById('model-' + use).innerHTML = options;
+}
+
+document.getElementById('provider-builder').addEventListener('change', function() {
+    populateModelDropdown('builder', this.value);
+});
+document.getElementById('provider-chat').addEventListener('change', function() {
+    populateModelDropdown('chat', this.value);
+});
+
+// --- Provider signup instructions ---
+var providerInstructions = {
+    'Anthropic': 'Sign up at <a href="https://platform.claude.com" target="_blank">platform.claude.com</a>, then get your key at <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com/settings/keys</a>.',
+    'OpenAI': 'Sign up at <a href="https://auth.openai.com/create-account" target="_blank">auth.openai.com/create-account</a>, then get your key at <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a>.'
+};
+
+// --- "More settings" toggle state (works for all users) ---
+var builderAdvanced = false;
+var chatAdvanced = false;
+
+function applyAdvancedToggle() {
+    document.getElementById('fg-maxTokens-builder').classList.toggle('wizard-hidden', !builderAdvanced);
+    document.getElementById('fg-instructions-builder').classList.toggle('wizard-hidden', !builderAdvanced);
+    document.getElementById('fg-maxTokens-chat').classList.toggle('wizard-hidden', !chatAdvanced);
+    document.getElementById('fg-instructions-chat').classList.toggle('wizard-hidden', !chatAdvanced);
+}
+
+document.getElementById('moreSettingsLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    builderAdvanced = !builderAdvanced;
+    this.innerHTML = builderAdvanced ? '&#9652; Less settings' : '&#9662; More settings';
+    applyAdvancedToggle();
+});
+
+document.getElementById('moreSettingsLinkChat').addEventListener('click', function(e) {
+    e.preventDefault();
+    chatAdvanced = !chatAdvanced;
+    this.innerHTML = chatAdvanced ? '&#9652; Less settings' : '&#9662; More settings';
+    applyAdvancedToggle();
+});
+
+// Hide advanced fields by default on load
+applyAdvancedToggle();
+
+// --- Wizard state ---
+var wizardActive = false;
+var builderStep = 0;  // 0 = provider only, 1 = + API key, 2 = fully configured
+
+function updateWizardVisibility() {
+    if (!wizardActive) return;
+    var fgApiKey = document.getElementById('fg-apikey-builder');
+    var fgModel = document.getElementById('fg-model-builder');
+    var moreLinkBuilder = document.getElementById('moreSettingsLink');
+    var chatCardEl = document.getElementById('chatCard');
+    var moreLinkChat = document.getElementById('moreSettingsLinkChat');
+
+    // Step 0: only provider visible
+    fgApiKey.classList.toggle('wizard-hidden', builderStep < 1);
+
+    // Model dropdown visible at step 2 (auto-selected)
+    fgModel.classList.toggle('wizard-hidden', builderStep < 2);
+
+    // Builder "More settings" hidden until step 2
+    moreLinkBuilder.style.display = builderStep >= 2 ? 'inline-block' : 'none';
+    if (builderStep < 2) {
+        document.getElementById('fg-maxTokens-builder').classList.add('wizard-hidden');
+        document.getElementById('fg-instructions-builder').classList.add('wizard-hidden');
+    } else {
+        // Let the toggle state drive visibility
+        applyAdvancedToggle();
+    }
+
+    // Chat card: before step 2, show only title grayed out
+    if (builderStep < 2) {
+        ['fg-provider-chat', 'fg-apikey-chat', 'fg-model-chat', 'fg-maxTokens-chat', 'fg-instructions-chat'].forEach(function(id) {
+            document.getElementById(id).classList.add('wizard-hidden');
+        });
+        moreLinkChat.style.display = 'none';
+        chatCardEl.classList.add('disabled');
+    } else {
+        // Step 2: show chat card populated — provider, key, model visible; advanced behind toggle
+        ['fg-provider-chat', 'fg-apikey-chat', 'fg-model-chat'].forEach(function(id) {
+            document.getElementById(id).classList.remove('wizard-hidden');
+        });
+        moreLinkChat.style.display = 'inline-block';
+        applyAdvancedToggle();
+        chatCardEl.classList.remove('disabled');
+    }
+
+    updateApplyButton();
+}
+
+function updateApplyButton() {
+    var btns = document.querySelectorAll('.apply-btn');
+    if (!wizardActive) {
+        btns.forEach(function(b) { b.disabled = false; });
+        return;
+    }
+    var hasProvider = !!document.getElementById('provider-builder').value;
+    var hasKey = !!document.getElementById('serviceApiKey-builder').value;
+    var hasModel = !!document.getElementById('model-builder').value;
+    var hasTokens = !!document.getElementById('maxTokens-builder').value;
+    var ready = hasProvider && hasKey && hasModel && hasTokens;
+    btns.forEach(function(b) { b.disabled = !ready; });
+}
+
+function autoPopulateChatCard() {
+    var providerVal = document.getElementById('provider-builder').value;
+    var apiKeyVal = document.getElementById('serviceApiKey-builder').value;
+
+    document.getElementById('provider-chat').value = providerVal;
+    populateModelDropdown('chat', providerVal);
+
+    var chatModelSelect = document.getElementById('model-chat');
+    if (chatModelSelect.options.length > 0) {
+        chatModelSelect.selectedIndex = 0;
+    }
+
+    document.getElementById('serviceApiKey-chat').value = apiKeyVal;
+    document.getElementById('maxTokens-chat').value = '32000';
+}
+
+// --- Wizard event listeners ---
+document.getElementById('provider-builder').addEventListener('change', function() {
+    if (!wizardActive) return;
+    var val = this.value;
+    if (!val) return;
+    if (builderStep < 1) builderStep = 1;
+    var instrEl = document.getElementById('providerInstructions');
+    if (providerInstructions[val]) {
+        instrEl.innerHTML = providerInstructions[val];
+        instrEl.style.display = 'block';
+    } else {
+        instrEl.style.display = 'none';
+    }
+    updateWizardVisibility();
+});
+
+document.getElementById('serviceApiKey-builder').addEventListener('input', function() {
+    if (!wizardActive) return;
+    if (this.value.length > 0 && builderStep < 2) {
+        builderStep = 2;
+        document.getElementById('providerInstructions').style.display = 'none';
+        document.getElementById('maxTokens-builder').value = '32000';
+        autoPopulateChatCard();
+        updateWizardVisibility();
+    }
+    updateApplyButton();
+});
+
+// --- Load data ---
+var isConfigured = false;
+
+Promise.all([
+    fetch('/api/settings').then(function(r) { return r.json(); }),
+    fetch('/api/themes').then(function(r) { return r.json(); }),
+    fetch('/api/services/registry').then(function(r) { return r.json(); }),
+    fetch('/api/services').then(function(r) { return r.json(); })
+]).then(function(results) {
+    var data = results[0], themes = results[1], registry = results[2], configs = results[3];
+
+    // Store providers data
+    providersData = data.providers || [];
+
+    // Find builder and chat entries from models array
+    var models = data.models || [];
+    var builder = models.find(function(m) { return m.use === 'builder'; }) || {};
+    var chat = models.find(function(m) { return m.use === 'chat'; }) || {};
+
+    var builderConfig = builder.configuration || {};
+    var chatConfig = chat.configuration || {};
+    var builderApiKey = builderConfig.apiKey || '';
+    var builderModel = builderConfig.model || '';
+    var builderMaxTokens = builderConfig.maxTokens || '';
+    isConfigured = builderApiKey && builderModel && builderMaxTokens;
+
+    // Populate provider dropdowns
+    populateProviderDropdowns();
+
+    // Builder fields
+    document.getElementById('provider-builder').value = builder.provider || 'Anthropic';
+    populateModelDropdown('builder', builder.provider || 'Anthropic');
+    document.getElementById('serviceApiKey-builder').value = builderApiKey;
+    document.getElementById('model-builder').value = builderModel;
+    document.getElementById('maxTokens-builder').value = builderMaxTokens;
+    document.getElementById('instructions-builder').value = builder.instructions || '';
+
+    // Chat fields
+    document.getElementById('provider-chat').value = chat.provider || 'Anthropic';
+    populateModelDropdown('chat', chat.provider || 'Anthropic');
+    document.getElementById('serviceApiKey-chat').value = chatConfig.apiKey || '';
+    document.getElementById('model-chat').value = chatConfig.model || '';
+    document.getElementById('maxTokens-chat').value = chatConfig.maxTokens || '';
+    document.getElementById('instructions-chat').value = chat.instructions || '';
+
+    var currentTheme = data.theme || 'nebula-dusk';
+    document.getElementById('theme').innerHTML = themes.map(function(t) {
+        return '<option value="' + t + '">' + t + '</option>';
+    }).join('');
+    document.getElementById('theme').value = currentTheme;
+
+    serviceRegistry = registry;
+    serviceConfigs = configs;
+    renderServiceFilterBar();
+    renderServiceCards();
+
+    var isFirstRun = params.get('firstRun') === '1';
+
+    if (!isConfigured) {
+        // Disable chat and navigation
+        document.getElementById('chatInput').disabled = true;
+        document.getElementById('chatInput').classList.add('disabled');
+        var pagesLink = document.getElementById('pagesLink');
+        pagesLink.style.opacity = '0.4';
+        pagesLink.style.pointerEvents = 'none';
+
+        // Show config required banner and open models section
+        document.getElementById('configBanner').style.display = 'block';
+        openSection('models');
+    }
+
+    if (isFirstRun) {
+        // Activate wizard — always treat as unconfigured when firstRun=1
+        wizardActive = true;
+        builderStep = 0;
+
+        // Disable chat and navigation (even if somehow configured)
+        document.getElementById('chatInput').disabled = true;
+        document.getElementById('chatInput').classList.add('disabled');
+
+        // Disable Copy, Pages, and Reload links
+        ['saveLink', 'pagesLink', 'resetLink'].forEach(function(id) {
+            var el = document.getElementById(id);
+            el.style.opacity = '0.4';
+            el.style.pointerEvents = 'none';
+        });
+
+        // Show firstRun greeting, hide default
+        document.getElementById('defaultGreeting').style.display = 'none';
+        document.getElementById('firstRunGreeting').style.display = '';
+
+        // Show banner and lock to models tab
+        document.getElementById('configBanner').style.display = 'block';
+        openSection('models');
+
+        // Disable other accordion tabs
+        document.querySelector('.accordion-section[data-section="general"]').classList.add('disabled');
+        document.querySelector('.accordion-section[data-section="features"]').classList.add('disabled');
+
+        // Clear any existing values so wizard starts fresh
+        document.getElementById('provider-builder').value = '';
+        document.getElementById('serviceApiKey-builder').value = '';
+        document.getElementById('model-builder').innerHTML = '<option value="">Select a model</option>';
+        document.getElementById('maxTokens-builder').value = '';
+        document.getElementById('instructions-builder').value = '';
+        document.getElementById('provider-chat').value = '';
+        document.getElementById('serviceApiKey-chat').value = '';
+        document.getElementById('model-chat').innerHTML = '<option value="">Select a model</option>';
+        document.getElementById('maxTokens-chat').value = '';
+        document.getElementById('instructions-chat').value = '';
+
+        // Add placeholder option to builder provider dropdown
+        var builderProviderSelect = document.getElementById('provider-builder');
+        var placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = 'Select a provider';
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        builderProviderSelect.insertBefore(placeholder, builderProviderSelect.firstChild);
+        builderProviderSelect.value = '';
+
+        // Disable Apply buttons until configured
+        document.querySelectorAll('.apply-btn').forEach(function(b) { b.disabled = true; });
+
+        updateWizardVisibility();
+    }
+}).catch(function(error) {
+    console.error('Error fetching settings:', error);
+});
+    </script>
 <script id="page-helpers" src="/api/page-helpers.js?v=2" data-locked="true"></script>
 <script id="page-script" src="/api/page-script.js?v=2" data-locked="true"></script>
 </body></html>

@@ -1,41 +1,37 @@
 import {anthropic, completePrompt, logCompletePrompt, openai} from 'agentm-core';
-import { loadSettings } from '../settings';
+import { getModelEntry, loadSettings } from '../settings';
+import { PROVIDERS } from '../models';
 
-export const availableModels = [
-    'claude-opus-4-5',
-    'Claude Sonnet 4.5',
-    'Claude Haiku 4.5',
-    'GPT-5.2',
-    'GPT-5 mini',
-    'GPT-5 nano'
-];
-
-export async function createCompletePrompt(pagesFolder: string, model?: string): Promise<completePrompt> {
+export async function createCompletePrompt(pagesFolder: string, use: 'builder' | 'chat', modelOverride?: string): Promise<completePrompt> {
     // Get configuration settings
     const settings = await loadSettings(pagesFolder);
-    if (!settings.serviceApiKey) {
-        throw new Error('OpenAI API key not configured');
+    const entry = getModelEntry(settings, use);
+
+    if (!entry.configuration.apiKey) {
+        throw new Error('API key not configured');
     }
 
     // Validate model
-    model = model || settings.model;
+    const model = modelOverride || entry.configuration.model;
     if (!model) {
         throw new Error('Model not configured');
     }
 
     // Create completion functions
     let modelInstance: completePrompt;
-    const apiKey = settings.serviceApiKey;
-    if (model.startsWith('claude-')) {
+    const apiKey = entry.configuration.apiKey;
+    if (entry.provider === 'Anthropic') {
         modelInstance = anthropic({apiKey, model});
     } else {
         modelInstance = openai({apiKey, model});
     }
 
     // Return new model instance
-    if (settings.logCompletions) {
+    if (entry.logCompletions) {
         return logCompletePrompt(modelInstance, true);
     } else {
         return modelInstance;
     }
 }
+
+export { PROVIDERS };

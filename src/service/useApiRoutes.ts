@@ -1,10 +1,10 @@
 import path from "path";
 import { listPages, loadPageMetadata, PageMetadata, savePageMetadata, REQUIRED_PAGES, deletePage, copyPage, loadPageState, savePageState, PAGE_VERSION } from "../pages";
 import { checkIfExists, deleteFile, loadFile } from "../files";
-import {loadSettings, saveSettings, ServicesConfig } from "../settings";
+import {getModelEntry, loadSettings, saveSettings, ServicesConfig } from "../settings";
 import { Application } from 'express';
 import { SynthOSConfig } from "../init";
-import { availableModels, createCompletePrompt } from "./createCompletePrompt";
+import { createCompletePrompt, PROVIDERS } from "./createCompletePrompt";
 import { generateDefaultImage, generateImage } from "./generateImage";
 import { chainOfThought } from "agentm-core";
 import { requiresSettings } from "./requiresSettings";
@@ -274,19 +274,26 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
     // Define a route to return settings
     app.get('/api/settings', async (req, res) => {
         const settings = await loadSettings(config.pagesFolder);
-        res.json({...settings, availableModels});
+        const providers = PROVIDERS.map(p => ({ name: p.name, builderModels: p.builderModels, chatModels: p.chatModels }));
+        res.json({...settings, providers});
     });
 
     // Define a route to save settings
     app.post('/api/settings', async (req, res) => {
         try {
-            // Covert non-string values
+            // Coerce non-string values inside models array
             const settings = req.body as Record<string, any>;
-            if (typeof settings.maxTokens === 'string') {
-                settings.maxTokens = parseInt(settings.maxTokens);
-            }
-            if (typeof settings.logCompletions === 'string') {
-                settings.logCompletions = settings.logCompletions === 'true';
+            if (Array.isArray(settings.models)) {
+                for (const entry of settings.models) {
+                    if (entry.configuration) {
+                        if (typeof entry.configuration.maxTokens === 'string') {
+                            entry.configuration.maxTokens = parseInt(entry.configuration.maxTokens);
+                        }
+                    }
+                    if (typeof entry.logCompletions === 'string') {
+                        entry.logCompletions = entry.logCompletions === 'true';
+                    }
+                }
             }
 
             // Save settings
@@ -302,9 +309,10 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
     app.post('/api/generate/image', async (req, res) => {
         await requiresSettings(res, config.pagesFolder, async (settings) => {
             const { prompt, shape, style } = req.body;
-            const { serviceApiKey, imageQuality, model } = settings;
-            const response = model.startsWith('gpt-') ?
-                await generateImage({ apiKey: serviceApiKey, prompt, shape, quality: imageQuality, style }) :
+            const builder = getModelEntry(settings, 'builder');
+            const { configuration, imageQuality, provider } = builder;
+            const response = provider === 'OpenAI' ?
+                await generateImage({ apiKey: configuration.apiKey, prompt, shape, quality: imageQuality, style }) :
                 await generateDefaultImage();
             if (response.completed) {
                 res.json(response.value);
@@ -318,8 +326,8 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
     app.post('/api/generate/completion', async (req, res) => {
         await requiresSettings(res, config.pagesFolder, async (settings) => {
             const { prompt, temperature } = req.body;
-            const { maxTokens } = settings;
-            const completePrompt = await createCompletePrompt(config.pagesFolder, req.body.model);
+            const maxTokens = getModelEntry(settings, 'chat').configuration.maxTokens;
+            const completePrompt = await createCompletePrompt(config.pagesFolder, 'chat', req.body.model);
             const response = await chainOfThought({ question: prompt, temperature, maxTokens, completePrompt });
             if (response.completed) {
                 res.json(response.value ?? {});
@@ -334,8 +342,8 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
     app.post('/api/brainstorm', async (req, res) => {
         await requiresSettings(res, config.pagesFolder, async (settings) => {
             const { context, messages } = req.body;
-            const { maxTokens } = settings;
-            const completePrompt = await createCompletePrompt(config.pagesFolder);
+            const maxTokens = getModelEntry(settings, 'chat').configuration.maxTokens;
+            const completePrompt = await createCompletePrompt(config.pagesFolder, 'chat');
 
             const system: { role: 'system'; content: string } = {
                 role: 'system',
@@ -675,7 +683,7 @@ ${context}
             }
 
             // Run LLM-based migration
-            const completePrompt = await createCompletePrompt(config.pagesFolder);
+            const completePrompt = await createCompletePrompt(config.pagesFolder, 'builder');
             const migratedHtml = await migratePage(html, currentVersion, PAGE_VERSION, completePrompt);
 
             // Save upgraded HTML to v2 folder structure
