@@ -2,7 +2,7 @@
     "name": "synthos",
     "author": "Steven Ickman",
     "description": "An AI powered shell experience.",
-    "version": "0.6.0",
+    "version": "0.7.2",
     "license": "MIT",
     "keywords": [
         "synthos",
@@ -52,8 +52,11 @@
         "dist",
         "bin",
         "src",
+        "tests",
         "default-pages",
         "default-scripts",
+        "default-themes",
+        "page-scripts",
         "required-pages",
         "images"
     ]

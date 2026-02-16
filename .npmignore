@@ -3,3 +3,13 @@ yarn.lock
 *.tgz
 .env
 .synthos
+.synthos-save
+.claude
+.experts
+.nyc_output
+.saved-pages
+CLAUDE.md
+MIGRATION_RULES.md
+SHARED-MEMORIES.md
+start.cmd
+start.sh

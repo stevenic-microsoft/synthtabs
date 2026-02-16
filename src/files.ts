@@ -55,6 +55,20 @@ export async function deleteFile(path: string): Promise<void> {
     await fs.unlink(path);
 }
 
+export async function copyFolderRecursive(srcFolder: string, destFolder: string): Promise<void> {
+    await ensureFolderExists(destFolder);
+    const entries = await fs.readdir(srcFolder, { withFileTypes: true });
+    for (const entry of entries) {
+        const srcPath = path.join(srcFolder, entry.name);
+        const destPath = path.join(destFolder, entry.name);
+        if (entry.isDirectory()) {
+            await copyFolderRecursive(srcPath, destPath);
+        } else {
+            await fs.copyFile(srcPath, destPath);
+        }
+    }
+}
+
 export async function deleteFolder(dirPath: string): Promise<void> {
     await fs.rm(dirPath, { recursive: true });
 }

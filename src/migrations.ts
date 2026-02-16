@@ -1,4 +1,6 @@
 import * as cheerio from 'cheerio';
+import * as fs from 'fs/promises';
+import path from 'path';
 import { completePrompt } from 'agentm-core';
 import { deduplicateInlineScripts } from './service/transformPage';
 
@@ -26,128 +28,57 @@ export async function migratePage(html: string, fromVersion: number, toVersion: 
     return current;
 }
 
-/** CSS classes that belong to the shared theme and must NOT appear in page-specific <style> blocks. */
+/** CSS selectors provided by the shared theme — used by post-processing to strip leftovers. */
 const SHARED_CSS_SELECTORS = [
-    '*',
-    'body',
-    '.chat-panel',
-    '.chat-header',
-    '.chat-messages',
-    '.chat-message',
-    '.chat-message p',
-    '.chat-message strong',
-    '.chat-message pre',
-    '.chat-message code',
-    '.chat-message a',
-    '.link-group',
-    '.link-group a',
+    // Base
+    ':root', '*', 'body', 'html',
+    // Chat panel
+    '.chat-panel', '.chat-header', '.chat-messages',
+    '.chat-message', '.chat-message p', '.chat-message p strong', '.chat-message p code',
+    '.chat-message strong', '.chat-message pre', '.chat-message code', '.chat-message a',
+    '.link-group', '.link-group a', '.link-group a:hover',
     'form',
-    '.chat-input',
-    '.chat-submit',
-    '.loading-overlay',
-    '.spinner',
-    '.viewer-panel',
-    '#loadingOverlay',
-    '.chat-submit:disabled',
-    '.chat-input:disabled',
+    '.chat-input', '.chat-input:focus', '.chat-input::placeholder', '.chat-input:disabled',
+    '.chat-submit', '.chat-submit:hover', '.chat-submit:active', '.chat-submit:disabled',
+    '.chat-input-wrapper', '.chat-input-wrapper .chat-input',
+    // Viewer panel
+    '.viewer-panel', '.viewer-panel::before', '.viewer-panel.full-viewer',
+    // Loading
+    '.loading-overlay', '.spinner', '#loadingOverlay',
+    // Chat toggle
+    '.chat-toggle', '.chat-toggle:hover', '.chat-toggle-dots', '.chat-toggle-dot',
+    '.chat-toggle:hover .chat-toggle-dot',
+    'body.chat-collapsed .chat-panel', 'body.chat-collapsed .chat-toggle',
+    // Modal system
+    '.modal-overlay', '.modal-overlay.show', '.modal-content', '.modal-header',
+    '.modal-body', '.modal-footer', '.modal-footer-right',
+    '.modal-btn', '.modal-btn-primary', '.modal-btn-primary:hover',
+    '.modal-btn-secondary', '.modal-btn-secondary:hover',
+    '.modal-btn-danger', '.modal-btn-danger:hover',
+    // Form elements
+    '.form-group', '.form-group:last-child', '.form-label',
+    '.form-input', '.form-input:focus', '.form-input:read-only', '.form-input::placeholder',
+    '.checkbox-label', '.checkbox-label input[type="checkbox"]', '.checkbox-label span',
+    // Brainstorm
+    '.brainstorm-icon-btn', '.brainstorm-icon-btn:hover',
+    '.brainstorm-modal .modal-content', '.brainstorm-modal .modal-header',
+    '.brainstorm-close-btn', '.brainstorm-close-btn:hover',
+    '.brainstorm-messages', '.brainstorm-message', '.brainstorm-user', '.brainstorm-assistant',
+    '.brainstorm-input-row', '.brainstorm-input', '.brainstorm-input:focus', '.brainstorm-input::placeholder',
+    '.brainstorm-send-btn', '.brainstorm-send-btn:hover', '.brainstorm-send-btn:disabled',
+    '.brainstorm-assistant p', '.brainstorm-assistant pre', '.brainstorm-assistant code',
+    '.brainstorm-build-row', '.brainstorm-build-btn', '.brainstorm-build-btn:hover',
+    '.brainstorm-suggestions', '.brainstorm-suggestion-chip',
+    '.brainstorm-suggestion-chip:hover', '.brainstorm-suggestion-chip:disabled',
+    '.brainstorm-thinking',
 ];
 
-const V1_TO_V2_SYSTEM_PROMPT = `You are a code migration tool. You convert SynthOS v1 pages to v2 format.
-
-## Rules — What to REMOVE
-
-1. **Shared CSS rules** — Remove CSS rules that match these selectors **exactly** (they are now in theme.css):
-   \`*\`, \`body\`, \`.chat-panel\`, \`.chat-header\`, \`.chat-messages\`, \`.chat-message\` (and descendants like \`.chat-message p\`, \`.chat-message strong\`, \`.chat-message pre\`, \`.chat-message code\`, \`.chat-message a\`), \`.link-group\`, \`.link-group a\`, \`form\`, \`.chat-input\`, \`.chat-submit\`, \`.loading-overlay\`, \`.spinner\`, \`.viewer-panel\`, \`#loadingOverlay\`, \`.chat-submit:disabled\`, \`.chat-input:disabled\`
-   Also remove any \`@keyframes spin\` and scrollbar pseudo-element rules (\`::-webkit-scrollbar\`, \`::-webkit-scrollbar-track\`, \`::-webkit-scrollbar-thumb\`).
-   **Important:** Only remove rules matching these selectors exactly. Do NOT remove pseudo-element variants (\`.viewer-panel::before\`, \`.viewer-panel::after\`), pseudo-class variants (\`.chat-input:focus\`, \`.chat-submit:hover\`), or any other compound selectors that extend the shared selectors — those are page-specific styles and must be preserved. Also preserve any \`@keyframes\` referenced by page-specific rules (e.g. if a page has \`.viewer-panel::before\` using a custom animation, keep that \`@keyframes\`).
-
-2. **Shared inline JS** — Remove these specific code blocks from \`<script>\` tags:
-   - \`document.getElementById('chatInput').focus()\` line
-   - \`chatForm\` submit event listener (the one with setTimeout and loading overlay)
-   - \`saveLink\` click handler
-   - \`resetLink\` click handler
-   - \`window.onload\` that ONLY scrolls chatMessages (keep other onload logic!)
-   - Chat panel toggle IIFE (references \`synthos-chat-collapsed\`)
-   - Focus management IIFE (references \`stopImmediatePropagation\`)
-   - \`// Basic chat functionality\` comment
-
-3. **Empty \`<script>\` tags** — If a script block becomes empty after stripping, remove it entirely.
-
-## Rules — What to ADD
-
-1. In \`<head>\`, add these two lines right after the \`<title>\` tag (if not already present):
-   \`\`\`
-   <script src="/api/theme-info.js"></script>
-   <link rel="stylesheet" href="/api/theme.css">
-   \`\`\`
-
-## Rules — What to TRANSFORM
-
-### Data/Table API migration
-The data API changed from global tables to **page-scoped** tables:
-- Old: \`/api/data/:table\` → New: \`/api/data/:page/:table\`
-- Old: \`/api/data/:table/:id\` → New: \`/api/data/:page/:table/:id\`
-- Tables are now stored as sub-folders of each page's folder.
-- **Raw fetch() calls** must be updated: e.g. \`fetch('/api/data/notes')\` → \`fetch('/api/data/' + pageName + '/notes')\`
-- **synthos.data.\* helpers** handle this automatically — they read the current page name from \`window.pageInfo.name\`. Prefer converting raw fetch data calls to use the helpers instead:
-  - \`fetch('/api/data/notes')\` → \`synthos.data.list('notes')\`
-  - \`fetch('/api/data/notes/' + id)\` → \`synthos.data.get('notes', id)\`
-  - \`fetch('/api/data/notes', { method: 'POST', ... })\` → \`synthos.data.save('notes', row)\`
-  - \`fetch('/api/data/notes/' + id, { method: 'DELETE' })\` → \`synthos.data.remove('notes', id)\`
-
-### Color variables
-Replace hardcoded Nebula Dusk colors with CSS variables in **page-specific** CSS only:
-| Hardcoded | CSS Variable |
-|-----------|-------------|
-| \`#667eea\` | \`var(--accent-primary)\` |
-| \`#764ba2\` | \`var(--accent-secondary)\` |
-| \`#f093fb\` | \`var(--accent-tertiary)\` |
-| \`#b794f6\` | \`var(--text-secondary)\` |
-| \`#e0e0e0\` | \`var(--text-primary)\` |
-| \`rgba(138, 43, 226, 0.3)\` or similar purple rgba | \`var(--border-color)\` or \`var(--accent-glow)\` (use border-color for borders, accent-glow for shadows) |
-| \`#1a1a2e\` | \`var(--bg-primary)\` |
-| \`#16213e\` | \`var(--bg-secondary)\` |
-| \`#0f0f23\` | \`var(--bg-tertiary)\` |
-
-For gradients using these colors (e.g. \`linear-gradient(135deg, #667eea, #764ba2)\`), replace with \`linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))\`.
-
-## Rules — What to PRESERVE (do NOT modify)
-
-- ALL viewer-panel HTML content (games, presentations, tools, etc.)
-- ALL page-specific JavaScript (game logic, presentation logic, keyboard handlers, etc.)
-- ALL page-specific CSS (game styles, presentation styles, layout rules for non-shared classes)
-- Chat message history in \`.chat-messages\`
-- \`<div id="thoughts">\` content
-- External CDN script tags (\`<script src="...">\`)
-- The two-panel layout structure (chat-panel + viewer-panel)
-- The \`<div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>\` element
-- The chat form, link-group, chat-header elements (structure only, their CSS is handled by theme)
-
-## V2 page structure example
-
-\`\`\`html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SynthOS - Page Title</title>
-    <script src="/api/theme-info.js"></script>
-    <link rel="stylesheet" href="/api/theme.css">
-    <style>
-        /* Only page-specific styles here — no shared chat/layout CSS */
-        .my-custom-element {
-            color: var(--text-primary);
-            background: var(--bg-secondary);
-        }
-    </style>
-    <!-- external CDN scripts if needed -->
-</head>
-<body>
+/** Default chat panel HTML — restored by post-processing if the LLM removes it. */
+const DEFAULT_CHAT_PANEL = `
     <div class="chat-panel">
         <div class="chat-header">SynthOS</div>
         <div class="chat-messages" id="chatMessages">
-            <!-- chat messages preserved -->
+            <div class="chat-message"><p>Welcome! How can I help you?</p></div>
         </div>
         <div class="link-group">
             <a href="#" id="saveLink">Save</a>
@@ -158,29 +89,23 @@ For gradients using these colors (e.g. \`linear-gradient(135deg, #667eea, #764ba
             <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message...">
             <button type="submit" class="chat-submit">Send</button>
         </form>
-    </div>
-    <div class="viewer-panel" id="viewerPanel">
-        <!-- page content preserved -->
-        <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
-    </div>
-    <div id="thoughts" style="display: none;">...</div>
-    <script>
-        // Only page-specific JS here — no shared chat handlers
-    </script>
-</body>
-</html>
-\`\`\`
+    </div>`;
 
-## Output format
-
-Return ONLY the complete migrated HTML. No markdown fences, no explanation, no commentary. Just the raw HTML starting with \`<!DOCTYPE html>\`.`;
+/**
+ * Load migration rules from the migration-rules/ folder.
+ */
+async function loadMigrationRules(filename: string): Promise<string> {
+    const rulesPath = path.join(__dirname, '..', 'migration-rules', filename);
+    return await fs.readFile(rulesPath, 'utf8');
+}
 
 /**
  * v1 -> v2: LLM-based migration that strips shared code and adds theme support.
  * Post-processes with cheerio to verify critical elements are present.
  */
 async function migrateV1toV2(html: string, completePrompt: completePrompt): Promise<string> {
-    const system = { role: 'system' as const, content: V1_TO_V2_SYSTEM_PROMPT };
+    const rules = await loadMigrationRules('v1-to-v2.md');
+    const system = { role: 'system' as const, content: rules };
     const prompt = { role: 'user' as const, content: `Convert this v1 page to v2 format:\n\n${html}` };
 
     const result = await completePrompt({ prompt, system, maxTokens: 16000 });
@@ -195,16 +120,72 @@ async function migrateV1toV2(html: string, completePrompt: completePrompt): Prom
     }
 
     // Post-process with cheerio to verify and fix critical elements
-    migrated = postProcessV2(migrated);
+    migrated = postProcessV2(migrated, html);
 
     return migrated;
 }
 
 /**
  * Cheerio-based post-processing to verify the LLM output meets v2 requirements.
+ * Uses the original HTML as a fallback source for critical elements.
  */
-export function postProcessV2(html: string): string {
+export function postProcessV2(html: string, originalHtml?: string): string {
     const $ = cheerio.load(html, { decodeEntities: false });
+    const $original = originalHtml ? cheerio.load(originalHtml, { decodeEntities: false }) : null;
+
+    // --- Critical structural checks ---
+
+    // Ensure chat-panel exists with chatForm
+    if ($('#chatForm').length === 0) {
+        if ($('.chat-panel').length > 0) {
+            // Chat panel exists but form is missing — restore form from original or default
+            const originalForm = $original?.('#chatForm').parent('.chat-panel');
+            if (originalForm && originalForm.length > 0) {
+                $('.chat-panel').replaceWith(originalForm.html()!);
+            } else {
+                // Append default form
+                $('.chat-panel').append(`
+        <form action="/" method="POST" id="chatForm">
+            <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message...">
+            <button type="submit" class="chat-submit">Send</button>
+        </form>`);
+            }
+        } else {
+            // Entire chat panel is missing — restore from original or use default
+            const originalPanel = $original?.('.chat-panel');
+            if (originalPanel && originalPanel.length > 0) {
+                $('body').prepend($.html(originalPanel));
+            } else {
+                $('body').prepend(DEFAULT_CHAT_PANEL);
+            }
+        }
+    }
+
+    // Ensure thoughts div exists
+    if ($('#thoughts').length === 0) {
+        const originalThoughts = $original?.('#thoughts');
+        if (originalThoughts && originalThoughts.length > 0) {
+            $('body').append($.html(originalThoughts));
+        } else {
+            $('body').append('<div id="thoughts" style="display: none;"></div>');
+        }
+    }
+
+    // Ensure loadingOverlay exists inside viewer-panel
+    const overlay = $('#loadingOverlay');
+    const viewerPanel = $('.viewer-panel');
+    if (overlay.length === 0 && viewerPanel.length > 0) {
+        viewerPanel.append('<div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>');
+    } else if (overlay.length > 0 && viewerPanel.length > 0) {
+        // Move inside viewer-panel if it's outside
+        if (overlay.closest('.viewer-panel').length === 0) {
+            const overlayHtml = $.html(overlay);
+            overlay.remove();
+            viewerPanel.append(overlayHtml);
+        }
+    }
+
+    // --- Theme refs ---
 
     // Ensure theme-info.js is in <head>
     if ($('script[src="/api/theme-info.js"]').length === 0) {
@@ -226,7 +207,8 @@ export function postProcessV2(html: string): string {
         }
     }
 
-    // Remove leftover shared CSS selectors from <style> blocks
+    // --- Strip leftover shared CSS ---
+
     $('style').each(function (_, el) {
         let css = $(el).html() ?? '';
         for (const selector of SHARED_CSS_SELECTORS) {
@@ -236,10 +218,11 @@ export function postProcessV2(html: string): string {
             const pattern = new RegExp(`(?:^|\\n)\\s*${escaped}\\s*\\{[^}]*\\}`, 'g');
             css = css.replace(pattern, '');
         }
-        // Remove @keyframes spin
+        // Remove @keyframes spin and nebula-pulse
         css = css.replace(/@keyframes\s+spin\s*\{[^}]*(?:\{[^}]*\}[^}]*)*\}/g, '');
+        css = css.replace(/@keyframes\s+nebula-pulse\s*\{[^}]*(?:\{[^}]*\}[^}]*)*\}/g, '');
         // Remove scrollbar pseudo-element rules
-        css = css.replace(/(?:^|\n)\s*(?:\*|body|)::-webkit-scrollbar(?:-(?:track|thumb))?\s*\{[^}]*\}/g, '');
+        css = css.replace(/(?:^|\n)\s*(?:\*|body|)::-webkit-scrollbar(?:-(?:track|thumb|corner))?(?::hover)?\s*\{[^}]*\}/g, '');
         $(el).html(css);
     });
 
