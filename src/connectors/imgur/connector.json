@@ -1,0 +1,29 @@
+{
+    "id": "imgur",
+    "name": "Imgur",
+    "category": "Image",
+    "description": "Image hosting and sharing. Upload images, create albums, and browse the Imgur gallery.",
+    "baseUrl": "https://api.imgur.com",
+    "authStrategy": "header",
+    "authKey": "Authorization",
+    "fields": [
+        { "name": "apiKey", "label": "Client ID", "type": "password" }
+    ],
+    "hints": [
+        "Upload image: POST /3/image with body: { image: \"<base64 or URL>\", title: \"...\" }",
+        "Get image: GET /3/image/{imageHash}",
+        "Get album: GET /3/album/{albumHash}",
+        "Response (upload): { data: { id, link, deletehash, width, height } }",
+        "IMPORTANT: Save your key as 'Client-ID YOUR_CLIENT_ID' (the proxy sends raw header value).",
+        "Free tier: 1,250 uploads/day, 12,500 requests/day."
+    ],
+    "onboarding": {
+        "url": "https://api.imgur.com/oauth2/addclient",
+        "steps": [
+            "Create an Imgur account if you don't have one",
+            "Register an application at api.imgur.com/oauth2/addclient",
+            "Select 'OAuth 2 authorization without a callback URL'",
+            "Copy your Client ID from the confirmation page"
+        ]
+    }
+}

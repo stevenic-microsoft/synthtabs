@@ -1,0 +1,26 @@
+{
+    "id": "brave-search",
+    "name": "Brave Search",
+    "category": "Search",
+    "description": "Web search powered by the Brave Search API. Provides real-time search results from the web.",
+    "baseUrl": "https://api.search.brave.com",
+    "authStrategy": "header",
+    "authKey": "X-Subscription-Token",
+    "fields": [
+        { "name": "apiKey", "label": "API Key", "type": "password" }
+    ],
+    "hints": [
+        "Endpoint: GET /res/v1/web/search",
+        "Query params: q (required), count (1-20, default 10), country, freshness",
+        "Response: { web: { results: [{ title, url, description }] } }",
+        "Note: synthos.search.web() is a convenience wrapper — prefer it over raw connector calls for basic web search."
+    ],
+    "onboarding": {
+        "url": "https://brave.com/search/api/",
+        "steps": [
+            "Create an account at brave.com/search/api/",
+            "Subscribe to the Free plan (2,000 queries/mo)",
+            "Go to your dashboard and copy your API key"
+        ]
+    }
+}

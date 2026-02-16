@@ -1,0 +1,28 @@
+{
+    "id": "notion",
+    "name": "Notion",
+    "category": "Productivity",
+    "description": "Workspace API for pages, databases, and blocks. Read and write Notion content programmatically.",
+    "baseUrl": "https://api.notion.com",
+    "authStrategy": "bearer",
+    "authKey": "Authorization",
+    "fields": [
+        { "name": "apiKey", "label": "Integration Token", "type": "password" }
+    ],
+    "hints": [
+        "Search: POST /v1/search with body: { query: \"...\", filter: { property: \"object\", value: \"page\" } }",
+        "Get page: GET /v1/pages/{page_id}",
+        "Query database: POST /v1/databases/{database_id}/query",
+        "IMPORTANT: All requests must include header Notion-Version: 2022-06-28.",
+        "Pages must be shared with your integration before they can be accessed."
+    ],
+    "onboarding": {
+        "url": "https://www.notion.so/my-integrations",
+        "steps": [
+            "Go to notion.so/my-integrations",
+            "Create a new internal integration",
+            "Copy the Internal Integration Token",
+            "Share your Notion pages/databases with the integration"
+        ]
+    }
+}

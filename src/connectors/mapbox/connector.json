@@ -1,0 +1,26 @@
+{
+    "id": "mapbox",
+    "name": "Mapbox",
+    "category": "Geo",
+    "description": "Maps, geocoding, directions, and location search. Build location-aware applications.",
+    "baseUrl": "https://api.mapbox.com",
+    "authStrategy": "query",
+    "authKey": "access_token",
+    "fields": [
+        { "name": "apiKey", "label": "Access Token", "type": "password" }
+    ],
+    "hints": [
+        "Geocoding: GET /geocoding/v5/mapbox.places/{query}.json",
+        "Directions: GET /directions/v5/mapbox/driving/{lon1},{lat1};{lon2},{lat2}",
+        "Static map image: GET /styles/v1/mapbox/streets-v12/static/{lon},{lat},{zoom}/600x400",
+        "Response (geocoding): { features: [{ place_name, center: [lon, lat] }] }"
+    ],
+    "onboarding": {
+        "url": "https://account.mapbox.com/auth/signup/",
+        "steps": [
+            "Create an account at mapbox.com",
+            "Go to your Account page",
+            "Copy your default public token or create a new one"
+        ]
+    }
+}

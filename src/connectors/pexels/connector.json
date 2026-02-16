@@ -1,0 +1,27 @@
+{
+    "id": "pexels",
+    "name": "Pexels",
+    "category": "Image",
+    "description": "Free stock photos and videos. Search a curated library of high-quality, royalty-free images and video clips.",
+    "baseUrl": "https://api.pexels.com",
+    "authStrategy": "header",
+    "authKey": "Authorization",
+    "fields": [
+        { "name": "apiKey", "label": "API Key", "type": "password" }
+    ],
+    "hints": [
+        "Search photos: GET https://api.pexels.com/v1/search?query={term}&per_page=10 — params: query (required), orientation (landscape|portrait|square), size (large|medium|small), color (red|orange|yellow|green|turquoise|blue|violet|pink|brown|black|gray|white|#hex), page (default:1), per_page (default:15, max:80)",
+        "Get a Photo by ID: GET https://api.pexels.com/v1/photos/{id} — params: id (required)",
+        "Response (search&get): { photos: [{ id, width, height, src: { original, large, medium, small, tiny }, alt, photographer }] }",
+        "Whenever you are doing an API request make sure to show a prominent link to Pexels. You can use a text link (e.g. 'Photos provided by Pexels').",
+        "Rate limit: 200 requests/hour, 20,000 requests/month."
+    ],
+    "onboarding": {
+        "url": "https://www.pexels.com/api",
+        "steps": [
+            "Create an account at pexels.com",
+            "Go to pexels.com/api to request API access",
+            "Copy your API key from the dashboard"
+        ]
+    }
+}

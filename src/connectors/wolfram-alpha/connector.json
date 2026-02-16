@@ -1,0 +1,26 @@
+{
+    "id": "wolfram-alpha",
+    "name": "Wolfram Alpha",
+    "category": "Science",
+    "description": "Computational intelligence engine. Get answers to factual queries, math, science, and data analysis.",
+    "baseUrl": "https://api.wolframalpha.com",
+    "authStrategy": "query",
+    "authKey": "appid",
+    "fields": [
+        { "name": "apiKey", "label": "App ID", "type": "password" }
+    ],
+    "hints": [
+        "Short answer: GET /v1/result?i={query} — returns plain text",
+        "Full results: GET /v2/query?input={query}&output=json",
+        "Response (v2): { queryresult: { pods: [{ title, subpods: [{ plaintext, img: { src } }] }] } }",
+        "Free tier: 2,000 queries/month."
+    ],
+    "onboarding": {
+        "url": "https://developer.wolframalpha.com/portal/myapps/",
+        "steps": [
+            "Create a Wolfram ID at developer.wolframalpha.com",
+            "Go to My Apps and create a new app",
+            "Copy the AppID from your app settings"
+        ]
+    }
+}

@@ -1,0 +1,28 @@
+{
+    "id": "twilio",
+    "name": "Twilio",
+    "category": "Communication",
+    "description": "SMS, voice, and messaging APIs. Send text messages, make calls, and build communication workflows.",
+    "baseUrl": "https://api.twilio.com",
+    "authStrategy": "header",
+    "authKey": "Authorization",
+    "fields": [
+        { "name": "apiKey", "label": "Auth Token (Base64 SID:Token)", "type": "password" }
+    ],
+    "hints": [
+        "Send SMS: POST /2010-04-01/Accounts/{AccountSid}/Messages.json",
+        "  Body (form-encoded): To=+1234567890&From=+0987654321&Body=Hello",
+        "  IMPORTANT: Twilio uses Basic auth. Save your key as 'Basic base64(AccountSID:AuthToken)'.",
+        "  Content-Type must be application/x-www-form-urlencoded for SMS.",
+        "List messages: GET /2010-04-01/Accounts/{AccountSid}/Messages.json",
+        "Free trial: requires verified phone numbers."
+    ],
+    "onboarding": {
+        "url": "https://www.twilio.com/try-twilio",
+        "steps": [
+            "Create a Twilio account at twilio.com/try-twilio",
+            "Find your Account SID and Auth Token on the Console dashboard",
+            "Base64-encode 'AccountSID:AuthToken' and paste as your key"
+        ]
+    }
+}

@@ -1,0 +1,27 @@
+{
+    "id": "nasa",
+    "name": "NASA",
+    "category": "Science",
+    "description": "Access NASA's open data APIs including astronomy photos, Mars rover images, and asteroid tracking.",
+    "baseUrl": "https://api.nasa.gov",
+    "authStrategy": "query",
+    "authKey": "api_key",
+    "fields": [
+        { "name": "apiKey", "label": "API Key", "type": "password" }
+    ],
+    "hints": [
+        "Astronomy Picture of the Day: GET /planetary/apod",
+        "Mars Rover Photos: GET /mars-photos/api/v1/rovers/curiosity/photos?sol=1000",
+        "Asteroids NeoWS: GET /neo/rest/v1/feed?start_date=2024-01-01&end_date=2024-01-07",
+        "Response (APOD): { title, explanation, url, hdurl, media_type }",
+        "Free tier: 1,000 requests/hour. DEMO_KEY works for testing (30 req/hr)."
+    ],
+    "onboarding": {
+        "url": "https://api.nasa.gov/",
+        "steps": [
+            "Visit api.nasa.gov",
+            "Fill in the sign-up form to get an API key",
+            "Check your email for the API key"
+        ]
+    }
+}

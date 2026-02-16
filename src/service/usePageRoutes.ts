@@ -56,10 +56,11 @@ function injectPageHelpers(html: string, pageVersion: number): string {
     if (pageVersion < 2) return html;
     const tag = `<script id="page-helpers" src="/api/page-helpers.js?v=${pageVersion}"></script>`;
 
-    // Replace any existing page-helpers script (may be at wrong position from prior LLM output)
+    // Remove any existing page-helpers script (may be at wrong position from prior LLM output)
+    // so it gets re-injected at the correct position below.
     const existing = html.match(/<script\s+id="page-helpers"[^>]*><\/script>/);
     if (existing) {
-        return html.replace(existing[0], tag);
+        html = html.replace(existing[0], '');
     }
 
     // Inject into <head> after page-info so helpers are available before inline body scripts

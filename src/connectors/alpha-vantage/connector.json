@@ -1,0 +1,26 @@
+{
+    "id": "alpha-vantage",
+    "name": "Alpha Vantage",
+    "category": "Finance",
+    "description": "Stock market data, forex, crypto, and technical indicators. Real-time and historical financial data.",
+    "baseUrl": "https://www.alphavantage.co",
+    "authStrategy": "query",
+    "authKey": "apikey",
+    "fields": [
+        { "name": "apiKey", "label": "API Key", "type": "password" }
+    ],
+    "hints": [
+        "Stock quote: GET /query?function=GLOBAL_QUOTE&symbol={SYMBOL}",
+        "Daily time series: GET /query?function=TIME_SERIES_DAILY&symbol={SYMBOL}",
+        "Forex rate: GET /query?function=CURRENCY_EXCHANGE_RATE&from_currency=USD&to_currency=EUR",
+        "Free tier: 25 requests/day. Response is JSON with nested objects keyed by metadata labels."
+    ],
+    "onboarding": {
+        "url": "https://www.alphavantage.co/support/#api-key",
+        "steps": [
+            "Visit the Alpha Vantage API key page",
+            "Fill in your details and click Get Free API Key",
+            "Copy the API key shown on the page"
+        ]
+    }
+}

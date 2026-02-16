@@ -1,0 +1,27 @@
+{
+    "id": "newsapi",
+    "name": "NewsAPI",
+    "category": "News",
+    "description": "Search and retrieve news articles from thousands of sources worldwide. Headlines, everything search, and source discovery.",
+    "baseUrl": "https://newsapi.org",
+    "authStrategy": "header",
+    "authKey": "X-Api-Key",
+    "fields": [
+        { "name": "apiKey", "label": "API Key", "type": "password" }
+    ],
+    "hints": [
+        "Top headlines: GET /v2/top-headlines?country=us&category=technology",
+        "Everything search: GET /v2/everything?q={query}&sortBy=publishedAt",
+        "Sources: GET /v2/top-headlines/sources",
+        "Response: { articles: [{ title, description, url, urlToImage, publishedAt, source: { name } }] }",
+        "Free tier: 100 requests/day, 1-month-old articles only."
+    ],
+    "onboarding": {
+        "url": "https://newsapi.org/register",
+        "steps": [
+            "Create an account at newsapi.org",
+            "After registering, your API key is shown on the dashboard",
+            "Copy the API key"
+        ]
+    }
+}

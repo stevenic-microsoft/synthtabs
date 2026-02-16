@@ -1,0 +1,43 @@
+{
+    "id": "instagram",
+    "name": "Instagram",
+    "category": "Social",
+    "description": "Post photos and videos to Instagram via the Instagram Graph API.",
+    "baseUrl": "https://graph.facebook.com/v21.0",
+    "authStrategy": "oauth2",
+    "authKey": "access_token",
+    "authorizationUrl": "https://www.facebook.com/v21.0/dialog/oauth",
+    "tokenUrl": "https://graph.facebook.com/v21.0/oauth/access_token",
+    "scopes": [
+        "instagram_basic",
+        "instagram_content_publish",
+        "pages_show_list",
+        "pages_read_engagement"
+    ],
+    "fields": [
+        { "name": "clientId", "label": "App ID", "type": "text" },
+        { "name": "clientSecret", "label": "App Secret", "type": "password" }
+    ],
+    "hints": [
+        "Publishing flow (two-step):",
+        "  1. Create media container: POST /{ig-user-id}/media",
+        "     Body (photo): { image_url, caption }",
+        "     Body (reel/video): { video_url, caption, media_type: \"REELS\" }",
+        "     Response: { id: \"<container-id>\" }",
+        "  2. Publish container: POST /{ig-user-id}/media_publish",
+        "     Body: { creation_id: \"<container-id>\" }",
+        "     Response: { id: \"<media-id>\" }",
+        "IMPORTANT: Do NOT include access_token in body or query params — the proxy attaches it automatically.",
+        "IMPORTANT: Images must be publicly accessible URLs. Use a hosting service or the data API to serve local images.",
+        "Rate limit: 25 posts per 24-hour period.",
+        "Requires a Business or Creator Instagram account linked to a Facebook Page."
+    ],
+    "onboarding": {
+        "url": "https://developers.facebook.com/",
+        "steps": [
+            "Create a Meta developer account at developers.facebook.com",
+            "Create a new app and add the Instagram Graph API product",
+            "Get your App ID and App Secret from Settings > Basic"
+        ]
+    }
+}

@@ -1,0 +1,28 @@
+{
+    "id": "deepl",
+    "name": "DeepL",
+    "category": "Translation",
+    "description": "High-quality AI translation for 30+ languages. Translate text and documents with state-of-the-art neural machine translation.",
+    "baseUrl": "https://api-free.deepl.com",
+    "authStrategy": "header",
+    "authKey": "Authorization",
+    "fields": [
+        { "name": "apiKey", "label": "API Key", "type": "password" }
+    ],
+    "hints": [
+        "Translate text: POST /v2/translate",
+        "  Body: { text: [\"Hello\"], target_lang: \"DE\" }",
+        "  Response: { translations: [{ detected_source_language: \"EN\", text: \"Hallo\" }] }",
+        "Supported languages: GET /v2/languages",
+        "IMPORTANT: The auth header value must be: DeepL-Auth-Key YOUR_KEY. The proxy sends raw apiKey — prepend 'DeepL-Auth-Key ' when saving your key.",
+        "Free tier: 500,000 characters/month."
+    ],
+    "onboarding": {
+        "url": "https://www.deepl.com/pro-api",
+        "steps": [
+            "Sign up for a DeepL API Free account",
+            "Go to your Account > API Keys",
+            "Copy your Authentication Key"
+        ]
+    }
+}

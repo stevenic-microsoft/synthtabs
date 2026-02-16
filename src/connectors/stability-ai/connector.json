@@ -1,0 +1,27 @@
+{
+    "id": "stability-ai",
+    "name": "Stability AI",
+    "category": "Image",
+    "description": "AI image generation powered by Stable Diffusion. Create images from text prompts.",
+    "baseUrl": "https://api.stability.ai",
+    "authStrategy": "bearer",
+    "authKey": "Authorization",
+    "fields": [
+        { "name": "apiKey", "label": "API Key", "type": "password" }
+    ],
+    "hints": [
+        "Text-to-image: POST /v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image",
+        "  Request headers: Content-Type: application/json, Accept: application/json",
+        "  Request body: { text_prompts: [{ text: string, weight: 1 }], cfg_scale: 7, steps: 30, width: 1024, height: 1024 }",
+        "  Response: { artifacts: [{ base64: string, finishReason: string }] }",
+        "  Display with: <img src=\"data:image/png;base64,{base64}\">"
+    ],
+    "onboarding": {
+        "url": "https://platform.stability.ai/",
+        "steps": [
+            "Create an account at platform.stability.ai",
+            "Go to Account > API Keys",
+            "Create and copy your API key"
+        ]
+    }
+}

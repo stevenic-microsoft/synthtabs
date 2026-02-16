@@ -2,6 +2,8 @@ export { CONNECTOR_REGISTRY } from './registry';
 export type {
     AuthStrategy,
     ConnectorField,
+    ConnectorOnboarding,
+    ConnectorJson,
     ConnectorDefinition,
     ConnectorConfig,
     ConnectorOAuthConfig,

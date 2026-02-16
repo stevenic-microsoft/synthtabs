@@ -1,0 +1,27 @@
+{
+    "id": "cloudinary",
+    "name": "Cloudinary",
+    "category": "Media",
+    "description": "Cloud-based image and video management. Upload, transform, optimize, and deliver media assets.",
+    "baseUrl": "https://api.cloudinary.com",
+    "authStrategy": "header",
+    "authKey": "Authorization",
+    "fields": [
+        { "name": "apiKey", "label": "Auth (Base64 key:secret)", "type": "password" }
+    ],
+    "hints": [
+        "Upload image: POST /v1_1/{cloud_name}/image/upload",
+        "  Body: { file: \"<url or base64>\", upload_preset: \"...\" }",
+        "List resources: GET /v1_1/{cloud_name}/resources/image",
+        "IMPORTANT: Cloudinary uses Basic auth. Save your key as 'Basic base64(API_KEY:API_SECRET)'.",
+        "Replace {cloud_name} in paths with your Cloudinary cloud name."
+    ],
+    "onboarding": {
+        "url": "https://cloudinary.com/users/register_free",
+        "steps": [
+            "Create a free Cloudinary account",
+            "Go to Settings > Access Keys",
+            "Base64-encode 'API_KEY:API_SECRET' and paste as your key"
+        ]
+    }
+}

@@ -1,0 +1,28 @@
+{
+    "id": "spoonacular",
+    "name": "Spoonacular",
+    "category": "Food",
+    "description": "Food and recipe API. Search recipes, get nutritional data, meal planning, and ingredient information.",
+    "baseUrl": "https://api.spoonacular.com",
+    "authStrategy": "header",
+    "authKey": "x-api-key",
+    "fields": [
+        { "name": "apiKey", "label": "API Key", "type": "password" }
+    ],
+    "hints": [
+        "Search recipes: GET /recipes/complexSearch?query={term}&number=10",
+        "Get recipe: GET /recipes/{id}/information",
+        "Random recipes: GET /recipes/random?number=5",
+        "Nutritional info: GET /recipes/{id}/nutritionWidget.json",
+        "Response (search): { results: [{ id, title, image }], totalResults }",
+        "Free tier: 150 requests/day."
+    ],
+    "onboarding": {
+        "url": "https://spoonacular.com/food-api/console#Dashboard",
+        "steps": [
+            "Create an account at spoonacular.com/food-api",
+            "Go to your Dashboard / Profile",
+            "Copy your API key"
+        ]
+    }
+}

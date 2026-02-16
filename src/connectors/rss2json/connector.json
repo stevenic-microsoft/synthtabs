@@ -1,0 +1,27 @@
+{
+    "id": "rss2json",
+    "name": "RSS/Atom Feed",
+    "category": "News",
+    "description": "Convert any RSS or Atom feed into JSON. Fetch and parse blog posts, podcasts, and news feeds from any source.",
+    "baseUrl": "https://api.rss2json.com",
+    "authStrategy": "query",
+    "authKey": "api_key",
+    "fields": [
+        { "name": "apiKey", "label": "API Key", "type": "password" }
+    ],
+    "hints": [
+        "Parse feed: GET /v1/api.json?rss_url={encoded_feed_url}",
+        "Response: { status: \"ok\", feed: { title, link, description }, items: [{ title, link, pubDate, description, content, thumbnail }] }",
+        "The rss_url param must be URL-encoded.",
+        "Free tier: 10,000 requests/day, up to 10 items per feed.",
+        "Paid plans return more items and support count, order_by, order_dir params."
+    ],
+    "onboarding": {
+        "url": "https://rss2json.com/",
+        "steps": [
+            "Create a free account at rss2json.com",
+            "Your API key is shown on the dashboard after sign-up",
+            "Copy the API key"
+        ]
+    }
+}

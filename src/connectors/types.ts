@@ -6,6 +6,11 @@ export interface ConnectorField {
     type: 'password' | 'text';
 }
 
+export interface ConnectorOnboarding {
+    url: string;
+    steps: string[];
+}
+
 export interface ConnectorDefinition {
     id: string;
     name: string;
@@ -17,11 +22,29 @@ export interface ConnectorDefinition {
     fields: ConnectorField[];
     /** Usage hints shown to the LLM — recommended endpoints, default settings, gotchas. */
     hints?: string;
+    /** Onboarding instructions — signup URL and steps to get an API key. */
+    onboarding?: ConnectorOnboarding;
     /** OAuth2: Authorization endpoint URL. */
     authorizationUrl?: string;
     /** OAuth2: Token exchange endpoint URL. */
     tokenUrl?: string;
     /** OAuth2: Requested scopes. */
+    scopes?: string[];
+}
+
+export interface ConnectorJson {
+    id: string;
+    name: string;
+    category: string;
+    description: string;
+    baseUrl: string;
+    authStrategy: AuthStrategy;
+    authKey: string;
+    fields: ConnectorField[];
+    hints?: string[];
+    onboarding?: ConnectorOnboarding;
+    authorizationUrl?: string;
+    tokenUrl?: string;
     scopes?: string[];
 }
 
@@ -46,6 +69,7 @@ export interface ConnectorSummary {
     id: string;
     name: string;
     category: string;
+    description: string;
     configured: boolean;
 }
 

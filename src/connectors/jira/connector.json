@@ -1,0 +1,28 @@
+{
+    "id": "jira",
+    "name": "Jira",
+    "category": "Developer",
+    "description": "Project management and issue tracking. Search, create, and update Jira issues via the REST API.",
+    "baseUrl": "https://your-domain.atlassian.net",
+    "authStrategy": "header",
+    "authKey": "Authorization",
+    "fields": [
+        { "name": "apiKey", "label": "Auth (Base64 email:token)", "type": "password" }
+    ],
+    "hints": [
+        "Search issues: GET /rest/api/3/search?jql={JQL}",
+        "Get issue: GET /rest/api/3/issue/{issueKey}",
+        "Create issue: POST /rest/api/3/issue with body: { fields: { project: { key }, summary, issuetype: { name } } }",
+        "IMPORTANT: Jira uses Basic auth. Save your key as 'Basic base64(email:api_token)'.",
+        "IMPORTANT: Update baseUrl to your Atlassian domain (e.g. https://mycompany.atlassian.net)."
+    ],
+    "onboarding": {
+        "url": "https://id.atlassian.com/manage-profile/security/api-tokens",
+        "steps": [
+            "Log in to your Atlassian account",
+            "Go to Account Settings > Security > API tokens",
+            "Create a new API token and copy it",
+            "Base64-encode 'your-email@example.com:api-token' and paste as your key"
+        ]
+    }
+}

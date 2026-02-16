@@ -1,0 +1,29 @@
+{
+    "id": "resend",
+    "name": "Resend",
+    "category": "Communication",
+    "description": "Modern email delivery API. Send transactional emails with a clean, developer-friendly interface.",
+    "baseUrl": "https://api.resend.com",
+    "authStrategy": "bearer",
+    "authKey": "Authorization",
+    "fields": [
+        { "name": "apiKey", "label": "API Key", "type": "password" }
+    ],
+    "hints": [
+        "Send email: POST /emails",
+        "  Body: { from: \"you@yourdomain.com\", to: [\"recipient@example.com\"], subject: \"...\", html: \"<p>Hello</p>\" }",
+        "  Response: { id: \"email-id\" }",
+        "Get email: GET /emails/{id}",
+        "  Response: { id, from, to, subject, created_at, last_event }",
+        "IMPORTANT: 'from' must use a verified domain. Use 'onboarding@resend.dev' for testing.",
+        "Free tier: 100 emails/day, 3,000 emails/month."
+    ],
+    "onboarding": {
+        "url": "https://resend.com/signup",
+        "steps": [
+            "Create an account at resend.com",
+            "Go to API Keys in the dashboard",
+            "Create a new API key and copy it"
+        ]
+    }
+}

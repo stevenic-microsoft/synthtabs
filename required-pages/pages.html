@@ -262,6 +262,19 @@
         var overflowCategories = [];
         var BUILDER_PAGE = 'builder';
 
+        // MRU: most-recently-used categories get priority for visible slots
+        var pagesMru = (function() {
+            try { return JSON.parse(localStorage.getItem('synthos_pagesMru')) || []; }
+            catch(e) { return []; }
+        })();
+        function pagesMruTouch(cat) {
+            if (cat === 'All') return;
+            pagesMru = pagesMru.filter(function(c) { return c !== cat; });
+            pagesMru.unshift(cat);
+            if (pagesMru.length > 20) pagesMru.length = 20;
+            try { localStorage.setItem('synthos_pagesMru', JSON.stringify(pagesMru)); } catch(e) {}
+        }
+
         // ── DOM refs ──
         var favoritesSection = document.getElementById('favoritesSection');
         var favoritesGrid = document.getElementById('favoritesGrid');
@@ -471,27 +484,48 @@
             temp.style.position = 'absolute';
             document.body.appendChild(temp);
 
+            // Measure "More" button width
+            temp.textContent = 'More \u25BE';
+            var moreBtnWidth = temp.offsetWidth + 8;
+
+            // Measure each category button
+            var catWidths = {};
+            allCats.forEach(function(cat) {
+                temp.textContent = cat;
+                catWidths[cat] = temp.offsetWidth + 8;
+            });
+            document.body.removeChild(temp);
+
+            // Sort categories: MRU first, then alphabetical
+            var sorted = allCats.slice().sort(function(a, b) {
+                var ai = pagesMru.indexOf(a);
+                var bi = pagesMru.indexOf(b);
+                var aInMru = ai !== -1;
+                var bInMru = bi !== -1;
+                if (aInMru && !bInMru) return -1;
+                if (!aInMru && bInMru) return 1;
+                if (aInMru && bInMru) return ai - bi;
+                return a.localeCompare(b);
+            });
+
             var usedWidth = 0;
-            var needsOverflow = false;
-            for (var i = 0; i < allCats.length; i++) {
-                temp.textContent = allCats[i];
-                var btnWidth = temp.offsetWidth + 8;
-                var remainingCats = allCats.length - i;
-                if (usedWidth + btnWidth + (needsOverflow ? 0 : (remainingCats > 1 ? 88 : 0)) <= availableWidth && !needsOverflow) {
-                    visibleCategories.push(allCats[i]);
-                    usedWidth += btnWidth;
+            var overflowing = false;
+            for (var i = 0; i < sorted.length; i++) {
+                var cat = sorted[i];
+                var remaining = sorted.length - i;
+                if (!overflowing && usedWidth + catWidths[cat] <= availableWidth - (remaining > 1 ? moreBtnWidth : 0)) {
+                    visibleCategories.push(cat);
+                    usedWidth += catWidths[cat];
                 } else {
-                    needsOverflow = true;
-                    overflowCategories.push(allCats[i]);
+                    overflowing = true;
+                    overflowCategories.push(cat);
                 }
             }
-            if (overflowCategories.length === 1 && visibleCategories.length > 0) {
-                temp.textContent = overflowCategories[0];
-                if (usedWidth + (temp.offsetWidth + 8) <= availableWidth) {
+            if (overflowCategories.length === 1) {
+                if (usedWidth + catWidths[overflowCategories[0]] <= availableWidth) {
                     visibleCategories.push(overflowCategories.pop());
                 }
             }
-            document.body.removeChild(temp);
         }
 
         function renderPages() {
@@ -510,6 +544,7 @@
 
         function setCategory(cat) {
             activeCategory = cat;
+            pagesMruTouch(cat);
             renderFilterBar();
             renderPages();
         }

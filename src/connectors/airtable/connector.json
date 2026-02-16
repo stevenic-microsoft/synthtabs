@@ -1,0 +1,27 @@
+{
+    "id": "airtable",
+    "name": "Airtable",
+    "category": "Productivity",
+    "description": "Cloud database and spreadsheet hybrid. Create, read, update, and manage structured data in Airtable bases.",
+    "baseUrl": "https://api.airtable.com",
+    "authStrategy": "bearer",
+    "authKey": "Authorization",
+    "fields": [
+        { "name": "apiKey", "label": "Personal Access Token", "type": "password" }
+    ],
+    "hints": [
+        "List records: GET /v0/{baseId}/{tableName}",
+        "Create record: POST /v0/{baseId}/{tableName} with body: { fields: { ... } }",
+        "Update record: PATCH /v0/{baseId}/{tableName}/{recordId} with body: { fields: { ... } }",
+        "Response: { records: [{ id, fields: { ... } }] }",
+        "Get your base ID from the Airtable API docs page for your base."
+    ],
+    "onboarding": {
+        "url": "https://airtable.com/create/tokens",
+        "steps": [
+            "Log in to your Airtable account",
+            "Go to airtable.com/create/tokens",
+            "Create a personal access token with the scopes you need and copy it"
+        ]
+    }
+}

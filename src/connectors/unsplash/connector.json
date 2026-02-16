@@ -1,0 +1,27 @@
+{
+    "id": "unsplash",
+    "name": "Unsplash",
+    "category": "Image",
+    "description": "Access a vast library of free high-resolution photos. Search, browse, and download professional photography.",
+    "baseUrl": "https://api.unsplash.com",
+    "authStrategy": "header",
+    "authKey": "Authorization",
+    "fields": [
+        { "name": "apiKey", "label": "Access Key", "type": "password" }
+    ],
+    "hints": [
+        "Search photos: GET /search/photos?query={term}&per_page=10",
+        "Random photo: GET /photos/random?query={term}",
+        "Response: { results: [{ urls: { regular, small, thumb }, description, user: { name } }] }",
+        "IMPORTANT: Save your key as 'Client-ID YOUR_ACCESS_KEY' (the proxy sends raw header value).",
+        "Free tier: 50 requests/hour."
+    ],
+    "onboarding": {
+        "url": "https://unsplash.com/developers",
+        "steps": [
+            "Create a developer account at unsplash.com/developers",
+            "Register a new application",
+            "Copy your Access Key from the app settings"
+        ]
+    }
+}

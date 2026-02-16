@@ -1,0 +1,27 @@
+{
+    "id": "open-exchange-rates",
+    "name": "Open Exchange Rates",
+    "category": "Finance",
+    "description": "Currency exchange rates and conversion. Real-time and historical forex data for 170+ currencies.",
+    "baseUrl": "https://openexchangerates.org",
+    "authStrategy": "query",
+    "authKey": "app_id",
+    "fields": [
+        { "name": "apiKey", "label": "App ID", "type": "password" }
+    ],
+    "hints": [
+        "Latest rates: GET /api/latest.json",
+        "Historical: GET /api/historical/{YYYY-MM-DD}.json",
+        "Currencies list: GET /api/currencies.json",
+        "Response: { base: \"USD\", rates: { EUR: 0.92, GBP: 0.79, ... } }",
+        "Free tier: 1,000 requests/month, USD base only."
+    ],
+    "onboarding": {
+        "url": "https://openexchangerates.org/signup/free",
+        "steps": [
+            "Create a free account at openexchangerates.org",
+            "Go to your App IDs page in the dashboard",
+            "Copy your App ID"
+        ]
+    }
+}

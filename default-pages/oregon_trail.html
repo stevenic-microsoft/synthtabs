@@ -1,0 +1,347 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SynthOS</title>
+    <script id="theme-info" src="/api/theme-info.js" data-locked="true"></script>
+    <link id="theme-css" rel="stylesheet" href="/api/theme.css" data-locked="true">
+    <style>.idle-container{position:absolute;width:100%;height:100%;pointer-events:none;opacity:1;transition:opacity 1s ease-out}.idle-container.hidden{opacity:0}.breathing-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(102,126,234,.15) 0,transparent 70%);animation:4s ease-in-out infinite breathe}.breathing-orb::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:rgba(183,148,246,.6);box-shadow:0 0 20px rgba(183,148,246,.4);animation:4s ease-in-out infinite core-pulse}@keyframes breathe{0%,100%{width:80px;height:80px;opacity:.3}50%{width:120px;height:120px;opacity:.6}}@keyframes core-pulse{0%,100%{opacity:.4;box-shadow:0 0 20px rgba(183,148,246,.3)}50%{opacity:.8;box-shadow:0 0 30px rgba(183,148,246,.5)}}.orbit-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;border:1px solid rgba(102,126,234,.1);border-radius:50%;animation:20s linear infinite orbit-rotate}.orbit-ring::after{content:'';position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:6px;height:6px;background:rgba(240,147,251,.5);border-radius:50%;box-shadow:0 0 10px rgba(240,147,251,.3)}@keyframes orbit-rotate{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.0/mermaid.min.js"></script>
+    <script id="page-info" src="/api/page-info.js?page=builder"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js" id="topojson-lib"></script><style id="us-map-styles">#us-map-container{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}#us-map-header{min-height:var(--header-min-height);padding:var(--header-padding-vertical) var(--header-padding-horizontal);line-height:var(--header-line-height);display:flex;align-items:center;justify-content:center;box-sizing:border-box;font-size:1.25rem;font-weight:600;color:var(--text-primary);width:100%;border-bottom:1px solid var(--border-color);background:var(--bg-secondary);flex-shrink:0;position:relative}#us-map-svg-wrap{flex:1;width:100%;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;position:relative}#us-map-svg-wrap svg{width:100%;height:100%;position:absolute;top:0;left:0}.region-path{cursor:pointer;transition:filter .2s ease;stroke-linejoin:round}.region-path:hover{filter:brightness(1.25)}.region-state{fill:rgba(46,125,50,0.5);stroke:#1b5e20;stroke-width:1.2}.region-oregon{fill:rgba(230,81,0,0.45);stroke:#bf360c;stroke-width:1.5}.region-minnesota{fill:rgba(255,152,0,0.45);stroke:#e65100;stroke-width:1.5}.region-utah{fill:rgba(255,111,0,0.4);stroke:#bf360c;stroke-width:1.5}.region-newmexico{fill:rgba(239,108,0,0.45);stroke:#bf360c;stroke-width:1.5}.region-unorganized{fill:rgba(141,110,99,0.4);stroke:#4e342e;stroke-width:1.5}.region-indian{fill:rgba(121,85,72,0.45);stroke:#3e2723;stroke-width:1.5}.light-mode .region-state{fill:rgba(46,125,50,0.5);stroke:#1b5e20}.light-mode .region-oregon{fill:rgba(230,81,0,0.45);stroke:#bf360c}.light-mode .region-minnesota{fill:rgba(255,152,0,0.45);stroke:#e65100}.light-mode .region-utah{fill:rgba(255,111,0,0.4);stroke:#bf360c}.light-mode .region-newmexico{fill:rgba(239,108,0,0.45);stroke:#bf360c}.light-mode .region-unorganized{fill:rgba(141,110,99,0.4);stroke:#4e342e}.light-mode .region-indian{fill:rgba(121,85,72,0.45);stroke:#3e2723}#map-tooltip{position:absolute;pointer-events:none;background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-color);border-radius:6px;padding:6px 12px;font-size:0.85rem;font-weight:500;box-shadow:0 2px 8px rgba(0,0,0,0.12);opacity:0;transition:opacity .15s ease;z-index:10;white-space:nowrap}#hist-legend{position:absolute;bottom:16px;left:16px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:10px 14px;font-size:0.75rem;color:var(--text-primary);z-index:5;box-shadow:0 2px 8px rgba(0,0,0,0.1)}#hist-legend .legend-item{display:flex;align-items:center;gap:8px;margin-bottom:4px}#hist-legend .legend-item:last-child{margin-bottom:0}#hist-legend .legend-swatch{width:14px;height:14px;border-radius:3px;flex-shrink:0}.trail-path{fill:none;stroke:#d32f2f;stroke-width:3;stroke-dasharray:8,4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 3px rgba(211,47,47,0.5))}.trail-path-glow{fill:none;stroke:rgba(211,47,47,0.25);stroke-width:8;stroke-linecap:round;stroke-linejoin:round}.trail-stop{cursor:pointer}.trail-stop circle.stop-outer{fill:rgba(211,47,47,0.2);stroke:#d32f2f;stroke-width:1.5;transition:r .2s ease, fill .2s ease}.trail-stop circle.stop-inner{fill:#d32f2f;transition:r .2s ease}.trail-stop:hover circle.stop-outer{fill:rgba(211,47,47,0.4)}.trail-stop.active circle.stop-outer{fill:rgba(211,47,47,0.5);stroke-width:2.5;r:9}.trail-stop.active circle.stop-inner{r:4}.trail-label{font-size:8px;font-weight:600;fill:#b71c1c;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:rgba(255,255,255,0.8);stroke-width:2.5px;stroke-linecap:round;stroke-linejoin:round}.light-mode .trail-path{stroke:#c62828}.light-mode .trail-label{fill:#b71c1c;stroke:rgba(255,255,255,0.85)}#trail-detail-card{position:absolute;top:16px;right:16px;width:340px;max-height:calc(100% - 40px);background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.15);z-index:20;opacity:0;transform:translateY(-10px) scale(0.97);pointer-events:none;transition:opacity .25s ease,transform .25s ease;overflow:hidden;display:flex;flex-direction:column}#trail-detail-card.visible{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}#trail-detail-card .card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;border-bottom:1px solid var(--border-color);background:linear-gradient(135deg,rgba(211,47,47,0.08),rgba(211,47,47,0.02));flex-shrink:0}#trail-detail-card .card-header h3{margin:0;font-size:0.95rem;font-weight:700;color:var(--text-primary);line-height:1.3}#trail-detail-card .card-header .card-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-secondary);padding:0 2px;line-height:1;border-radius:4px;transition:background .15s ease}#trail-detail-card .card-header .card-close:hover{background:rgba(0,0,0,0.08)}#trail-detail-card .card-subtitle{font-size:0.72rem;color:var(--text-secondary);margin:2px 0 0;font-weight:500}#trail-detail-card .card-tabs{display:flex;border-bottom:1px solid var(--border-color);flex-shrink:0}#trail-detail-card .card-tab{flex:1;padding:8px 10px;font-size:0.78rem;font-weight:600;text-align:center;cursor:pointer;border:none;background:none;color:var(--text-secondary);transition:all .15s ease;border-bottom:2px solid transparent;position:relative}#trail-detail-card .card-tab:hover{color:var(--text-primary);background:rgba(0,0,0,0.03)}#trail-detail-card .card-tab.active{color:#c62828;border-bottom-color:#c62828;background:rgba(211,47,47,0.05)}#trail-detail-card .card-tab-icon{margin-right:4px}#trail-detail-card .tab-content{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}#trail-detail-card .tab-pane{display:none;flex:1;overflow-y:auto;flex-direction:column;min-height:0}#trail-detail-card .tab-pane.active{display:flex}#trail-detail-card .facts-pane{padding:12px 14px;overflow-y:auto}#trail-detail-card .fact-row{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start}#trail-detail-card .fact-icon{font-size:1rem;flex-shrink:0;width:22px;text-align:center;margin-top:1px}#trail-detail-card .fact-content{flex:1}#trail-detail-card .fact-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);font-weight:600;margin-bottom:1px}#trail-detail-card .fact-value{font-size:0.8rem;color:var(--text-primary);line-height:1.4}#trail-detail-card .card-divider{height:1px;background:var(--border-color);margin:4px 0 8px}#trail-detail-card .card-description{font-size:0.78rem;color:var(--text-primary);line-height:1.5;margin-top:2px}#trail-detail-card .mile-marker{display:inline-flex;align-items:center;gap:4px;background:rgba(211,47,47,0.1);color:#c62828;font-size:0.68rem;font-weight:600;padding:2px 7px;border-radius:12px;margin-bottom:8px}.light-mode #trail-detail-card .mile-marker{background:rgba(211,47,47,0.1);color:#b71c1c}.chat-pane{display:flex;flex-direction:column;min-height:0;flex:1}.chat-pane .chat-messages-area{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px;min-height:120px}.chat-pane .chat-welcome{text-align:center;padding:16px 8px;color:var(--text-secondary);font-size:0.78rem;line-height:1.5}.chat-pane .chat-welcome .welcome-emoji{font-size:1.8rem;margin-bottom:6px;display:block}.chat-pane .chat-welcome strong{color:var(--text-primary)}.chat-pane .chat-bubble{max-width:92%;padding:8px 11px;border-radius:12px;font-size:0.78rem;line-height:1.45;word-wrap:break-word;animation:bubbleIn .2s ease}.chat-pane .chat-bubble.user-bubble{align-self:flex-end;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-bottom-right-radius:4px}.chat-pane .chat-bubble.ai-bubble{align-self:flex-start;background:var(--bg-secondary);color:var(--text-primary);border:1px solid var(--border-color);border-bottom-left-radius:4px}.chat-pane .chat-bubble.ai-bubble.loading{opacity:0.7}.chat-pane .typing-dots{display:inline-flex;gap:3px;padding:2px 0}.chat-pane .typing-dots span{width:5px;height:5px;border-radius:50%;background:var(--text-secondary);animation:dotBounce .6s ease-in-out infinite}.chat-pane .typing-dots span:nth-child(2){animation-delay:.15s}.chat-pane .typing-dots span:nth-child(3){animation-delay:.3s}@keyframes dotBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}@keyframes bubbleIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}.chat-pane .chat-input-area{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--border-color);background:var(--bg-tertiary);flex-shrink:0;border-radius:0 0 12px 12px}.chat-pane .chat-input-field{flex:1;border:1px solid var(--border-color);border-radius:18px;padding:7px 12px;font-size:0.78rem;background:var(--bg-primary);color:var(--text-primary);outline:none;transition:border-color .15s ease;font-family:inherit}.chat-pane .chat-input-field:focus{border-color:var(--accent-primary)}.chat-pane .chat-input-field::placeholder{color:var(--text-secondary);opacity:0.7}.chat-pane .chat-send-btn{width:32px;height:32px;border-radius:50%;border:none;background:linear-gradient(135deg,#d32f2f,#b71c1c);color:#fff;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s ease,opacity .15s ease;flex-shrink:0}.chat-pane .chat-send-btn:hover{transform:scale(1.08)}.chat-pane .chat-send-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}.chat-pane .suggested-questions{display:flex;flex-wrap:wrap;gap:4px;padding:0 12px 8px}.chat-pane .suggested-q{font-size:0.68rem;padding:4px 8px;border-radius:12px;border:1px solid var(--border-color);background:var(--bg-primary);color:var(--text-secondary);cursor:pointer;transition:all .15s ease;white-space:nowrap}.chat-pane .suggested-q:hover{background:rgba(211,47,47,0.08);color:#c62828;border-color:rgba(211,47,47,0.3)}</style></head>
+<body>
+    <div class="chat-panel" data-locked="true">
+        <div class="chat-header" data-locked="true">SynthOS</div>
+        <div class="chat-messages" id="chatMessages" data-locked="true">
+            <div class="chat-message" id="defaultGreeting"><strong>SynthOS:</strong> What can I create for you? Ask "what can you do?" or "how does this work?" to learn more. Remember to save often!</div>
+            <div class="chat-message" id="firstRunGreeting" style="display:none;">
+                <p><strong>Welcome to SynthOS!</strong></p>
+                <p>You're all set up and ready to start creating. This is the <strong>Builder</strong> — your main workspace. Just type what you want to build into the chat and SynthOS will generate it for you as a live, interactive page.</p>
+                <p>You can create just about anything: dashboards, tools, games, visualizations, forms, calculators — if it can be expressed as a web page, you can build it here through conversation.</p>
+                <p><strong>How pages work:</strong></p>
+                <ul>
+                    <li>Each creation lives on its own <strong>page</strong>. When you save, it gets a name and becomes part of your collection.</li>
+                    <li>The <strong>Pages</strong> button (in the link bar above) takes you to the <strong>Pages Gallery</strong> where you can browse, open, and manage all your saved creations.</li>
+                </ul>
+                <p><strong>Key actions:</strong></p>
+                <ul>
+                    <li><strong>Save</strong> — saves your current page. You'll be prompted for a name the first time. <em>Save often!</em> Your work only persists when you save it.</li>
+                    <li><strong>Reset</strong> — clears the current page back to a blank slate. Useful when you want to start fresh on something new.</li>
+                </ul>
+                <p>When you're ready, we recommend trying the <a href="/solar_tutorial">Solar Tutorial</a> — it's a guided walkthrough that will show you the basics of creating with SynthOS step by step.</p>
+                <p>Have fun building!</p>
+            </div>
+        <div class="chat-message"><p><strong>User:</strong> create a map of the united states</p></div><div class="chat-message"><p><strong>SynthOS:</strong> Here's an interactive map of the United States! Hover over any state to see its name. The map is built with D3.js and uses an Albers USA projection that includes Alaska and Hawaii.</p></div><div class="chat-message"><p><strong>User:</strong> now in a second layer can you overlay that with a map of the usa circa 1850s</p></div><div class="chat-message"><p><strong>SynthOS:</strong> I've overlaid the modern map with an 1850s historical layer! The overlay shows the political divisions of the United States around 1850 (after the Compromise of 1850):</p><ul><li><strong style="color:#2e7d32;">Green</strong> — States admitted to the Union by 1850</li><li><strong style="color:#e65100;">Orange</strong> — Organized territories</li><li><strong style="color:#8d6e63;">Brown</strong> — Unorganized territory</li></ul><p>You can toggle the historical overlay on and off with the button in the top-right corner. The modern state boundaries show through underneath for reference.</p></div><div class="chat-message"><p><strong>User:</strong> remove the current state boundaries and draw new boundaries for how the territories were organized</p></div><div class="chat-message"><p><strong>SynthOS:</strong> I've replaced the modern state boundaries with historically-grouped 1850s territorial boundaries. The map now shows the approximate political divisions of the United States circa 1850, with internal state lines dissolved within each territory:</p><ul><li><strong style="color:#2e7d32;">Green</strong> — Individual states (31 states admitted by 1850)</li><li><strong style="color:#e65100;">Orange</strong> — Oregon Territory, Minnesota Territory, Utah Territory, New Mexico Territory</li><li><strong style="color:#8d6e63;">Brown</strong> — Unorganized Territory &amp; Indian Territory</li></ul><p>Note: Since this uses modern state shapes as approximations, the boundaries aren't perfectly historically accurate (e.g., territories that split modern states), but it gives a good sense of how the country was organized. Hover over any region to see its 1850s designation.</p></div><div class="chat-message"><p><strong>User:</strong> now overlay that with the oregon trail</p></div><div class="chat-message"><p><strong>SynthOS:</strong> I've overlaid the Oregon Trail on the 1850s map! The trail is shown as a <strong style="color:#d32f2f;">red dashed line</strong> running from <strong>Independence, Missouri</strong> to <strong>Oregon City, Oregon</strong> — roughly 2,000 miles.</p><p>Key stops along the trail are marked with dots and labels:</p><ul><li><strong>Independence, MO</strong> — the main jumping-off point</li><li><strong>Fort Kearny</strong> — first major military outpost</li><li><strong>Chimney Rock</strong> — famous landmark</li><li><strong>Fort Laramie</strong> — key resupply point</li><li><strong>Independence Rock</strong> — "Register of the Desert"</li><li><strong>South Pass</strong> — crossing the Continental Divide</li><li><strong>Fort Bridger</strong> — trading post</li><li><strong>Fort Hall</strong> — Hudson's Bay Company post</li><li><strong>Fort Boise</strong> — another HBC post</li><li><strong>The Dalles</strong> — end of the overland route</li><li><strong>Oregon City</strong> — final destination</li></ul><p>Hover over any stop for its name. The trail follows the approximate historical route through the Platte River valley, over the Rockies at South Pass, and along the Snake River into Oregon.</p></div><div class="chat-message"><p><strong>User:</strong> create a detail card that tells me facts about key stops along the way</p></div><div class="chat-message"><p><strong>SynthOS:</strong> I've added an interactive detail card! Click on any trail stop marker on the map to see historical facts about that location, including when it was established, its elevation, who used it, and why it mattered to Oregon Trail emigrants. Click the × button or click elsewhere to dismiss the card.</p></div><div class="chat-message"><p><strong>User:</strong> can you add an AI powered chat interface to that card that lets me ask questions relative to that location and the journey as a whole. the target audience should be 8-12 year olds. track the last 10 turns for follow up questions. reorganize the card if you need to</p></div><div class="chat-message"><p><strong>SynthOS:</strong> I've added an AI-powered chat to the detail card! Here's what's new:</p><ul><li><strong>Two tabs</strong> — "📋 Facts" shows the historical info, and "💬 Ask Me!" opens the chat</li><li><strong>Meet Dusty 🤠</strong> — your friendly trail guide who answers questions in fun, kid-friendly language (perfect for ages 8–12)</li><li><strong>Suggested questions</strong> — each stop has starter questions to tap, or kids can type their own</li><li><strong>Conversation memory</strong> — Dusty remembers the last 10 exchanges so kids can ask follow-up questions</li><li><strong>Per-stop context</strong> — switching to a new stop resets the chat with fresh context about that location</li></ul><p>Click any trail stop, then hit the "Ask Me!" tab to start chatting with Dusty!</p></div></div>
+        <div class="link-group" data-locked="true">
+            <a href="#" id="saveLink" data-locked="true">Save</a>
+            <a href="/pages" id="pagesLink" data-locked="true">Pages</a>
+            <a href="#" id="resetLink" data-locked="true">Reset</a>
+        </div>
+        <form action="/" method="POST" id="chatForm" data-locked="true">
+            <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message..." data-locked="true">
+            <button type="submit" class="chat-submit" data-locked="true">Send</button>
+        </form>
+    </div>
+    <div class="viewer-panel" id="viewerPanel"><div id="us-map-container"><div id="us-map-header">United States — Circa 1850 — with Oregon Trail</div><div id="us-map-svg-wrap"><div id="hist-legend"><div style="font-weight:600;margin-bottom:6px;">Circa 1850</div><div class="legend-item"><div class="legend-swatch" style="background:rgba(46,125,50,0.6);border:1px solid #1b5e20;"></div><span>States (31)</span></div><div class="legend-item"><div class="legend-swatch" style="background:rgba(230,81,0,0.55);border:1px solid #bf360c;"></div><span>Oregon Territory</span></div><div class="legend-item"><div class="legend-swatch" style="background:rgba(255,152,0,0.55);border:1px solid #e65100;"></div><span>Minnesota Territory</span></div><div class="legend-item"><div class="legend-swatch" style="background:rgba(255,111,0,0.5);border:1px solid #bf360c;"></div><span>Utah Territory</span></div><div class="legend-item"><div class="legend-swatch" style="background:rgba(239,108,0,0.55);border:1px solid #bf360c;"></div><span>New Mexico Territory</span></div><div class="legend-item"><div class="legend-swatch" style="background:rgba(141,110,99,0.5);border:1px solid #4e342e;"></div><span>Unorganized Territory</span></div><div class="legend-item"><div class="legend-swatch" style="background:rgba(121,85,72,0.55);border:1px solid #3e2723;"></div><span>Indian Territory</span></div><div style="border-top:1px solid var(--border-color);margin-top:6px;padding-top:6px;"></div><div class="legend-item"><div class="legend-swatch" style="background:#d32f2f;border:1px solid #b71c1c;border-radius:50%;"></div><span style="font-weight:600;">Oregon Trail</span></div></div><div id="trail-detail-card"><div class="card-header"><div><h3 id="card-title"></h3><div class="card-subtitle" id="card-subtitle"></div></div><button class="card-close" id="card-close-btn" aria-label="Close">×</button></div><div class="card-tabs"><button class="card-tab active" data-tab="facts"><span class="card-tab-icon">📋</span>Facts</button><button class="card-tab" data-tab="chat"><span class="card-tab-icon">💬</span>Ask Me!</button></div><div class="tab-content"><div class="tab-pane facts-pane active" id="facts-pane"><div id="card-body"></div></div><div class="tab-pane chat-pane" id="chat-pane"><div class="chat-messages-area" id="trail-chat-messages"><div class="chat-welcome"><span class="welcome-emoji">🤠</span>Howdy, explorer! <strong>Click a trail stop</strong> and ask me anything about life on the Oregon Trail!</div></div><div class="suggested-questions" id="trail-suggested-q"></div><div class="chat-input-area"><input type="text" class="chat-input-field" id="trail-chat-input" placeholder="Ask me anything..." autocomplete="off"><button class="chat-send-btn" id="trail-chat-send" aria-label="Send">➤</button></div></div></div></div></div><div id="map-tooltip"></div></div><div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div></div>
+    <div id="instructions" style="display: none;" data-locked="true"></div>
+    <div id="thoughts" style="display: none;" data-locked="true">User wants an AI-powered chat interface inside the trail detail card so kids (8-12) can ask questions about each stop and the Oregon Trail journey. I need to:
+
+1. Reorganize the detail card to have tabs or sections - facts + chat
+2. Add a chat input and message area inside the card
+3. Use synthos.generate.completion() to power the AI responses
+4. Track last 10 conversation turns for context
+5. Style it kid-friendly
+6. The card needs to be taller/scrollable to accommodate both facts and chat
+
+Plan:
+- Restructure the card to have two tabs: "Facts" and "Ask Me!"
+- The chat tab has a scrollable message area and input
+- Store conversation history per stop (or globally with stop context)
+- Use completion API with a kid-friendly system prompt
+- Track last 10 turns in a JS array
+
+I'll update the CSS, the card HTML structure, and the JS to handle all of this.</div>
+    <script id="idle-animation">function hideIdleAnimation(){const idleContainer=document.getElementById("idleAnimation");idleContainer&&(idleContainer.classList.add("hidden"),setTimeout(()=>{idleContainer.style.display="none"},1e3))}function showIdleAnimation(){const idleContainer=document.getElementById("idleAnimation");idleContainer&&(idleContainer.style.display="block",setTimeout(()=>{idleContainer.classList.remove("hidden")},10))}</script>
+    <button class="chat-toggle" aria-label="Toggle chat panel">
+        <span class="chat-toggle-dots">
+            <span class="chat-toggle-dot"></span>
+            <span class="chat-toggle-dot"></span>
+            <span class="chat-toggle-dot"></span>
+        </span>
+    </button>
+<script id="first-run-check">
+(function() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('firstRun') === 'true') {
+        document.getElementById('defaultGreeting').style.display = 'none';
+        document.getElementById('firstRunGreeting').style.display = '';
+    }
+})();
+</script>
+
+
+<script id="us-map-script">(function(){var FIPS_TO_NAME={1:'Alabama',2:'Alaska',4:'Arizona',5:'Arkansas',6:'California',8:'Colorado',9:'Connecticut',10:'Delaware',11:'District of Columbia',12:'Florida',13:'Georgia',15:'Hawaii',16:'Idaho',17:'Illinois',18:'Indiana',19:'Iowa',20:'Kansas',21:'Kentucky',22:'Louisiana',23:'Maine',24:'Maryland',25:'Massachusetts',26:'Michigan',27:'Minnesota',28:'Mississippi',29:'Missouri',30:'Montana',31:'Nebraska',32:'Nevada',33:'New Hampshire',34:'New Jersey',35:'New Mexico',36:'New York',37:'North Carolina',38:'North Dakota',39:'Ohio',40:'Oklahoma',41:'Oregon',42:'Pennsylvania',44:'Rhode Island',45:'South Carolina',46:'South Dakota',47:'Tennessee',48:'Texas',49:'Utah',50:'Vermont',51:'Virginia',53:'Washington',54:'West Virginia',55:'Wisconsin',56:'Wyoming'};
+var STATES_1850=[9,10,13,24,25,33,34,36,37,42,44,45,51,50,21,47,39,22,18,28,17,1,23,29,5,26,12,48,19,55,6,54,11];
+var OREGON_TERR=[41,53,16];
+var MINNESOTA_TERR=[27];
+var UTAH_TERR=[49,32];
+var NEWMEXICO_TERR=[35,4];
+var UNORGANIZED=[31,20,38,46,56,30,8];
+var INDIAN_TERR=[40];
+var TERRITORY_GROUPS=[{fips:OREGON_TERR,name:'Oregon Territory',cls:'region-oregon'},{fips:MINNESOTA_TERR,name:'Minnesota Territory',cls:'region-minnesota'},{fips:UTAH_TERR,name:'Utah Territory',cls:'region-utah'},{fips:NEWMEXICO_TERR,name:'New Mexico Territory',cls:'region-newmexico'},{fips:UNORGANIZED,name:'Unorganized Territory',cls:'region-unorganized'},{fips:INDIAN_TERR,name:'Indian Territory',cls:'region-indian'}];
+var TRAIL_POINTS=[[-94.41,39.09],[-95.20,39.05],[-95.68,39.05],[-96.50,39.20],[-97.30,39.50],[-98.00,40.00],[-99.00,40.65],[-99.80,40.85],[-100.77,41.12],[-101.80,41.40],[-103.00,41.70],[-103.70,41.83],[-104.52,42.21],[-105.50,42.50],[-106.31,42.87],[-107.13,42.49],[-108.00,42.40],[-108.80,42.33],[-109.50,42.00],[-110.39,41.32],[-110.90,42.00],[-111.60,42.66],[-112.43,42.92],[-113.50,42.70],[-114.46,42.56],[-115.30,43.00],[-116.20,43.62],[-117.00,44.05],[-117.80,44.80],[-118.50,45.30],[-119.50,45.55],[-120.50,45.60],[-121.18,45.60],[-121.80,45.50],[-122.61,45.36]];
+var TRAIL_STOPS=[{coords:[-94.41,39.09],name:'Independence, MO',labelPos:'below'},{coords:[-99.00,40.65],name:'Fort Kearny',labelPos:'above'},{coords:[-103.00,41.70],name:'Chimney Rock',labelPos:'above'},{coords:[-104.52,42.21],name:'Fort Laramie',labelPos:'above'},{coords:[-107.13,42.49],name:'Independence Rock',labelPos:'above'},{coords:[-108.80,42.33],name:'South Pass',labelPos:'below'},{coords:[-110.39,41.32],name:'Fort Bridger',labelPos:'below'},{coords:[-112.43,42.92],name:'Fort Hall',labelPos:'above'},{coords:[-116.20,43.62],name:'Fort Boise',labelPos:'above'},{coords:[-121.18,45.60],name:'The Dalles',labelPos:'above'},{coords:[-122.61,45.36],name:'Oregon City',labelPos:'below'}];
+var STOP_FACTS={'Independence, MO':{subtitle:'The Gateway to the West',established:'Settled 1827',elevation:'830 ft (253 m)',miles:'Mile 0 — Starting Point',territory:'State of Missouri',facts:[{icon:'🏪',label:'Role',value:'Primary "jumping-off" point for westward emigrants'},{icon:'📅',label:'Peak Years',value:'1843–1860, with up to 50,000 emigrants departing annually in peak years'},{icon:'🛒',label:'Supplies',value:'Emigrants stocked up on flour, bacon, coffee, sugar, and oxen — a typical family spent $600–$1,000 outfitting'},{icon:'👥',label:'Population',value:'About 3,000 residents by 1850, swelling each spring with emigrants'}],description:'Independence was the most popular starting point for the Oregon, California, and Santa Fe trails. Wagon trains typically departed between April and May to cross the mountains before winter snows.'},'Fort Kearny':{subtitle:'First Military Outpost on the Trail',established:'Est. 1848',elevation:'2,146 ft (654 m)',miles:'Mile 319 — ~2 weeks from Independence',territory:'Unorganized Territory (present-day Nebraska)',facts:[{icon:'⚔️',label:'Purpose',value:'U.S. Army post built to protect emigrants on the Oregon Trail'},{icon:'📬',label:'Services',value:'Post office, blacksmith shop, and supply store for travelers'},{icon:'🦬',label:'Wildlife',value:'Located in prime buffalo country — emigrants often saw herds of thousands'},{icon:'🪖',label:'Garrison',value:'Typically 200–400 soldiers stationed here'}],description:'Fort Kearny served as the first major rest stop and resupply point. It was also where the trail from St. Joseph merged with the Independence route. Soldiers here helped repair wagons and provided medical aid.'},'Chimney Rock':{subtitle:'The Most Famous Landmark on the Trail',established:'Named by fur traders, 1820s',elevation:'4,228 ft (1,289 m)',miles:'Mile 561 — ~5 weeks from Independence',territory:'Unorganized Territory (present-day Nebraska)',facts:[{icon:'🏔️',label:'Height',value:'Spire rises ~325 ft above the North Platte River valley'},{icon:'📖',label:'Mentions',value:'Referenced in more emigrant journals than any other landmark on the trail'},{icon:'⚡',label:'Erosion',value:'Was significantly taller in the 1840s — lightning and erosion have reduced it'},{icon:'🎯',label:'Significance',value:'Marked the transition from prairies to the rugged terrain of the West'}],description:'Chimney Rock was visible for days before emigrants reached it, serving as a beacon of progress. Many carved their names into its soft clay base. It told travelers they were about one-third of the way to Oregon.'},'Fort Laramie':{subtitle:'Crossroads of the Frontier',established:'Est. 1834 (fur trade); U.S. Army 1849',elevation:'4,519 ft (1,377 m)',miles:'Mile 650 — ~6 weeks from Independence',territory:'Unorganized Territory (present-day Wyoming)',facts:[{icon:'🏛️',label:'Origin',value:'Started as a fur trading post called Fort William, later Fort John'},{icon:'🤝',label:'Treaty',value:'Site of the 1851 Fort Laramie Treaty with Plains Indian nations'},{icon:'🔧',label:'Services',value:'Blacksmith, trading post, and the last reliable resupply before the Rockies'},{icon:'⚖️',label:'Lightening Loads',value:'Emigrants often abandoned heavy items here — the fort was surrounded by discarded goods'}],description:'Fort Laramie was the most important stop on the entire trail. Here emigrants rested, repaired wagons, traded worn-out oxen, and prepared for the difficult mountain crossings ahead. Many wrote letters home from here.'},'Independence Rock':{subtitle:'The Register of the Desert',established:'Named by fur trappers, ~1824',elevation:'5,900 ft (1,798 m)',miles:'Mile 838 — ~8 weeks from Independence',territory:'Unorganized Territory (present-day Wyoming)',facts:[{icon:'🪨',label:'Size',value:'Granite dome ~1,900 ft long, 700 ft wide, and 128 ft high'},{icon:'✍️',label:'Names',value:'Over 5,000 names were carved or painted on the rock by passing emigrants'},{icon:'📅',label:'Timing',value:'Emigrants aimed to reach it by July 4th (Independence Day) to stay on schedule'},{icon:'🎆',label:'Celebrations',value:'Many wagon trains held Fourth of July celebrations here'}],description:'This massive granite outcrop became the most famous "guest book" in American history. Reaching it by Independence Day meant you were on pace to cross the mountains before winter. Father De Smet called it the "Register of the Desert" in 1840.'},'South Pass':{subtitle:'Crossing the Continental Divide',established:'Discovered by Europeans ~1812; widely used from 1840s',elevation:'7,550 ft (2,301 m)',miles:'Mile 914 — ~9 weeks from Independence',territory:'Unorganized Territory (present-day Wyoming)',facts:[{icon:'⛰️',label:'Geography',value:'A broad, gentle 20-mile-wide saddle through the Rocky Mountains'},{icon:'💧',label:'Divide',value:'Waters east flow to the Atlantic; waters west flow to the Pacific'},{icon:'😮',label:'Surprise',value:'So gradual that many emigrants didn\'t realize they\'d crossed the Rockies'},{icon:'🗺️',label:'Importance',value:'The only feasible wagon route through the Rockies for 2,000 miles'}],description:'South Pass was the key to the entire Oregon Trail. Without this gentle crossing of the Continental Divide, wagon travel to Oregon would have been nearly impossible. Despite being at 7,550 feet, the pass was so wide and gradual that it felt like rolling prairie.'},'Fort Bridger':{subtitle:'Mountain Man\'s Trading Post',established:'Est. 1843 by Jim Bridger',elevation:'6,665 ft (2,031 m)',miles:'Mile 1,026 — ~10 weeks from Independence',territory:'Unorganized Territory (present-day Wyoming)',facts:[{icon:'🧔',label:'Founder',value:'Jim Bridger — legendary mountain man, fur trapper, and scout'},{icon:'🔀',label:'Junction',value:'Where the Oregon Trail and the Mormon Trail to Salt Lake diverged'},{icon:'🐎',label:'Trade',value:'Emigrants traded tired animals for fresh ones with local Shoshone people'},{icon:'🏚️',label:'Condition',value:'Many emigrants were disappointed — described it as a shabby collection of log huts'}],description:'Jim Bridger and Louis Vasquez established this trading post on Black\'s Fork of the Green River. Despite its rough appearance, it was a critical decision point where emigrants chose between routes. The Donner Party fatefully took the Hastings Cutoff from near here in 1846.'},'Fort Hall':{subtitle:'Hudson\'s Bay Company Outpost',established:'Est. 1834 by Nathaniel Wyeth',elevation:'4,400 ft (1,341 m)',miles:'Mile 1,217 — ~12 weeks from Independence',territory:'Oregon Territory (present-day Idaho)',facts:[{icon:'🇬🇧',label:'Ownership',value:'Sold to Britain\'s Hudson\'s Bay Company in 1837'},{icon:'⚠️',label:'Discouragement',value:'HBC agents often tried to discourage American emigrants from continuing to Oregon'},{icon:'🔀',label:'Split',value:'Where the California Trail branched south from the Oregon Trail'},{icon:'🛞',label:'Wagons',value:'Early emigrants were told to abandon wagons here — the first to take wagons through to Oregon did so in 1843'}],description:'Fort Hall sat at a strategic crossroads. The Hudson\'s Bay Company, wanting to keep Americans out of Oregon, often told emigrants the route ahead was impassable by wagon. Despite this, thousands pushed through. After 1843, it became the split point for California-bound gold seekers.'},'Fort Boise':{subtitle:'Snake River Oasis',established:'Est. 1834 by Hudson\'s Bay Company',elevation:'2,730 ft (832 m)',miles:'Mile 1,450 — ~14 weeks from Independence',territory:'Oregon Territory (present-day Idaho)',facts:[{icon:'🏊',label:'River Crossing',value:'Emigrants had to ford the dangerous Boise River and Snake River nearby'},{icon:'🌿',label:'Relief',value:'Green river valley was a welcome sight after the harsh Snake River Plain'},{icon:'💀',label:'Danger',value:'The Snake River crossings near here claimed many lives — swift current and hidden holes'},{icon:'🐟',label:'Food',value:'Emigrants could trade with local Shoshone for salmon and camas root'}],description:'After weeks of dusty, barren travel along the Snake River Plain, Fort Boise offered shade, fresh water, and a chance to trade. The river crossings in this area were among the most dangerous on the entire trail, with many drownings recorded in emigrant diaries.'},'The Dalles':{subtitle:'End of the Overland Road',established:'Methodist mission est. 1838',elevation:'200 ft (61 m)',miles:'Mile 1,880 — ~18 weeks from Independence',territory:'Oregon Territory (present-day Oregon)',facts:[{icon:'🌊',label:'Challenge',value:'The Columbia River Gorge ahead was too narrow and dangerous for wagons'},{icon:'🛶',label:'River Route',value:'Many emigrants built rafts or hired Native canoes to float to Oregon City'},{icon:'🛤️',label:'Barlow Road',value:'After 1846, Sam Barlow\'s toll road over Mt. Hood offered an alternative ($5 per wagon)'},{icon:'⛪',label:'Mission',value:'A Methodist mission here served as a waystation for weary travelers'}],description:'The Dalles marked the end of the overland trail and the beginning of the final, often harrowing leg of the journey. The Columbia River route through the gorge was treacherous — many lost everything on the rapids. The Barlow Road, though steep and muddy, became the preferred route after 1846.'},'Oregon City':{subtitle:'Journey\'s End — The Promised Land',established:'Founded 1829; incorporated 1844',elevation:'55 ft (17 m)',miles:'Mile 2,000 — ~5 months from Independence',territory:'Oregon Territory',facts:[{icon:'🏛️',label:'Capital',value:'First incorporated city west of the Rockies; capital of Oregon Territory 1848–1852'},{icon:'🌊',label:'Falls',value:'Built at Willamette Falls — the falls powered sawmills and flour mills'},{icon:'📜',label:'Land Claims',value:'Under the Donation Land Claim Act (1850), settlers could claim 320–640 acres free'},{icon:'👨‍👩‍👧‍👦',label:'Arrivals',value:'~53,000 emigrants reached Oregon by wagon between 1840–1860'}],description:'Oregon City was the official end of the Oregon Trail and the heart of the new American settlement in the Pacific Northwest. Exhausted emigrants arrived here after five months and 2,000 miles to claim their new lives. The fertile Willamette Valley beyond offered the rich farmland that had drawn them west.'}};
+
+var SUGGESTED_QUESTIONS={'Independence, MO':['What did kids do on the trail?','What food did they bring?','How long was the trip?'],'Fort Kearny':['Did kids go to school?','Were there really buffalo?','What was a typical day like?'],'Chimney Rock':['How tall is it really?','Did people climb it?','What did it look like back then?'],'Fort Laramie':['What did they trade?','Who lived at the fort?','Was it dangerous here?'],'Independence Rock':['Why did people carve names?','Can you still see the names?','What games did kids play?'],'South Pass':['How cold was it up there?','Did wagons ever get stuck?','What animals lived here?'],'Fort Bridger':['Who was Jim Bridger?','What happened to the Donner Party?','What did they eat here?'],'Fort Hall':['Why did the British want Oregon?','How did they cross rivers?','Were there any kids on the trail?'],'Fort Boise':['How dangerous were river crossings?','What fish could they catch?','Did anyone get lost?'],'The Dalles':['What were the rapids like?','How much was the toll road?','Did anyone\'s raft sink?'],'Oregon City':['What happened when they arrived?','How big was the free land?','What did they build first?']};
+
+var activeStop=null;
+var chatHistory=[];
+var currentStopName=null;
+
+function showDetailCard(stopName){
+var card=document.getElementById('trail-detail-card');
+var facts=STOP_FACTS[stopName];
+if(!facts||!card)return;
+document.getElementById('card-title').textContent=stopName;
+document.getElementById('card-subtitle').textContent=facts.subtitle;
+var body=document.getElementById('card-body');
+var html='';
+html+='<span class="mile-marker">📍 '+facts.miles+'</span>';
+html+='<div class="fact-row"><div class="fact-icon">🗓️</div><div class="fact-content"><div class="fact-label">Established</div><div class="fact-value">'+facts.established+'</div></div></div>';
+html+='<div class="fact-row"><div class="fact-icon">📏</div><div class="fact-content"><div class="fact-label">Elevation</div><div class="fact-value">'+facts.elevation+'</div></div></div>';
+html+='<div class="fact-row"><div class="fact-icon">🗺️</div><div class="fact-content"><div class="fact-label">Territory</div><div class="fact-value">'+facts.territory+'</div></div></div>';
+html+='<div class="card-divider"></div>';
+facts.facts.forEach(function(f){html+='<div class="fact-row"><div class="fact-icon">'+f.icon+'</div><div class="fact-content"><div class="fact-label">'+f.label+'</div><div class="fact-value">'+f.value+'</div></div></div>';});
+html+='<div class="card-divider"></div>';
+html+='<div class="card-description">'+facts.description+'</div>';
+body.innerHTML=html;
+
+if(currentStopName!==stopName){
+currentStopName=stopName;
+chatHistory=[];
+var msgArea=document.getElementById('trail-chat-messages');
+msgArea.innerHTML='<div class="chat-welcome"><span class="welcome-emoji">🤠</span>Howdy, explorer! You\'re at <strong>'+stopName+'</strong>! Ask me anything about this place or the Oregon Trail journey!</div>';
+}
+updateSuggestedQuestions(stopName);
+
+activeStop=stopName;
+card.classList.add('visible');
+setActiveTab('facts');
+d3.selectAll('.trail-stop').classed('active',false);
+d3.selectAll('.trail-stop').each(function(){var el=d3.select(this);if(el.attr('data-stop-name')===stopName)el.classed('active',true);});
+}
+
+function hideDetailCard(){
+var card=document.getElementById('trail-detail-card');
+if(card)card.classList.remove('visible');
+activeStop=null;
+d3.selectAll('.trail-stop').classed('active',false);
+}
+
+function setActiveTab(tabName){
+document.querySelectorAll('#trail-detail-card .card-tab').forEach(function(t){
+t.classList.toggle('active',t.getAttribute('data-tab')===tabName);
+});
+document.querySelectorAll('#trail-detail-card .tab-pane').forEach(function(p){
+var id=p.id;
+if(tabName==='facts')p.classList.toggle('active',id==='facts-pane');
+else p.classList.toggle('active',id==='chat-pane');
+});
+if(tabName==='chat'){
+var input=document.getElementById('trail-chat-input');
+if(input)setTimeout(function(){input.focus();},100);
+scrollChatToBottom();
+}
+}
+
+function updateSuggestedQuestions(stopName){
+var container=document.getElementById('trail-suggested-q');
+var questions=SUGGESTED_QUESTIONS[stopName]||['What was it like here?','Tell me something cool!','Was it dangerous?'];
+container.innerHTML='';
+questions.forEach(function(q){
+var btn=document.createElement('button');
+btn.className='suggested-q';
+btn.textContent=q;
+btn.addEventListener('click',function(){sendTrailChat(q);});
+container.appendChild(btn);
+});
+}
+
+function scrollChatToBottom(){
+var area=document.getElementById('trail-chat-messages');
+if(area)area.scrollTop=area.scrollHeight;
+}
+
+function addChatBubble(text,isUser){
+var area=document.getElementById('trail-chat-messages');
+var welcome=area.querySelector('.chat-welcome');
+if(welcome)welcome.remove();
+var bubble=document.createElement('div');
+bubble.className='chat-bubble '+(isUser?'user-bubble':'ai-bubble');
+bubble.textContent=text;
+area.appendChild(bubble);
+scrollChatToBottom();
+return bubble;
+}
+
+function addLoadingBubble(){
+var area=document.getElementById('trail-chat-messages');
+var bubble=document.createElement('div');
+bubble.className='chat-bubble ai-bubble loading';
+bubble.id='trail-loading-bubble';
+bubble.innerHTML='<div class="typing-dots"><span></span><span></span><span></span></div>';
+area.appendChild(bubble);
+scrollChatToBottom();
+return bubble;
+}
+
+function removeLoadingBubble(){
+var el=document.getElementById('trail-loading-bubble');
+if(el)el.remove();
+}
+
+function buildPrompt(userQuestion){
+var stopData=STOP_FACTS[currentStopName];
+var contextParts=[];
+contextParts.push('You are a friendly, enthusiastic trail guide named "Dusty" who teaches kids (ages 8-12) about the Oregon Trail and the 1850s American frontier.');
+contextParts.push('You are currently at: '+currentStopName+' — '+stopData.subtitle);
+contextParts.push('Key facts about this location:');
+contextParts.push('- Established: '+stopData.established);
+contextParts.push('- Elevation: '+stopData.elevation);
+contextParts.push('- Position on trail: '+stopData.miles);
+contextParts.push('- Territory: '+stopData.territory);
+contextParts.push('- Description: '+stopData.description);
+stopData.facts.forEach(function(f){contextParts.push('- '+f.label+': '+f.value);});
+contextParts.push('');
+contextParts.push('RULES:');
+contextParts.push('- Use simple, fun language appropriate for 8-12 year olds');
+contextParts.push('- Keep answers to 2-4 short paragraphs max');
+contextParts.push('- Use vivid descriptions and comparisons kids can relate to');
+contextParts.push('- Include fun facts when possible');
+contextParts.push('- If you don\'t know something, say so honestly');
+contextParts.push('- You can reference other stops on the Oregon Trail for context');
+contextParts.push('- Use occasional emojis but don\'t overdo it');
+contextParts.push('- Never break character — you are Dusty the trail guide');
+contextParts.push('');
+
+if(chatHistory.length>0){
+contextParts.push('Recent conversation:');
+var recentHistory=chatHistory.slice(-10);
+recentHistory.forEach(function(turn){
+contextParts.push((turn.role==='user'?'Kid: ':'Dusty: ')+turn.text);
+});
+contextParts.push('');
+}
+
+contextParts.push('Kid\'s question: '+userQuestion);
+contextParts.push('');
+contextParts.push('Respond as Dusty the trail guide:');
+return contextParts.join('\n');
+}
+
+async function sendTrailChat(message){
+if(!message||!message.trim()||!currentStopName)return;
+var input=document.getElementById('trail-chat-input');
+var sendBtn=document.getElementById('trail-chat-send');
+message=message.trim();
+input.value='';
+sendBtn.disabled=true;
+
+setActiveTab('chat');
+addChatBubble(message,true);
+chatHistory.push({role:'user',text:message});
+
+addLoadingBubble();
+
+try{
+var prompt=buildPrompt(message);
+var result=await synthos.generate.completion({prompt:prompt,temperature:0.7});
+removeLoadingBubble();
+var answer=result.answer||'Hmm, my trail map got a little dusty! Try asking me again. 🤠';
+addChatBubble(answer,false);
+chatHistory.push({role:'assistant',text:answer});
+if(chatHistory.length>20)chatHistory=chatHistory.slice(-20);
+}catch(err){
+removeLoadingBubble();
+addChatBubble('Whoops! My wagon wheel got stuck. 🛞 Try asking again in a moment!',false);
+console.error('Trail chat error:',err);
+}
+sendBtn.disabled=false;
+input.focus();
+}
+
+window._showTrailDetail=showDetailCard;
+window._hideTrailDetail=hideDetailCard;
+
+document.getElementById('card-close-btn').addEventListener('click',function(e){e.stopPropagation();hideDetailCard();});
+
+document.querySelectorAll('#trail-detail-card .card-tab').forEach(function(tab){
+tab.addEventListener('click',function(e){
+e.stopPropagation();
+setActiveTab(tab.getAttribute('data-tab'));
+});
+});
+
+document.getElementById('trail-chat-send').addEventListener('click',function(e){
+e.stopPropagation();
+var input=document.getElementById('trail-chat-input');
+sendTrailChat(input.value);
+});
+
+document.getElementById('trail-chat-input').addEventListener('keydown',function(e){
+if(e.key==='Enter'){e.preventDefault();e.stopPropagation();sendTrailChat(this.value);}
+});
+
+document.getElementById('trail-chat-input').addEventListener('click',function(e){e.stopPropagation();});
+
+function init(){
+var wrap=document.getElementById('us-map-svg-wrap');
+if(!wrap)return;
+var tooltip=document.getElementById('map-tooltip');
+wrap.querySelectorAll('svg').forEach(function(s){s.remove();});
+var svg=d3.select(wrap).append('svg').attr('id','hist-map-svg').attr('viewBox','0 0 960 600').attr('preserveAspectRatio','xMidYMid meet').style('padding','16px').style('box-sizing','border-box');
+var projection=d3.geoAlbersUsa().scale(1280).translate([480,300]);
+var path=d3.geoPath().projection(projection);
+d3.json('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json').then(function(us){
+var statesGeo=us.objects.states;
+var allGeometries=statesGeo.geometries;
+function geomsForFips(fipsList){return allGeometries.filter(function(g){return fipsList.indexOf(+g.id)!==-1;});}
+var stateGeoms=geomsForFips(STATES_1850);
+stateGeoms.forEach(function(geom){
+var feature=topojson.feature(us,geom);
+svg.append('path').datum(feature).attr('class','region-path region-state').attr('d',path)
+.on('mousemove',function(event){var name=FIPS_TO_NAME[+geom.id]||'Unknown';tooltip.textContent=name+' (State)';tooltip.style.opacity='1';var rect=wrap.getBoundingClientRect();var x=event.clientX-rect.left+12;var y=event.clientY-rect.top-30;if(x+180>rect.width)x=x-200;if(y<0)y=event.clientY-rect.top+18;tooltip.style.left=x+'px';tooltip.style.top=y+'px';}).on('mouseleave',function(){tooltip.style.opacity='0';}).on('click',function(){hideDetailCard();});
+});
+TERRITORY_GROUPS.forEach(function(group){
+var geoms=geomsForFips(group.fips);
+if(geoms.length===0)return;
+var merged=topojson.merge(us,geoms);
+svg.append('path').datum(merged).attr('class','region-path '+group.cls).attr('d',path)
+.on('mousemove',function(event){tooltip.textContent=group.name;tooltip.style.opacity='1';var rect=wrap.getBoundingClientRect();var x=event.clientX-rect.left+12;var y=event.clientY-rect.top-30;if(x+180>rect.width)x=x-200;if(y<0)y=event.clientY-rect.top+18;tooltip.style.left=x+'px';tooltip.style.top=y+'px';}).on('mouseleave',function(){tooltip.style.opacity='0';}).on('click',function(){hideDetailCard();});
+});
+var stateGeoms2=geomsForFips(STATES_1850);
+svg.append('path').datum(topojson.mesh(us,{type:'GeometryCollection',geometries:stateGeoms2},function(a,b){return a!==b&&STATES_1850.indexOf(+a.id)!==-1&&STATES_1850.indexOf(+b.id)!==-1;})).attr('fill','none').attr('stroke','rgba(27,94,32,0.4)').attr('stroke-width','0.5').attr('d',path).style('pointer-events','none');
+var trailGroup=svg.append('g').attr('class','trail-group');
+var projectedPoints=[];
+TRAIL_POINTS.forEach(function(p){var pt=projection(p);if(pt)projectedPoints.push(pt);});
+if(projectedPoints.length>1){
+var lineGen=d3.line().x(function(d){return d[0];}).y(function(d){return d[1];}).curve(d3.curveCatmullRom.alpha(0.5));
+trailGroup.append('path').attr('class','trail-path-glow').attr('d',lineGen(projectedPoints));
+trailGroup.append('path').attr('class','trail-path').attr('d',lineGen(projectedPoints));
+}
+TRAIL_STOPS.forEach(function(stop){
+var pt=projection(stop.coords);
+if(!pt)return;
+var g=trailGroup.append('g').attr('class','trail-stop').attr('transform','translate('+pt[0]+','+pt[1]+')').attr('data-stop-name',stop.name);
+g.append('circle').attr('class','stop-outer').attr('r',6);
+g.append('circle').attr('class','stop-inner').attr('r',2.5);
+var labelY=stop.labelPos==='above'?-10:14;
+g.append('text').attr('class','trail-label').attr('y',labelY).text(stop.name);
+g.on('mousemove',function(event){tooltip.textContent='Oregon Trail: '+stop.name;tooltip.style.opacity='1';var rect=wrap.getBoundingClientRect();var x=event.clientX-rect.left+12;var y=event.clientY-rect.top-30;if(x+180>rect.width)x=x-200;if(y<0)y=event.clientY-rect.top+18;tooltip.style.left=x+'px';tooltip.style.top=y+'px';}).on('mouseleave',function(){tooltip.style.opacity='0';}).on('click',function(event){event.stopPropagation();showDetailCard(stop.name);});
+});
+}).catch(function(err){console.error('Failed to load US map data:',err);wrap.innerHTML='<p style="color:var(--text-secondary);text-align:center;">Failed to load map data. Please try again.</p>';});
+}
+if(typeof topojson!=='undefined'){init();}else{var check=setInterval(function(){if(typeof topojson!=='undefined'){clearInterval(check);init();}},100);setTimeout(function(){clearInterval(check);},10000);}
+})();</script><script id="page-helpers" src="/api/page-helpers.js?v=2" data-locked="true"></script><script id="page-script" src="/api/page-script.js?v=2" data-locked="true"></script></body></html>

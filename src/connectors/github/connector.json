@@ -1,0 +1,29 @@
+{
+    "id": "github",
+    "name": "GitHub",
+    "category": "Developer",
+    "description": "Access GitHub repositories, issues, pull requests, and more via the GitHub REST API.",
+    "baseUrl": "https://api.github.com",
+    "authStrategy": "bearer",
+    "authKey": "Authorization",
+    "fields": [
+        { "name": "apiKey", "label": "Personal Access Token", "type": "password" }
+    ],
+    "hints": [
+        "Get user: GET /user",
+        "List repos: GET /user/repos?sort=updated&per_page=10",
+        "Get repo: GET /repos/{owner}/{repo}",
+        "List issues: GET /repos/{owner}/{repo}/issues",
+        "Create issue: POST /repos/{owner}/{repo}/issues with body: { title, body }",
+        "All requests should include header Accept: application/vnd.github+json."
+    ],
+    "onboarding": {
+        "url": "https://github.com/settings/tokens",
+        "steps": [
+            "Go to github.com/settings/tokens",
+            "Generate a new token (classic or fine-grained)",
+            "Select the scopes you need (e.g. repo, read:user)",
+            "Copy the generated token"
+        ]
+    }
+}

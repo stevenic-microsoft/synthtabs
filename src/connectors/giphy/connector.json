@@ -1,0 +1,27 @@
+{
+    "id": "giphy",
+    "name": "Giphy",
+    "category": "Media",
+    "description": "Search and discover GIFs, stickers, and animated content. The world's largest GIF library.",
+    "baseUrl": "https://api.giphy.com",
+    "authStrategy": "query",
+    "authKey": "api_key",
+    "fields": [
+        { "name": "apiKey", "label": "API Key", "type": "password" }
+    ],
+    "hints": [
+        "Search GIFs: GET /v1/gifs/search?q={term}&limit=10",
+        "Trending: GET /v1/gifs/trending?limit=10",
+        "Random: GET /v1/gifs/random?tag={term}",
+        "Response: { data: [{ images: { original: { url }, fixed_height: { url } }, title }] }",
+        "Display with: <img src=\"{images.fixed_height.url}\">"
+    ],
+    "onboarding": {
+        "url": "https://developers.giphy.com/dashboard/",
+        "steps": [
+            "Create a GIPHY developer account",
+            "Create a new app on the dashboard",
+            "Copy the API key from your app settings"
+        ]
+    }
+}

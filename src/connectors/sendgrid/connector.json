@@ -1,0 +1,27 @@
+{
+    "id": "sendgrid",
+    "name": "SendGrid",
+    "category": "Communication",
+    "description": "Email delivery service. Send transactional and marketing emails at scale via API.",
+    "baseUrl": "https://api.sendgrid.com",
+    "authStrategy": "bearer",
+    "authKey": "Authorization",
+    "fields": [
+        { "name": "apiKey", "label": "API Key", "type": "password" }
+    ],
+    "hints": [
+        "Send email: POST /v3/mail/send",
+        "  Body: { personalizations: [{ to: [{ email }] }], from: { email }, subject: \"...\", content: [{ type: \"text/plain\", value: \"...\" }] }",
+        "  Returns 202 Accepted (no body) on success.",
+        "List templates: GET /v3/templates?generations=dynamic",
+        "Free tier: 100 emails/day."
+    ],
+    "onboarding": {
+        "url": "https://signup.sendgrid.com/",
+        "steps": [
+            "Create an account at sendgrid.com",
+            "Go to Settings > API Keys",
+            "Create a new API key with appropriate permissions and copy it"
+        ]
+    }
+}

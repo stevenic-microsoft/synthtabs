@@ -1,0 +1,26 @@
+{
+    "id": "openweathermap",
+    "name": "OpenWeatherMap",
+    "category": "Weather",
+    "description": "Real-time weather data, forecasts, and historical weather information for any location worldwide.",
+    "baseUrl": "https://api.openweathermap.org",
+    "authStrategy": "query",
+    "authKey": "appid",
+    "fields": [
+        { "name": "apiKey", "label": "API Key", "type": "password" }
+    ],
+    "hints": [
+        "Current weather: GET /data/2.5/weather?q={city}&units=metric",
+        "5-day forecast: GET /data/2.5/forecast?q={city}&units=metric",
+        "Response: { main: { temp, humidity }, weather: [{ description }], wind: { speed } }",
+        "Use units=metric for Celsius or units=imperial for Fahrenheit."
+    ],
+    "onboarding": {
+        "url": "https://home.openweathermap.org/users/sign_up",
+        "steps": [
+            "Create an account at openweathermap.org",
+            "Go to API Keys in your account dashboard",
+            "Copy your default API key (or generate a new one)"
+        ]
+    }
+}

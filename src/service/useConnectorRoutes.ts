@@ -35,6 +35,7 @@ export function useConnectorRoutes(config: SynthOSConfig, app: Application): voi
                         id: def.id,
                         name: def.name,
                         category: def.category,
+                        description: def.description,
                         configured: isOAuth
                             ? !!oauthCfg && oauthCfg.enabled && !!oauthCfg.accessToken
                             : !!cfg && cfg.enabled && !!cfg.apiKey
@@ -352,11 +353,20 @@ export function useConnectorRoutes(config: SynthOSConfig, app: Application): voi
             }
 
             // Build URL — join baseUrl path with request path to avoid
-            // absolute paths (e.g. "/me/accounts") replacing the base path
+            // absolute paths (e.g. "/me/accounts") replacing the base path.
+            // Split path from inline query string first — assigning a '?' to
+            // URL.pathname encodes it as %3F, which breaks upstream APIs.
+            const [reqPath, reqQS] = request.path.split('?');
             const base = new URL(def.baseUrl);
-            const joinedPath = base.pathname.replace(/\/+$/, '') + '/' + request.path.replace(/^\/+/, '');
+            const joinedPath = base.pathname.replace(/\/+$/, '') + '/' + reqPath.replace(/^\/+/, '');
             base.pathname = joinedPath;
             const url = base;
+            if (reqQS) {
+                const inline = new URLSearchParams(reqQS);
+                for (const [key, value] of inline.entries()) {
+                    url.searchParams.set(key, value);
+                }
+            }
             if (request.query) {
                 for (const [key, value] of Object.entries(request.query)) {
                     url.searchParams.set(key, value);

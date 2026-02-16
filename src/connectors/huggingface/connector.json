@@ -1,0 +1,27 @@
+{
+    "id": "huggingface",
+    "name": "Hugging Face",
+    "category": "AI",
+    "description": "Access thousands of AI models for text generation, image classification, NLP, and more via the Inference API.",
+    "baseUrl": "https://api-inference.huggingface.co",
+    "authStrategy": "bearer",
+    "authKey": "Authorization",
+    "fields": [
+        { "name": "apiKey", "label": "API Token", "type": "password" }
+    ],
+    "hints": [
+        "Run inference: POST /models/{model-id}",
+        "  Example (text generation): POST /models/gpt2 with body: { inputs: \"Hello world\" }",
+        "  Example (sentiment): POST /models/distilbert-base-uncased-finetuned-sst-2-english with body: { inputs: \"I love this!\" }",
+        "Response format varies by model task type.",
+        "Free tier: rate-limited, models may need to warm up (first request may be slow)."
+    ],
+    "onboarding": {
+        "url": "https://huggingface.co/join",
+        "steps": [
+            "Create an account at huggingface.co",
+            "Go to Settings > Access Tokens",
+            "Create a new token with read permissions and copy it"
+        ]
+    }
+}
