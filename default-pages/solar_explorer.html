@@ -1853,11 +1853,14 @@ animate();
     applySettingsToUI(); // revert UI to saved
   });
 
+  var overlayMouseDownTarget = null;
+  overlay.addEventListener('mousedown', function(e) { overlayMouseDownTarget = e.target; });
   overlay.addEventListener('click', function(e) {
-    if (e.target === overlay) {
+    if (e.target === overlay && overlayMouseDownTarget === overlay) {
       overlay.classList.remove('active');
       applySettingsToUI();
     }
+    overlayMouseDownTarget = null;
   });
 
   saveBtn.addEventListener('click', async function() {

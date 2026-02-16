@@ -381,8 +381,11 @@ function closeConnectorModal() {
 
 document.getElementById('connectorCancelBtn').addEventListener('click', closeConnectorModal);
 
+var connectorModalMouseDownTarget = null;
+document.getElementById('connectorModal').addEventListener('mousedown', function(e) { connectorModalMouseDownTarget = e.target; });
 document.getElementById('connectorModal').addEventListener('click', function(e) {
-    if (e.target === this) closeConnectorModal();
+    if (e.target === this && connectorModalMouseDownTarget === this) closeConnectorModal();
+    connectorModalMouseDownTarget = null;
 });
 
 document.getElementById('connectorSaveBtn').addEventListener('click', function() {

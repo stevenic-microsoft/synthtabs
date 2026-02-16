@@ -288,11 +288,17 @@
         document.getElementById('errorCloseBtn').addEventListener('click', closeError);
         document.getElementById('errorOkBtn').addEventListener('click', closeError);
 
+        var saveModalMouseDownTarget = null;
+        modal.addEventListener('mousedown', function(e) { saveModalMouseDownTarget = e.target; });
         modal.addEventListener('click', function(e) {
-            if (e.target === modal) closeSaveModal();
+            if (e.target === modal && saveModalMouseDownTarget === modal) closeSaveModal();
+            saveModalMouseDownTarget = null;
         });
+        var errorModalMouseDownTarget = null;
+        errorModal.addEventListener('mousedown', function(e) { errorModalMouseDownTarget = e.target; });
         errorModal.addEventListener('click', function(e) {
-            if (e.target === errorModal) closeError();
+            if (e.target === errorModal && errorModalMouseDownTarget === errorModal) closeError();
+            errorModalMouseDownTarget = null;
         });
 
         document.addEventListener('keydown', function(e) {
@@ -596,8 +602,11 @@
         brainstormBtn.addEventListener('click', openBrainstorm);
         document.getElementById('brainstormCloseBtn').addEventListener('click', closeBrainstorm);
 
+        var brainstormMouseDownTarget = null;
+        modal.addEventListener('mousedown', function(e) { brainstormMouseDownTarget = e.target; });
         modal.addEventListener('click', function(e) {
-            if (e.target === modal) closeBrainstorm();
+            if (e.target === modal && brainstormMouseDownTarget === modal) closeBrainstorm();
+            brainstormMouseDownTarget = null;
         });
 
         document.addEventListener('keydown', function(e) {
