@@ -355,8 +355,14 @@ The goal is to help them generate a prompt for the builder that captures their v
 Suggest concrete approaches when you can, not complex visions for some ellaborate app.
 Just help expand their thoughts into a great next prompt.
 
+<CONTEXT>
+${context}
+
+<INSTRUCTIONS>
 Look at the <CHAT_HISTORY> and if it's empty it's the start of a new idea. Simply greet them and ask them what they're thinking of building. Suggestions could be help me decide, etc.
 If you see a conversation between SynthOS and the User. Asses what they're building and ask them what they'd like help with. Maybe offer a few good next steps.
+
+SynthOS exposes table storage and chat completion api's that every page can use. If the user wants to store something or use AI, your prompt should suggest using table storage or make llm calls.
 
 You MUST return your response as a JSON object with exactly these fields:
 {
@@ -367,11 +373,7 @@ You MUST return your response as a JSON object with exactly these fields:
 
 suggestions — 2-4 short phrases the user can click to continue the conversation. These are next-step options: directions to explore, questions to answer, or choices to make. Keep each under 60 characters. Always provide suggestions.
 
-Return ONLY the JSON object. No markdown fences.
-
-<CONTEXT>
-${context}
-</CONTEXT>`};
+Return ONLY the JSON object.`};
 
             // Format multi-turn conversation into a single prompt
             const formatted = (messages as { role: string; content: string }[]).map(m =>
