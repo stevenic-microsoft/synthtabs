@@ -108,7 +108,7 @@ async function migrateV1toV2(html: string, completePrompt: completePrompt): Prom
     const system = { role: 'system' as const, content: rules };
     const prompt = { role: 'user' as const, content: `Convert this v1 page to v2 format:\n\n${html}` };
 
-    const result = await completePrompt({ prompt, system, maxTokens: 16000 });
+    const result = await completePrompt({ prompt, system });
     if (!result.completed || !result.value) {
         throw new Error('LLM migration failed: ' + (result.error?.message ?? 'no response'));
     }

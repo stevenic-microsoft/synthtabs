@@ -286,9 +286,6 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
             if (Array.isArray(settings.models)) {
                 for (const entry of settings.models) {
                     if (entry.configuration) {
-                        if (typeof entry.configuration.maxTokens === 'string') {
-                            entry.configuration.maxTokens = parseInt(entry.configuration.maxTokens);
-                        }
                     }
                     if (typeof entry.logCompletions === 'string') {
                         entry.logCompletions = entry.logCompletions === 'true';
@@ -326,9 +323,8 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
     app.post('/api/generate/completion', async (req, res) => {
         await requiresSettings(res, config.pagesFolder, async (settings) => {
             const { prompt, temperature } = req.body;
-            const maxTokens = getModelEntry(settings, 'chat').configuration.maxTokens;
             const completePrompt = await createCompletePrompt(config.pagesFolder, 'chat', req.body.model);
-            const response = await chainOfThought({ question: prompt, temperature, maxTokens, completePrompt });
+            const response = await chainOfThought({ question: prompt, temperature, completePrompt });
             if (response.completed) {
                 res.json(response.value ?? {});
             } else {
@@ -342,7 +338,6 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
     app.post('/api/brainstorm', async (req, res) => {
         await requiresSettings(res, config.pagesFolder, async (settings) => {
             const { context, messages } = req.body;
-            const maxTokens = getModelEntry(settings, 'chat').configuration.maxTokens;
             const completePrompt = await createCompletePrompt(config.pagesFolder, 'chat');
 
             const system: { role: 'system'; content: string } = {
@@ -382,7 +377,7 @@ Return ONLY the JSON object.`};
 
             const prompt: { role: 'user'; content: string } = { role: 'user', content: formatted };
 
-            const result = await completePrompt({ prompt, system, maxTokens, jsonMode: true });
+            const result = await completePrompt({ prompt, system, jsonMode: true });
             if (result.completed) {
                 let response = result.value || '';
                 let brainstormPrompt = '';

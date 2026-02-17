@@ -8,16 +8,14 @@ export interface OpenaiArgs {
     organization?: string;
     project?: string;
     temperature?: number;
-    maxTokens?: number;
 }
 
 export function openai(args: OpenaiArgs): completePrompt {
-    const { apiKey, model, baseURL, organization, project, maxTokens = 1000 } = args;
+    const { apiKey, model, baseURL, organization, project } = args;
 
     const client = new OpenAI({ apiKey, baseURL, organization, project });
 
     return async (completionArgs: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
-        const reqMaxTokens = completionArgs.maxTokens ?? maxTokens;
 
         // Build input messages
         const input: OpenAI.Responses.ResponseInputItem[] = [];
@@ -62,7 +60,6 @@ export function openai(args: OpenaiArgs): completePrompt {
                 model,
                 instructions: completionArgs.system?.content,
                 input,
-                max_output_tokens: reqMaxTokens,
                 ...(text ? { text } : {}),
             });
 

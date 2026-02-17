@@ -20,7 +20,6 @@ export type { ModelEntry } from './models';
 export interface SettingsV1 {
     serviceApiKey: string;
     model: string;
-    maxTokens: number;
     imageQuality: 'standard' | 'hd';
     instructions?: string;
     logCompletions?: boolean;
@@ -47,7 +46,7 @@ export const DefaultSettings: SettingsV2 = {
         {
             use: 'builder',
             provider: 'Anthropic',
-            configuration: { apiKey: '', model: '', maxTokens: 32000 },
+            configuration: { apiKey: '', model: '' },
             imageQuality: 'standard',
             instructions: '',
             logCompletions: false,
@@ -55,7 +54,7 @@ export const DefaultSettings: SettingsV2 = {
         {
             use: 'chat',
             provider: 'Anthropic',
-            configuration: { apiKey: '', model: '', maxTokens: 32000 },
+            configuration: { apiKey: '', model: '' },
             imageQuality: 'standard',
             instructions: '',
             logCompletions: false,
@@ -100,7 +99,6 @@ function migrateV1toV2(raw: Record<string, unknown>): SettingsV2 {
                 configuration: {
                     apiKey: v1.serviceApiKey ?? '',
                     model,
-                    maxTokens: v1.maxTokens ?? 32000,
                 },
                 imageQuality: v1.imageQuality ?? 'standard',
                 instructions: v1.instructions ?? '',
@@ -112,7 +110,6 @@ function migrateV1toV2(raw: Record<string, unknown>): SettingsV2 {
                 configuration: {
                     apiKey: v1.serviceApiKey ?? '',
                     model: chatModel,
-                    maxTokens: v1.maxTokens ?? 32000,
                 },
                 imageQuality: v1.imageQuality ?? 'standard',
                 instructions: v1.instructions ?? '',
@@ -133,10 +130,6 @@ export async function hasConfiguredSettings(folder: string): Promise<boolean> {
     if (typeof builder.configuration.model !== 'string' || builder.configuration.model.length == 0) {
         return false;
     }
-    if (typeof builder.configuration.maxTokens !== 'number' || builder.configuration.maxTokens <= 0) {
-        return false;
-    }
-
     return true;
 }
 

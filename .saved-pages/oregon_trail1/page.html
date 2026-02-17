@@ -1,0 +1,521 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SynthOS</title>
+    <script id="theme-info" src="/api/theme-info.js" data-locked="true"></script>
+    <link id="theme-css" rel="stylesheet" href="/api/theme.css" data-locked="true">
+    <style>.idle-container{position:absolute;width:100%;height:100%;pointer-events:none;opacity:1;transition:opacity 1s ease-out}.idle-container.hidden{opacity:0}.breathing-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(102,126,234,.15) 0,transparent 70%);animation:4s ease-in-out infinite breathe}.breathing-orb::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:rgba(183,148,246,.6);box-shadow:0 0 20px rgba(183,148,246,.4);animation:4s ease-in-out infinite core-pulse}@keyframes breathe{0%,100%{width:80px;height:80px;opacity:.3}50%{width:120px;height:120px;opacity:.6}}@keyframes core-pulse{0%,100%{opacity:.4;box-shadow:0 0 20px rgba(183,148,246,.3)}50%{opacity:.8;box-shadow:0 0 30px rgba(183,148,246,.5)}}.orbit-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;border:1px solid rgba(102,126,234,.1);border-radius:50%;animation:20s linear infinite orbit-rotate}.orbit-ring::after{content:'';position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:6px;height:6px;background:rgba(240,147,251,.5);border-radius:50%;box-shadow:0 0 10px rgba(240,147,251,.3)}@keyframes orbit-rotate{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.0/mermaid.min.js"></script>
+    <script id="page-info" src="/api/page-info.js?page=builder"></script>
+<style id="map-styles">
+.map-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-tertiary);
+  overflow: hidden;
+}
+.map-header {
+  min-height: var(--header-min-height);
+  padding: var(--header-padding-vertical) var(--header-padding-horizontal);
+  line-height: var(--header-line-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+.map-body {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+#mapSvg {
+  width: 100%;
+  height: 100%;
+}
+.map-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 100;
+  max-width: 260px;
+}
+.map-tooltip.visible {
+  opacity: 1;
+}
+.map-tooltip h4 {
+  margin: 0 0 4px 0;
+  font-size: 0.95rem;
+  color: var(--accent-secondary);
+}
+.map-tooltip p {
+  margin: 0;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+.map-legend {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  z-index: 50;
+}
+.map-legend h5 {
+  margin: 0 0 8px 0;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.legend-swatch {
+  width: 16px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid rgba(0,0,0,0.15);
+  flex-shrink: 0;
+}
+.light-mode .state-path {
+  stroke: #5a4a3a;
+  stroke-width: 0.8;
+}
+.state-path {
+  stroke: #5a4a3a;
+  stroke-width: 0.8;
+  cursor: pointer;
+  transition: opacity 0.2s, stroke-width 0.2s;
+}
+.state-path:hover {
+  opacity: 0.8;
+  stroke-width: 2;
+}
+.state-label {
+  font-size: 8px;
+  fill: #2d2640;
+  text-anchor: middle;
+  pointer-events: none;
+  font-weight: 600;
+  font-family: Georgia, serif;
+}
+.map-title-text {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+  fill: var(--text-primary);
+  text-anchor: middle;
+  font-weight: bold;
+}
+.map-subtitle-text {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 11px;
+  fill: var(--text-secondary);
+  text-anchor: middle;
+}
+.trail-path {
+  fill: none;
+  stroke: #8b2500;
+  stroke-width: 2.5;
+  stroke-dasharray: 8,4;
+  stroke-linecap: round;
+  opacity: 0.85;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+}
+.trail-waypoint {
+  cursor: pointer;
+  transition: r 0.2s;
+}
+.trail-waypoint:hover {
+  r: 6;
+}
+.trail-waypoint-label {
+  font-size: 7px;
+  fill: #5a1a00;
+  text-anchor: middle;
+  pointer-events: none;
+  font-weight: 700;
+  font-family: Georgia, serif;
+  text-shadow: 0 0 3px #f5edd6, 0 0 3px #f5edd6, 0 0 3px #f5edd6;
+  paint-order: stroke;
+  stroke: #f5edd6;
+  stroke-width: 2.5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.trail-legend-line {
+  width: 20px;
+  height: 0;
+  border-top: 2.5px dashed #8b2500;
+  flex-shrink: 0;
+}
+</style></head>
+<body>
+    <div class="chat-panel" data-locked="true">
+        <div class="chat-header" data-locked="true">SynthOS</div>
+        <div class="chat-messages" id="chatMessages" data-locked="true">
+            <div class="chat-message" id="defaultGreeting"><strong>SynthOS:</strong> What can I create for you? Ask "what can you do?" or "how does this work?" to learn more. Remember to save often!</div>
+            <div class="chat-message" id="firstRunGreeting" style="display:none;">
+                <p><strong>Welcome to SynthOS!</strong></p>
+                <p>You're all set up and ready to start creating. This is the <strong>Builder</strong> — your main workspace. Just type what you want to build into the chat and SynthOS will generate it for you as a live, interactive page.</p>
+                <p>You can create just about anything: dashboards, tools, games, visualizations, forms, calculators — if it can be expressed as a web page, you can build it here through conversation.</p>
+                <p><strong>How pages work:</strong></p>
+                <ul>
+                    <li>Each creation lives on its own <strong>page</strong>. When you save, it gets a name and becomes part of your collection.</li>
+                    <li>The <strong>Pages</strong> button (in the link bar above) takes you to the <strong>Pages Gallery</strong> where you can browse, open, and manage all your saved creations.</li>
+                </ul>
+                <p><strong>Key actions:</strong></p>
+                <ul>
+                    <li><strong>Save</strong> — saves your current page. You'll be prompted for a name the first time. <em>Save often!</em> Your work only persists when you save it.</li>
+                    <li><strong>Reset</strong> — clears the current page back to a blank slate. Useful when you want to start fresh on something new.</li>
+                </ul>
+                <p>When you're ready, we recommend trying the <a href="/solar_tutorial">Solar Tutorial</a> — it's a guided walkthrough that will show you the basics of creating with SynthOS step by step.</p>
+                <p>Have fun building!</p>
+            </div>
+        <div class="chat-message"><p><strong>User:</strong> can you build a map of the united states circa mid 1800's</p></div><div class="chat-message"><p><strong>SynthOS:</strong> I've built an interactive map of the United States circa 1850! It shows the states and territories as they existed around that time, including key acquisitions like the Louisiana Purchase (1803), the Oregon Territory, the Mexican Cession (1848), and the Texas Annexation (1845). Hover over any region to see details. The map uses a vintage parchment style to give it a period-appropriate feel.</p></div><div class="chat-message"><p><strong>User:</strong> now can you plot out the path of the oregon trail?</p></div><div class="chat-message"><p><strong>SynthOS:</strong> Done! I've plotted the Oregon Trail on the map as a dashed red-brown line tracing the historic route from Independence, Missouri to Oregon City, Oregon. Key landmarks and stops along the trail are marked with dots and labels, including Fort Kearny, Chimney Rock, Fort Laramie, Independence Rock, South Pass, Fort Hall, Fort Boise, The Dalles, and Oregon City. Hover over any waypoint to see details about that stop on the trail.</p></div></div>
+        <div class="link-group" data-locked="true">
+            <a href="#" id="saveLink" data-locked="true">Save</a>
+            <a href="/pages" id="pagesLink" data-locked="true">Pages</a>
+            <a href="#" id="resetLink" data-locked="true">Reset</a>
+        </div>
+        <form action="/" method="POST" id="chatForm" data-locked="true">
+            <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message..." data-locked="true">
+            <button type="submit" class="chat-submit" data-locked="true">Send</button>
+        </form>
+    </div>
+    <div class="viewer-panel" id="viewerPanel"><div class="map-container" id="mapContainer">
+  <div class="map-header">United States of America — Circa 1850</div>
+  <div class="map-body" id="mapBody">
+    <svg id="mapSvg"></svg>
+    <div class="map-tooltip" id="mapTooltip"></div>
+    <div class="map-legend">
+      <h5>Legend</h5>
+      <div class="legend-item"><div class="legend-swatch" style="background:#c4956a;"></div> Original 13 States</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#d4a574;"></div> Early Statehood (1790s–1820s)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#a8c490;"></div> Louisiana Purchase (1803)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#8bb8a8;"></div> Oregon Territory</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#d4a0a0;"></div> Texas Annexation (1845)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#c9b896;"></div> Mexican Cession (1848)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#b8a8c8;"></div> Territories</div>
+      <div class="legend-item"><div class="trail-legend-line"></div> Oregon Trail</div>
+    </div>
+  </div>
+</div></div>
+    <div id="instructions" style="display: none;" data-locked="true"></div>
+    <div id="thoughts" style="display: none;" data-locked="true">User wants the Oregon Trail path plotted on the existing 1850s US map. I need to add a polyline/path to the SVG that traces the Oregon Trail route from Independence, Missouri to Oregon City, Oregon. Key waypoints: Independence MO (~-94.4, 39.1), Fort Kearny NE (~-99, 40.7), Chimney Rock NE (~-103.3, 41.8), Fort Laramie WY (~-104.5, 42.2), Independence Rock WY (~-107.5, 42.5), South Pass WY (~-108.8, 42.3), Fort Hall ID (~-112.4, 43), Fort Boise ID (~-116.2, 43.6), The Dalles OR (~-121.2, 45.6), Oregon City OR (~-122.6, 45.4). I'll add these as a styled path on the map with waypoint markers and labels. I need to update the map-script to draw this trail after the regions are rendered.</div>
+    <script id="idle-animation">function hideIdleAnimation(){const idleContainer=document.getElementById("idleAnimation");idleContainer&&(idleContainer.classList.add("hidden"),setTimeout(()=>{idleContainer.style.display="none"},1e3))}function showIdleAnimation(){const idleContainer=document.getElementById("idleAnimation");idleContainer&&(idleContainer.style.display="block",setTimeout(()=>{idleContainer.classList.remove("hidden")},10))}</script>
+    <button class="chat-toggle" aria-label="Toggle chat panel">
+        <span class="chat-toggle-dots">
+            <span class="chat-toggle-dot"></span>
+            <span class="chat-toggle-dot"></span>
+            <span class="chat-toggle-dot"></span>
+        </span>
+    </button>
+<script id="first-run-check">
+(function() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('firstRun') === 'true') {
+        document.getElementById('defaultGreeting').style.display = 'none';
+        document.getElementById('firstRunGreeting').style.display = '';
+    }
+})();
+</script>
+
+
+<script id="map-script">
+(function() {
+  const svg = d3.select('#mapSvg');
+  const tooltip = document.getElementById('mapTooltip');
+  const mapBody = document.getElementById('mapBody');
+
+  const colors = {
+    original13: '#c4956a',
+    earlyState: '#d4a574',
+    louisiana: '#a8c490',
+    oregon: '#8bb8a8',
+    texas: '#d4a0a0',
+    mexican: '#c9b896',
+    territory: '#b8a8c8'
+  };
+
+  const regions = [
+    { name: 'Maine', abbr: 'ME', cat: 'original13', year: '1820', desc: 'Admitted 1820 (from Massachusetts)', coords: [[-70.5,47.5],[-67,47.5],[-67,44],[-68.5,43.5],[-70,43.5],[-71,44.5],[-70.5,47.5]] },
+    { name: 'New Hampshire', abbr: 'NH', cat: 'original13', year: '1788', desc: 'Ratified Constitution 1788', coords: [[-72.5,45],[-71,45],[-71,43],[-70.7,43],[-71.5,42.7],[-72.5,42.7],[-72.5,45]] },
+    { name: 'Vermont', abbr: 'VT', cat: 'original13', year: '1791', desc: 'Admitted 1791', coords: [[-73.4,45],[-72.5,45],[-72.5,42.7],[-73.3,42.7],[-73.4,45]] },
+    { name: 'Massachusetts', abbr: 'MA', cat: 'original13', year: '1788', desc: 'Ratified Constitution 1788', coords: [[-73.3,42.7],[-71.5,42.7],[-70.7,42],[-70,41.7],[-71.2,41.5],[-73.5,41.5],[-73.3,42.7]] },
+    { name: 'Rhode Island', abbr: 'RI', cat: 'original13', year: '1790', desc: 'Ratified Constitution 1790', coords: [[-71.9,42],[-71.1,42],[-71.1,41.3],[-71.9,41.3],[-71.9,42]] },
+    { name: 'Connecticut', abbr: 'CT', cat: 'original13', year: '1788', desc: 'Ratified Constitution 1788', coords: [[-73.7,42.05],[-71.8,42.05],[-71.8,41],[-73.7,41],[-73.7,42.05]] },
+    { name: 'New York', abbr: 'NY', cat: 'original13', year: '1788', desc: 'Ratified Constitution 1788', coords: [[-79.8,43],[-76.5,43.5],[-75,45],[-73.4,45],[-73.3,42.7],[-73.5,41.5],[-74.2,40.5],[-74,40.5],[-75.5,40],[-79.8,42],[-79.8,43]] },
+    { name: 'New Jersey', abbr: 'NJ', cat: 'original13', year: '1787', desc: 'Ratified Constitution 1787', coords: [[-75.5,41.4],[-74,41.4],[-74,40.5],[-74.2,39.5],[-75.5,39],[-75.5,41.4]] },
+    { name: 'Pennsylvania', abbr: 'PA', cat: 'original13', year: '1787', desc: 'Ratified Constitution 1787', coords: [[-80.5,42],[-75.5,42],[-75.5,40],[-75,39.7],[-75.5,39.7],[-80.5,39.7],[-80.5,42]] },
+    { name: 'Delaware', abbr: 'DE', cat: 'original13', year: '1787', desc: 'First state to ratify, 1787', coords: [[-75.8,39.8],[-75.1,39.8],[-75.1,38.5],[-75.8,38.5],[-75.8,39.8]] },
+    { name: 'Maryland', abbr: 'MD', cat: 'original13', year: '1788', desc: 'Ratified Constitution 1788', coords: [[-79.5,39.7],[-75.8,39.7],[-75.8,38.3],[-76,38],[-76.5,38],[-79.5,39.2],[-79.5,39.7]] },
+    { name: 'Virginia', abbr: 'VA', cat: 'original13', year: '1788', desc: 'Ratified Constitution 1788', coords: [[-83.5,39.2],[-79.5,39.2],[-76.5,38],[-75.8,37],[-76,36.5],[-83.5,36.5],[-83.5,39.2]] },
+    { name: 'North Carolina', abbr: 'NC', cat: 'original13', year: '1789', desc: 'Ratified Constitution 1789', coords: [[-84.3,36.5],[-75.5,36.5],[-75.5,34],[-78.5,33.8],[-84.3,35],[-84.3,36.5]] },
+    { name: 'South Carolina', abbr: 'SC', cat: 'original13', year: '1788', desc: 'Ratified Constitution 1788', coords: [[-83.4,35],[-78.5,33.8],[-79,32.1],[-81,32],[-83.4,34.5],[-83.4,35]] },
+    { name: 'Georgia', abbr: 'GA', cat: 'original13', year: '1788', desc: 'Ratified Constitution 1788', coords: [[-85.6,35],[-83.4,34.5],[-83.4,34.5],[-81,32],[-80.8,31],[-81,30.5],[-85,30.5],[-85.6,35]] },
+    { name: 'Kentucky', abbr: 'KY', cat: 'earlyState', year: '1792', desc: 'Admitted 1792, from Virginia', coords: [[-89.5,36.5],[-83.5,36.5],[-83.5,39.2],[-84.8,39.2],[-85.5,38.5],[-89,37],[-89.5,36.5]] },
+    { name: 'Tennessee', abbr: 'TN', cat: 'earlyState', year: '1796', desc: 'Admitted 1796', coords: [[-90.3,35],[-84.3,35],[-84.3,36.5],[-81.6,36.5],[-90.3,36.5],[-90.3,35]] },
+    { name: 'Ohio', abbr: 'OH', cat: 'earlyState', year: '1803', desc: 'Admitted 1803', coords: [[-84.8,41.7],[-80.5,41.7],[-80.5,39.7],[-84.8,39.2],[-84.8,41.7]] },
+    { name: 'Indiana', abbr: 'IN', cat: 'earlyState', year: '1816', desc: 'Admitted 1816', coords: [[-88,41.7],[-84.8,41.7],[-84.8,39.2],[-85.5,38.5],[-88,37.8],[-88,41.7]] },
+    { name: 'Illinois', abbr: 'IL', cat: 'earlyState', year: '1818', desc: 'Admitted 1818', coords: [[-91.5,42.5],[-88,42.5],[-88,37.8],[-89,37],[-89.5,36.5],[-91,37],[-91.5,42.5]] },
+    { name: 'Alabama', abbr: 'AL', cat: 'earlyState', year: '1819', desc: 'Admitted 1819', coords: [[-88.5,35],[-85.6,35],[-85,30.5],[-88,30.2],[-88.5,35]] },
+    { name: 'Mississippi', abbr: 'MS', cat: 'earlyState', year: '1817', desc: 'Admitted 1817', coords: [[-91.6,35],[-88.5,35],[-88,30.2],[-89.5,30],[-91.6,31],[-91.6,35]] },
+    { name: 'Michigan', abbr: 'MI', cat: 'earlyState', year: '1837', desc: 'Admitted 1837', coords: [[-87,46],[-84,46],[-82.5,43],[-83,41.7],[-84.8,41.7],[-87,42.5],[-87,46]] },
+    { name: 'Arkansas', abbr: 'AR', cat: 'earlyState', year: '1836', desc: 'Admitted 1836', coords: [[-94.5,36.5],[-90.3,36.5],[-90.3,35],[-91.6,35],[-91.6,33],[-94.5,33],[-94.5,36.5]] },
+    { name: 'Missouri', abbr: 'MO', cat: 'earlyState', year: '1821', desc: 'Admitted 1821 (Missouri Compromise)', coords: [[-95.8,40.6],[-91.5,40.6],[-91.5,42.5],[-91,37],[-89.5,36.5],[-90.3,36.5],[-94.5,36.5],[-94.6,39],[-95.8,40.6]] },
+    { name: 'Florida', abbr: 'FL', cat: 'earlyState', year: '1845', desc: 'Admitted 1845', coords: [[-87.6,31],[-85,30.5],[-80.8,31],[-80,28],[-81,25],[-82,25],[-85,29],[-87.6,30.2],[-87.6,31]] },
+    { name: 'Wisconsin', abbr: 'WI', cat: 'earlyState', year: '1848', desc: 'Admitted 1848', coords: [[-92.8,47],[-87,46],[-87,42.5],[-91.5,42.5],[-92.8,44],[-92.8,47]] },
+    { name: 'Iowa', abbr: 'IA', cat: 'earlyState', year: '1846', desc: 'Admitted 1846', coords: [[-96.5,43.5],[-91.5,43.5],[-91.5,40.6],[-95.8,40.6],[-96.5,43.5]] },
+    { name: 'Louisiana', abbr: 'LA', cat: 'louisiana', year: '1812', desc: 'Admitted 1812, from Louisiana Purchase', coords: [[-94.1,33],[-91.6,33],[-91.6,31],[-89.5,30],[-89,29],[-93,29.5],[-94.1,30],[-94.1,33]] },
+    { name: 'Minnesota Territory', abbr: 'MN Terr.', cat: 'territory', year: '1849', desc: 'Organized as territory 1849', coords: [[-97.2,49],[-92.8,49],[-92.8,47],[-92.8,44],[-96.5,43.5],[-97.2,44],[-97.2,49]] },
+    { name: 'Nebraska Territory', abbr: 'NE Terr.', cat: 'territory', year: '1854', desc: 'Unorganized territory in 1850', coords: [[-104,43],[-96.5,43.5],[-95.8,40.6],[-94.6,39],[-104,37],[-104,43]] },
+    { name: 'Kansas Territory', abbr: 'KS Terr.', cat: 'territory', year: '1854', desc: 'Unorganized territory in 1850', coords: [[-104,37],[-94.6,39],[-94.5,36.5],[-94.5,33],[-104,33],[-104,37]] },
+    { name: 'Indian Territory', abbr: 'Indian Terr.', cat: 'territory', year: '\u2014', desc: 'Reserved for relocated Native American tribes', coords: [[-100,37],[-94.5,37],[-94.5,33],[-94.1,33],[-94.1,30],[-100,34],[-100,37]] },
+    { name: 'Dakota Territory', abbr: 'Dakota', cat: 'territory', year: '\u2014', desc: 'Unorganized in 1850, part of Louisiana Purchase', coords: [[-104,49],[-97.2,49],[-97.2,44],[-96.5,43.5],[-104,43],[-104,49]] },
+    { name: 'Oregon Territory', abbr: 'OR Terr.', cat: 'oregon', year: '1848', desc: 'Organized 1848, joint US-British occupation ended 1846', coords: [[-124.5,49],[-117,49],[-117,42],[-124.5,42],[-124.5,49]] },
+    { name: 'Texas', abbr: 'TX', cat: 'texas', year: '1845', desc: 'Annexed 1845, formerly Republic of Texas', coords: [[-106.5,36.5],[-100,36.5],[-100,34],[-94.1,30],[-97,26],[-100,26],[-103,29],[-106.5,32],[-106.5,36.5]] },
+    { name: 'California', abbr: 'CA', cat: 'mexican', year: '1850', desc: 'Admitted 1850, from Mexican Cession', coords: [[-124.5,42],[-120,42],[-117.5,37],[-117,34],[-120,32.5],[-124.5,40],[-124.5,42]] },
+    { name: 'Utah Territory', abbr: 'UT Terr.', cat: 'mexican', year: '1850', desc: 'Organized 1850, from Mexican Cession', coords: [[-120,42],[-117,42],[-111,42],[-111,37],[-117.5,37],[-120,42]] },
+    { name: 'New Mexico Territory', abbr: 'NM Terr.', cat: 'mexican', year: '1850', desc: 'Organized 1850, from Mexican Cession', coords: [[-117,34],[-117.5,37],[-111,37],[-111,37],[-109,37],[-109,31.3],[-106.5,32],[-103,29],[-106.5,32],[-117,34]] },
+    { name: 'Unorganized (Great Plains)', abbr: 'Unorg.', cat: 'territory', year: '\u2014', desc: 'Vast unorganized territory of the Great Plains', coords: [[-111,42],[-104,42],[-104,49],[-111,49],[-111,42]] }
+  ];
+
+  // Oregon Trail waypoints [lon, lat, name, description]
+  const oregonTrailWaypoints = [
+    [-94.4, 39.1, 'Independence, MO', 'Starting point of the Oregon Trail. Emigrants gathered here to form wagon trains before heading west.'],
+    [-96.0, 39.8, 'St. Joseph, MO', 'Alternate jumping-off point. Many emigrants crossed the Missouri River here.'],
+    [-96.7, 40.7, 'Big Blue River Crossing', 'Major river crossing in present-day Kansas/Nebraska border area.'],
+    [-99.0, 40.7, 'Fort Kearny', 'First military outpost on the trail. Provided supplies and protection for emigrants (est. 1848).'],
+    [-101.7, 41.2, 'Platte River Road', 'Emigrants followed the Platte River valley westward across the Great Plains.'],
+    [-103.3, 41.7, 'Chimney Rock', 'Iconic natural landmark visible for miles. Most-mentioned landmark in pioneer journals.'],
+    [-103.8, 41.8, "Scotts Bluff", 'Prominent bluff along the North Platte River, a major trail landmark.'],
+    [-104.5, 42.2, 'Fort Laramie', 'Key resupply point in present-day Wyoming. Originally a fur trading post (est. 1834).'],
+    [-106.3, 42.8, 'Casper / Upper Platte Crossing', 'Dangerous river crossing of the North Platte River.'],
+    [-107.5, 42.5, 'Independence Rock', 'Famous granite monolith where thousands of emigrants carved their names. Called the "Register of the Desert."'],
+    [-107.9, 42.3, "Devil's Gate", 'Narrow gorge cut through granite by the Sweetwater River.'],
+    [-108.8, 42.3, 'South Pass', 'Broad, gentle pass through the Rocky Mountains at the Continental Divide. Key to the trail\'s success.'],
+    [-110.0, 42.0, 'Green River Crossing', 'Major river crossing in present-day Wyoming.'],
+    [-110.5, 42.6, 'Fort Bridger', 'Trading post established by Jim Bridger in 1843. Resupply point.'],
+    [-111.5, 42.6, 'Soda Springs', 'Natural carbonated springs that fascinated emigrants.'],
+    [-112.4, 43.0, 'Fort Hall', 'Hudson\'s Bay Company trading post in present-day Idaho. Many emigrants decided here whether to go to Oregon or California.'],
+    [-113.5, 42.7, 'Massacre Rocks', 'Narrow passage along the Snake River, site of conflicts.'],
+    [-114.5, 42.8, 'Register Rock', 'Another place where emigrants left their names carved in stone.'],
+    [-115.5, 43.2, 'Three Island Crossing', 'Dangerous Snake River crossing in present-day Idaho.'],
+    [-116.2, 43.6, 'Fort Boise', 'Hudson\'s Bay Company post near present-day Boise, Idaho.'],
+    [-117.2, 44.0, 'Blue Mountains', 'Difficult mountain crossing in present-day Oregon.'],
+    [-118.5, 45.0, 'Whitman Mission', 'Marcus and Narcissa Whitman\'s mission near present-day Walla Walla.'],
+    [-120.2, 45.6, 'The Dalles', 'End of the overland trail along the Columbia River. Emigrants could raft downriver or take the Barlow Road.'],
+    [-121.5, 45.4, 'Barlow Pass', 'Toll road around Mount Hood, an alternative to rafting the Columbia River.'],
+    [-122.6, 45.4, 'Oregon City', 'End of the Oregon Trail! Provisional capital of Oregon Territory and destination for thousands of emigrants.']
+  ];
+
+  function getColor(cat) {
+    return colors[cat] || colors.territory;
+  }
+
+  function render() {
+    const rect = mapBody.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+    svg.selectAll('*').remove();
+
+    const defs = svg.append('defs');
+    const filter = defs.append('filter').attr('id', 'parchment');
+    filter.append('feTurbulence').attr('type', 'fractalNoise').attr('baseFrequency', '0.04').attr('numOctaves', '5');
+    filter.append('feColorMatrix').attr('type', 'saturate').attr('values', '0');
+
+    // Glow filter for trail
+    const glowFilter = defs.append('filter').attr('id', 'trailGlow');
+    glowFilter.append('feGaussianBlur').attr('stdDeviation', '2').attr('result', 'blur');
+    const feMerge = glowFilter.append('feMerge');
+    feMerge.append('feMergeNode').attr('in', 'blur');
+    feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
+
+    svg.append('rect')
+      .attr('width', width)
+      .attr('height', height)
+      .attr('fill', '#f5edd6')
+      .attr('rx', 0);
+
+    const lonMin = -128, lonMax = -65;
+    const latMin = 24, latMax = 50;
+    const mapPadding = 40;
+    const mapWidth = width - mapPadding * 2;
+    const mapHeight = height - mapPadding * 2 - 30;
+
+    function projectX(lon) {
+      return mapPadding + ((lon - lonMin) / (lonMax - lonMin)) * mapWidth;
+    }
+    function projectY(lat) {
+      return mapPadding + 30 + ((latMax - lat) / (latMax - latMin)) * mapHeight;
+    }
+
+    svg.append('text')
+      .attr('class', 'map-title-text')
+      .attr('x', width / 2)
+      .attr('y', 24)
+      .text('Map of the United States \u2014 Circa 1850');
+
+    svg.append('rect')
+      .attr('x', mapPadding)
+      .attr('y', mapPadding + 30)
+      .attr('width', mapWidth)
+      .attr('height', mapHeight)
+      .attr('fill', '#d4dfe8')
+      .attr('rx', 4)
+      .attr('opacity', 0.3);
+
+    const lineGen = d3.line()
+      .x(d => projectX(d[0]))
+      .y(d => projectY(d[1]))
+      .curve(d3.curveLinearClosed);
+
+    const g = svg.append('g');
+
+    regions.forEach(region => {
+      const path = g.append('path')
+        .datum(region.coords)
+        .attr('d', lineGen)
+        .attr('class', 'state-path')
+        .attr('fill', getColor(region.cat))
+        .attr('data-name', region.name);
+
+      path.on('mouseenter', function(event) {
+        tooltip.innerHTML = `<h4>${region.name}</h4><p>${region.desc}</p><p style="margin-top:4px;font-size:0.75rem;opacity:0.7;">${region.year !== '\u2014' ? 'Year: ' + region.year : 'Unorganized territory'}</p>`;
+        tooltip.classList.add('visible');
+      });
+      path.on('mousemove', function(event) {
+        const bounds = mapBody.getBoundingClientRect();
+        let x = event.clientX - bounds.left + 15;
+        let y = event.clientY - bounds.top - 10;
+        if (x + 200 > bounds.width) x = x - 230;
+        if (y + 100 > bounds.height) y = y - 100;
+        tooltip.style.left = x + 'px';
+        tooltip.style.top = y + 'px';
+      });
+      path.on('mouseleave', function() {
+        tooltip.classList.remove('visible');
+      });
+
+      const centroid = d3.polygonCentroid(region.coords.map(c => [projectX(c[0]), projectY(c[1])]));
+      if (centroid && !isNaN(centroid[0])) {
+        g.append('text')
+          .attr('class', 'state-label')
+          .attr('x', centroid[0])
+          .attr('y', centroid[1])
+          .text(region.abbr);
+      }
+    });
+
+    // Draw Oregon Trail
+    const trailG = svg.append('g').attr('class', 'oregon-trail-group');
+
+    // Trail path (background glow)
+    const trailLineGen = d3.line()
+      .x(d => projectX(d[0]))
+      .y(d => projectY(d[1]))
+      .curve(d3.curveCatmullRom.alpha(0.5));
+
+    const trailCoords = oregonTrailWaypoints.map(w => [w[0], w[1]]);
+
+    // Glow behind trail
+    trailG.append('path')
+      .datum(trailCoords)
+      .attr('d', trailLineGen)
+      .attr('fill', 'none')
+      .attr('stroke', '#8b2500')
+      .attr('stroke-width', 6)
+      .attr('opacity', 0.15)
+      .attr('stroke-linecap', 'round');
+
+    // Main trail path
+    trailG.append('path')
+      .datum(trailCoords)
+      .attr('d', trailLineGen)
+      .attr('class', 'trail-path');
+
+    // Waypoint dots and labels
+    oregonTrailWaypoints.forEach((wp, i) => {
+      const cx = projectX(wp[0]);
+      const cy = projectY(wp[1]);
+      const isKeyStop = [0, 3, 5, 7, 10, 11, 15, 19, 22, 24].includes(i);
+
+      // Dot
+      const dot = trailG.append('circle')
+        .attr('class', 'trail-waypoint')
+        .attr('cx', cx)
+        .attr('cy', cy)
+        .attr('r', isKeyStop ? 4.5 : 3)
+        .attr('fill', isKeyStop ? '#8b2500' : '#a0522d')
+        .attr('stroke', '#f5edd6')
+        .attr('stroke-width', 1.5);
+
+      dot.on('mouseenter', function(event) {
+        tooltip.innerHTML = `<h4>${wp[2]}</h4><p>${wp[3]}</p><p style="margin-top:4px;font-size:0.75rem;opacity:0.7;">Stop ${i + 1} of ${oregonTrailWaypoints.length}</p>`;
+        tooltip.classList.add('visible');
+      });
+      dot.on('mousemove', function(event) {
+        const bounds = mapBody.getBoundingClientRect();
+        let x = event.clientX - bounds.left + 15;
+        let y = event.clientY - bounds.top - 10;
+        if (x + 200 > bounds.width) x = x - 230;
+        if (y + 100 > bounds.height) y = y - 100;
+        tooltip.style.left = x + 'px';
+        tooltip.style.top = y + 'px';
+      });
+      dot.on('mouseleave', function() {
+        tooltip.classList.remove('visible');
+      });
+
+      // Labels for key stops only
+      if (isKeyStop) {
+        const labelOffset = (i % 2 === 0) ? -10 : 12;
+        trailG.append('text')
+          .attr('class', 'trail-waypoint-label')
+          .attr('x', cx)
+          .attr('y', cy + labelOffset)
+          .text(wp[2].split(',')[0]);
+      }
+    });
+
+    // Compass rose
+    const compassCx = width - 60;
+    const compassCy = height - 70;
+    const compassG = svg.append('g').attr('transform', `translate(${compassCx},${compassCy})`);
+    compassG.append('circle').attr('r', 25).attr('fill', 'none').attr('stroke', '#8b7355').attr('stroke-width', 1).attr('opacity', 0.5);
+    compassG.append('line').attr('x1', 0).attr('y1', -20).attr('x2', 0).attr('y2', 20).attr('stroke', '#8b7355').attr('stroke-width', 1);
+    compassG.append('line').attr('x1', -20).attr('y1', 0).attr('x2', 20).attr('y2', 0).attr('stroke', '#8b7355').attr('stroke-width', 1);
+    compassG.append('text').attr('y', -28).attr('text-anchor', 'middle').attr('font-size', '10px').attr('fill', '#8b7355').attr('font-family', 'Georgia, serif').text('N');
+    compassG.append('polygon').attr('points', '0,-18 -4,-8 4,-8').attr('fill', '#8b7355');
+  }
+
+  render();
+  const ro = new ResizeObserver(() => render());
+  ro.observe(mapBody);
+})();
+</script><script id="page-helpers" src="/api/page-helpers.js?v=2" data-locked="true"></script><script id="page-script" src="/api/page-script.js?v=2" data-locked="true"></script></body></html>

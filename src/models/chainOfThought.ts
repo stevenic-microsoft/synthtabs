@@ -8,12 +8,11 @@ export interface ExplainedAnswer {
 export interface ChainOfThoughtArgs extends AgentArgs {
     question: string;
     temperature?: number;
-    maxTokens?: number;
     instructions?: string;
 }
 
 export async function chainOfThought(args: ChainOfThoughtArgs): Promise<AgentCompletion<ExplainedAnswer>> {
-    const { completePrompt, question, temperature, maxTokens, instructions } = args;
+    const { completePrompt, question, temperature, instructions } = args;
 
     const systemContent = instructions
         ? `${instructions}\n\nYou must return your response as a JSON object with "explanation" and "answer" fields.`
@@ -22,14 +21,28 @@ export async function chainOfThought(args: ChainOfThoughtArgs): Promise<AgentCom
     const system: SystemMessage = { role: 'system', content: systemContent };
     const prompt: UserMessage = { role: 'user', content: question };
 
-    const result = await completePrompt({ prompt, system, temperature, maxTokens, jsonMode: true });
+    const result = await completePrompt({ prompt, system, temperature, jsonMode: true });
 
     if (!result.completed || !result.value) {
         return { completed: false, error: result.error };
     }
 
     try {
-        const parsed = typeof result.value === 'object' ? result.value as any : JSON.parse(result.value as string);
+        let parsed: any;
+        if (typeof result.value === 'object') {
+            parsed = result.value;
+        } else {
+            let text = result.value as string;
+            // Strip markdown code fences if present
+            text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '');
+            // Extract the first JSON object from the text
+            const start = text.indexOf('{');
+            const end = text.lastIndexOf('}');
+            if (start !== -1 && end > start) {
+                text = text.substring(start, end + 1);
+            }
+            parsed = JSON.parse(text);
+        }
         return {
             completed: true,
             value: {

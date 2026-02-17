@@ -5,7 +5,6 @@ export interface FireworksAIArgs {
     apiKey: string;
     model: string;
     temperature?: number;
-    maxTokens?: number;
 }
 
 /** Known short-name → full Fireworks model path mappings. */
@@ -55,14 +54,13 @@ function extractJSON(text: string): string {
 }
 
 export function fireworksai(args: FireworksAIArgs): completePrompt {
-    const { apiKey, temperature = 0.0, maxTokens = 1000 } = args;
+    const { apiKey, temperature = 0.0 } = args;
     const model = FIREWORKS_MODEL_MAP[args.model] || args.model;
 
     const client = new OpenAI({ apiKey, baseURL: FIREWORKS_BASE_URL });
 
     return async (completionArgs: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
         const reqTemp = completionArgs.temperature ?? temperature;
-        const reqMaxTokens = completionArgs.maxTokens ?? maxTokens;
         const useJson = completionArgs.jsonMode || completionArgs.jsonSchema;
 
         // Build chat messages
@@ -87,7 +85,7 @@ export function fireworksai(args: FireworksAIArgs): completePrompt {
                 model,
                 messages,
                 temperature: reqTemp,
-                max_tokens: reqMaxTokens,
+                max_tokens: 32768,
                 ...(useJson ? { response_format: { type: 'json_object' } } : {}),
             });
 

@@ -534,7 +534,7 @@
             allPages.forEach(function(p) {
                 if (p.name === 'builder') return;
                 var inCategory = activeCategory === 'All'
-                    ? (p.showInAll !== false)
+                    ? (term || p.showInAll !== false)
                     : p.categories.includes(activeCategory);
                 if (!inCategory) return;
                 if (term && !p.name.toLowerCase().includes(term) && !displayName(p).toLowerCase().includes(term)) return;

@@ -1,0 +1,526 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SynthOS</title>
+    <script id="theme-info" src="/api/theme-info.js" data-locked="true"></script>
+    <link id="theme-css" rel="stylesheet" href="/api/theme.css" data-locked="true">
+    <style>.idle-container{position:absolute;width:100%;height:100%;pointer-events:none;opacity:1;transition:opacity 1s ease-out}.idle-container.hidden{opacity:0}.breathing-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(102,126,234,.15) 0,transparent 70%);animation:4s ease-in-out infinite breathe}.breathing-orb::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:rgba(183,148,246,.6);box-shadow:0 0 20px rgba(183,148,246,.4);animation:4s ease-in-out infinite core-pulse}@keyframes breathe{0%,100%{width:80px;height:80px;opacity:.3}50%{width:120px;height:120px;opacity:.6}}@keyframes core-pulse{0%,100%{opacity:.4;box-shadow:0 0 20px rgba(183,148,246,.3)}50%{opacity:.8;box-shadow:0 0 30px rgba(183,148,246,.5)}}.orbit-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;border:1px solid rgba(102,126,234,.1);border-radius:50%;animation:20s linear infinite orbit-rotate}.orbit-ring::after{content:'';position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:6px;height:6px;background:rgba(240,147,251,.5);border-radius:50%;box-shadow:0 0 10px rgba(240,147,251,.3)}@keyframes orbit-rotate{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.0/mermaid.min.js"></script>
+    <script id="page-info" src="/api/page-info.js?page=builder"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js" id="topojson-lib"></script><style id="us-map-styles">#us-map-container{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}#us-map-header{min-height:var(--header-min-height);padding:var(--header-padding-vertical) var(--header-padding-horizontal);line-height:var(--header-line-height);display:flex;align-items:center;justify-content:center;box-sizing:border-box;font-size:1.25rem;font-weight:600;color:var(--text-primary);width:100%;border-bottom:1px solid var(--border-color);background:var(--bg-secondary);flex-shrink:0;position:relative}#us-map-svg-wrap{flex:1;width:100%;display:flex;align-items:center;justify-content:center;box-sizing:border-box;position:relative}#us-map-svg-wrap svg{width:100%;height:100%;position:absolute;top:0;left:0;cursor:grab}#us-map-svg-wrap svg:active{cursor:grabbing}.region-path{cursor:pointer;transition:filter .2s ease;stroke-linejoin:round}.region-path:hover{filter:brightness(1.25)}.region-state{fill:rgba(46,125,50,0.5);stroke:#1b5e20;stroke-width:1.2}.region-oregon{fill:rgba(230,81,0,0.45);stroke:#bf360c;stroke-width:1.5}.region-minnesota{fill:rgba(255,152,0,0.45);stroke:#e65100;stroke-width:1.5}.region-utah{fill:rgba(255,111,0,0.4);stroke:#bf360c;stroke-width:1.5}.region-newmexico{fill:rgba(239,108,0,0.45);stroke:#bf360c;stroke-width:1.5}.region-unorganized{fill:rgba(141,110,99,0.4);stroke:#4e342e;stroke-width:1.5}.region-indian{fill:rgba(121,85,72,0.45);stroke:#3e2723;stroke-width:1.5}.light-mode .region-state{fill:rgba(46,125,50,0.5);stroke:#1b5e20}.light-mode .region-oregon{fill:rgba(230,81,0,0.45);stroke:#bf360c}.light-mode .region-minnesota{fill:rgba(255,152,0,0.45);stroke:#e65100}.light-mode .region-utah{fill:rgba(255,111,0,0.4);stroke:#bf360c}.light-mode .region-newmexico{fill:rgba(239,108,0,0.45);stroke:#bf360c}.light-mode .region-unorganized{fill:rgba(141,110,99,0.4);stroke:#4e342e}.light-mode .region-indian{fill:rgba(121,85,72,0.45);stroke:#3e2723}#map-tooltip{position:absolute;pointer-events:none;background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-color);border-radius:6px;padding:6px 12px;font-size:0.85rem;font-weight:500;box-shadow:0 2px 8px rgba(0,0,0,0.12);opacity:0;transition:opacity .15s ease;z-index:10;white-space:nowrap}#hist-legend{position:absolute;bottom:16px;left:16px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:10px 14px;font-size:0.75rem;color:var(--text-primary);z-index:5;box-shadow:0 2px 8px rgba(0,0,0,0.1)}#hist-legend .legend-item{display:flex;align-items:center;gap:8px;margin-bottom:4px}#hist-legend .legend-item:last-child{margin-bottom:0}#hist-legend .legend-swatch{width:14px;height:14px;border-radius:3px;flex-shrink:0}#zoom-controls{position:absolute;top:16px;right:16px;display:flex;flex-direction:column;gap:4px;z-index:5}#zoom-controls button{width:36px;height:36px;border:1px solid var(--border-color);border-radius:6px;background:var(--bg-tertiary);color:var(--text-primary);font-size:1.2rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.1);transition:background .15s ease}#zoom-controls button:hover{background:var(--bg-secondary)}</style><style id="detail-card-styles">.city-marker{cursor:pointer}.city-marker .marker-glow{fill:var(--accent-primary);opacity:0.15;transition:opacity .2s ease}.city-marker .marker-dot{fill:var(--accent-primary);transition:r .2s ease}.city-marker .marker-hit{fill:transparent;cursor:pointer}.city-marker:hover .marker-glow{opacity:0.35}.city-marker:hover .marker-dot{r:3.5}.city-marker .marker-label{font-size:8px;font-weight:600;fill:var(--text-primary);text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:var(--bg-primary);stroke-width:2.5px;stroke-linecap:round;stroke-linejoin:round}#detail-card{position:absolute;top:16px;right:16px;width:340px;max-height:calc(100% - 40px);background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.15);z-index:20;opacity:0;transform:translateY(-10px) scale(0.97);pointer-events:none;transition:opacity .25s ease,transform .25s ease;overflow:hidden;display:flex;flex-direction:column}#detail-card.visible{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}#detail-card .card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;border-bottom:1px solid var(--border-color);background:var(--bg-secondary);flex-shrink:0}#detail-card .card-header h3{margin:0;font-size:0.95rem;font-weight:700;color:var(--text-primary);line-height:1.3}#detail-card .card-header .card-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-secondary);padding:0 2px;line-height:1;border-radius:4px;transition:background .15s ease}#detail-card .card-header .card-close:hover{background:rgba(0,0,0,0.08)}#detail-card .card-subtitle{font-size:0.72rem;color:var(--text-secondary);margin:2px 0 0;font-weight:500}#detail-card .card-tabs{display:flex;border-bottom:1px solid var(--border-color);flex-shrink:0}#detail-card .card-tab{flex:1;padding:8px 10px;font-size:0.78rem;font-weight:600;text-align:center;cursor:pointer;border:none;background:none;color:var(--text-secondary);transition:all .15s ease;border-bottom:2px solid transparent;position:relative}#detail-card .card-tab:hover{color:var(--text-primary);background:rgba(0,0,0,0.03)}#detail-card .card-tab.active{color:var(--accent-primary);border-bottom-color:var(--accent-primary)}#detail-card .card-tab-icon{margin-right:4px}#detail-card .tab-content{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}#detail-card .tab-pane{display:none;flex:1;overflow-y:auto;flex-direction:column;min-height:0}#detail-card .tab-pane.active{display:flex}#detail-card .facts-pane{padding:12px 14px;overflow-y:auto}#detail-card .fact-row{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start}#detail-card .fact-icon{font-size:1rem;flex-shrink:0;width:22px;text-align:center;margin-top:1px}#detail-card .fact-content{flex:1}#detail-card .fact-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);font-weight:600;margin-bottom:1px}#detail-card .fact-value{font-size:0.8rem;color:var(--text-primary);line-height:1.4}#detail-card .card-divider{height:1px;background:var(--border-color);margin:4px 0 8px}#detail-card .card-description{font-size:0.78rem;color:var(--text-primary);line-height:1.5;margin-top:2px}#detail-card .chat-pane{flex-direction:column;min-height:0;flex:1}#detail-card .chat-messages-area{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px;min-height:120px}#detail-card .chat-welcome{text-align:center;padding:16px 8px;color:var(--text-secondary);font-size:0.78rem;line-height:1.5}#detail-card .chat-welcome strong{color:var(--text-primary)}#detail-card .chat-bubble{max-width:92%;padding:8px 11px;border-radius:12px;font-size:0.78rem;line-height:1.45;word-wrap:break-word;animation:bubbleIn .2s ease}#detail-card .chat-bubble.user-bubble{align-self:flex-end;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-bottom-right-radius:4px}#detail-card .chat-bubble.ai-bubble{align-self:flex-start;background:var(--bg-secondary);color:var(--text-primary);border:1px solid var(--border-color);border-bottom-left-radius:4px}#detail-card .chat-bubble.ai-bubble.loading{opacity:0.7}#detail-card .typing-dots{display:inline-flex;gap:3px;padding:2px 0}#detail-card .typing-dots span{width:5px;height:5px;border-radius:50%;background:var(--text-secondary);animation:dotBounce .6s ease-in-out infinite}#detail-card .typing-dots span:nth-child(2){animation-delay:.15s}#detail-card .typing-dots span:nth-child(3){animation-delay:.3s}@keyframes dotBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}@keyframes bubbleIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}#detail-card .chat-input-area{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--border-color);background:var(--bg-tertiary);flex-shrink:0;border-radius:0 0 12px 12px}#detail-card .chat-input-field{flex:1;border:1px solid var(--border-color);border-radius:18px;padding:7px 12px;font-size:0.78rem;background:var(--bg-primary);color:var(--text-primary);outline:none;transition:border-color .15s ease;font-family:inherit}#detail-card .chat-input-field:focus{border-color:var(--accent-primary)}#detail-card .chat-input-field::placeholder{color:var(--text-secondary);opacity:0.7}#detail-card .chat-send-btn{width:32px;height:32px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s ease,opacity .15s ease;flex-shrink:0}#detail-card .chat-send-btn:hover{transform:scale(1.08)}#detail-card .chat-send-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}#detail-card .suggested-questions{display:flex;flex-wrap:wrap;gap:4px;padding:0 12px 8px}#detail-card .suggested-q{font-size:0.68rem;padding:4px 8px;border-radius:12px;border:1px solid var(--border-color);background:var(--bg-primary);color:var(--text-secondary);cursor:pointer;transition:all .15s ease;white-space:nowrap}#detail-card .suggested-q:hover{color:var(--accent-primary);border-color:var(--accent-primary)}#card-backdrop{display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.2);z-index:15}#card-backdrop.visible{display:block}</style></head>
+<body>
+    <div class="chat-panel" data-locked="true">
+        <div class="chat-header" data-locked="true">SynthOS</div>
+        <div class="chat-messages" id="chatMessages" data-locked="true">
+            <div class="chat-message" id="defaultGreeting"><p><strong>SynthOS:</strong> Welcome! This is an interactive map of the United States circa the 1850s, showing how the country was politically organized after the Compromise of 1850. It's designed for interactive exploration — here are a few things you could try:
+<ul style="margin-top:8px;margin-bottom:4px;padding-left:20px;">
+<li><strong>Population density overlay</strong> — Visualize estimated population distribution across states and territories in the 1850s</li>
+<li><strong>Railroad &amp; transportation routes</strong> — Map the major rail lines, trails, and waterways that connected the nation</li>
+<li><strong>Climate &amp; geography zones</strong> — Overlay biomes, elevation, or average rainfall data onto the territorial boundaries</li>
+<li><strong>Statehood timeline animation</strong> — Animate how territories became states over time from 1776 to 1860</li>
+<li><strong>Resource &amp; agriculture map</strong> — Show where key crops, minerals, and natural resources were concentrated</li>
+</ul>
+Just tell me what you'd like to explore!</p></div>
+        <div class="chat-message"><p><strong>User:</strong> Add all of the major towns or cities out west in 1850 with a styled detail card that shows facts about each.</p></div><div class="chat-message"><p><strong>SynthOS:</strong> I've added <strong>18 major western cities and towns</strong> from the 1850s era to the map! Each one appears as a glowing marker dot with a label. Click any marker to open a detailed card with:</p><ul style="margin-top:8px;padding-left:20px;"><li><strong>📋 Facts tab</strong> — Population, founding date, economy, historical role, and more</li><li><strong>💬 Ask Me tab</strong> — Chat with an AI historian about that specific location</li><li><strong>Suggested questions</strong> — Quick-start prompts tailored to each city</li></ul><p style="margin-top:8px;">Cities include: <em>San Francisco, Sacramento, Salt Lake City, Santa Fe, Portland, Oregon City, Los Angeles, San Diego, Independence, Council Bluffs, St. Joseph, Monterey, Tucson, Olympia, Stockton, El Paso, Astoria,</em> and <em>San Jose</em>. Try zooming in to explore the western regions!</p></div></div>
+        <div class="link-group" data-locked="true">
+            <a href="#" id="saveLink" data-locked="true">Save</a>
+            <a href="/pages" id="pagesLink" data-locked="true">Pages</a>
+            <a href="#" id="resetLink" data-locked="true">Reset</a>
+        </div>
+        <form action="/" method="POST" id="chatForm" data-locked="true">
+            <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message..." data-locked="true">
+            <button type="submit" class="chat-submit" data-locked="true">Send</button>
+        </form>
+    </div>
+    <div class="viewer-panel full-viewer" id="viewerPanel"><div id="us-map-container"><div id="us-map-header">United States — Circa 1850</div><div id="us-map-svg-wrap"><div id="hist-legend"><div style="font-weight:600;margin-bottom:6px;">Circa 1850</div><div class="legend-item"><div class="legend-swatch" style="background:rgba(46,125,50,0.6);border:1px solid #1b5e20;"></div><span>States (31)</span></div><div class="legend-item"><div class="legend-swatch" style="background:rgba(230,81,0,0.55);border:1px solid #bf360c;"></div><span>Oregon Territory</span></div><div class="legend-item"><div class="legend-swatch" style="background:rgba(255,152,0,0.55);border:1px solid #e65100;"></div><span>Minnesota Territory</span></div><div class="legend-item"><div class="legend-swatch" style="background:rgba(255,111,0,0.5);border:1px solid #bf360c;"></div><span>Utah Territory</span></div><div class="legend-item"><div class="legend-swatch" style="background:rgba(239,108,0,0.55);border:1px solid #bf360c;"></div><span>New Mexico Territory</span></div><div class="legend-item"><div class="legend-swatch" style="background:rgba(141,110,99,0.5);border:1px solid #4e342e;"></div><span>Unorganized Territory</span></div><div class="legend-item"><div class="legend-swatch" style="background:rgba(121,85,72,0.55);border:1px solid #3e2723;"></div><span>Indian Territory</span></div></div><div id="zoom-controls"><button id="zoom-in-btn" title="Zoom in">+</button><button id="zoom-out-btn" title="Zoom out">−</button><button id="zoom-reset-btn" title="Reset view" style="font-size:0.75rem;">⟲</button></div></div><div id="map-tooltip"></div><div id="detail-card"><div class="card-header"><div><h3 id="card-title"></h3><div class="card-subtitle" id="card-subtitle"></div></div><button class="card-close" id="card-close-btn" aria-label="Close">×</button></div><div class="card-tabs"><button class="card-tab active" data-tab="facts"><span class="card-tab-icon">📋</span>Facts</button><button class="card-tab" data-tab="chat"><span class="card-tab-icon">💬</span>Ask Me</button></div><div class="tab-content"><div class="tab-pane facts-pane active" id="facts-pane"><div id="card-body"></div></div><div class="tab-pane chat-pane" id="chat-pane"><div class="chat-messages-area" id="detail-chat-messages"></div><div class="suggested-questions" id="detail-suggested-q"></div><div class="chat-input-area"><input type="text" class="chat-input-field" id="detail-chat-input" placeholder="Ask me anything..." autocomplete="off"><button class="chat-send-btn" id="detail-chat-send" aria-label="Send">➤</button></div></div></div></div><div id="card-backdrop"></div></div><div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div></div>
+    <div id="instructions" style="display: none;" data-locked="true"></div>
+    <div id="thoughts" style="display: none;" data-locked="true">User wants major western towns/cities circa 1850 plotted on the map with styled detail cards showing facts. I need to populate the MARKER_DATA array in the detail-card-script with historically accurate western cities from the 1850s era. Key western cities/towns: San Francisco, Sacramento, Salt Lake City, Portland, Oregon City, Santa Fe, Astoria, Los Angeles, San Diego, Monterey, Tucson, El Paso, Independence (MO - gateway), Council Bluffs, Fort Laramie, Sutter's Fort/Sacramento, Yerba Buena/San Francisco, Olympia, etc. I'll focus on the most significant ones. I also need to make sure the detail card positioning works well with the zoom controls. The detail card already has full styling and functionality from the existing CSS and script - I just need to populate MARKER_DATA. Let me also add some cities that were important jumping-off points. I'll update the detail-card-script to include rich MARKER_DATA.</div>
+    <script id="idle-animation">function hideIdleAnimation(){const idleContainer=document.getElementById("idleAnimation");idleContainer&&(idleContainer.classList.add("hidden"),setTimeout(()=>{idleContainer.style.display="none"},1e3))}function showIdleAnimation(){const idleContainer=document.getElementById("idleAnimation");idleContainer&&(idleContainer.style.display="block",setTimeout(()=>{idleContainer.classList.remove("hidden")},10))}</script>
+    <button class="chat-toggle" aria-label="Toggle chat panel">
+        <span class="chat-toggle-dots">
+            <span class="chat-toggle-dot"></span>
+            <span class="chat-toggle-dot"></span>
+            <span class="chat-toggle-dot"></span>
+        </span>
+    </button>
+
+
+<script id="us-map-script">(function(){var FIPS_TO_NAME={1:'Alabama',2:'Alaska',4:'Arizona',5:'Arkansas',6:'California',8:'Colorado',9:'Connecticut',10:'Delaware',11:'District of Columbia',12:'Florida',13:'Georgia',15:'Hawaii',16:'Idaho',17:'Illinois',18:'Indiana',19:'Iowa',20:'Kansas',21:'Kentucky',22:'Louisiana',23:'Maine',24:'Maryland',25:'Massachusetts',26:'Michigan',27:'Minnesota',28:'Mississippi',29:'Missouri',30:'Montana',31:'Nebraska',32:'Nevada',33:'New Hampshire',34:'New Jersey',35:'New Mexico',36:'New York',37:'North Carolina',38:'North Dakota',39:'Ohio',40:'Oklahoma',41:'Oregon',42:'Pennsylvania',44:'Rhode Island',45:'South Carolina',46:'South Dakota',47:'Tennessee',48:'Texas',49:'Utah',50:'Vermont',51:'Virginia',53:'Washington',54:'West Virginia',55:'Wisconsin',56:'Wyoming'};
+var STATES_1850=[9,10,13,24,25,33,34,36,37,42,44,45,51,50,21,47,39,22,18,28,17,1,23,29,5,26,12,48,19,55,6,54,11];
+var OREGON_TERR=[41,53,16];
+var MINNESOTA_TERR=[27];
+var UTAH_TERR=[49,32];
+var NEWMEXICO_TERR=[35,4];
+var UNORGANIZED=[31,20,38,46,56,30,8];
+var INDIAN_TERR=[40];
+var TERRITORY_GROUPS=[{fips:OREGON_TERR,name:'Oregon Territory',cls:'region-oregon'},{fips:MINNESOTA_TERR,name:'Minnesota Territory',cls:'region-minnesota'},{fips:UTAH_TERR,name:'Utah Territory',cls:'region-utah'},{fips:NEWMEXICO_TERR,name:'New Mexico Territory',cls:'region-newmexico'},{fips:UNORGANIZED,name:'Unorganized Territory',cls:'region-unorganized'},{fips:INDIAN_TERR,name:'Indian Territory',cls:'region-indian'}];
+function init(){var wrap=document.getElementById('us-map-svg-wrap');if(!wrap)return;var tooltip=document.getElementById('map-tooltip');wrap.querySelectorAll('svg').forEach(function(s){s.remove();});
+var svg=d3.select(wrap).append('svg').attr('id','hist-map-svg').attr('viewBox','0 0 960 600').attr('preserveAspectRatio','xMidYMid meet').style('padding','0').style('box-sizing','border-box');
+var g=svg.append('g').attr('id','map-zoom-group');
+var zoom=d3.zoom().scaleExtent([1,12]).on('zoom',function(event){g.attr('transform',event.transform);});
+svg.call(zoom);
+svg.on('dblclick.zoom',null);
+var projection=d3.geoAlbersUsa().scale(1280).translate([480,300]);var path=d3.geoPath().projection(projection);
+d3.json('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json').then(function(us){var statesGeo=us.objects.states;var allGeometries=statesGeo.geometries;
+function geomsForFips(fipsList){return allGeometries.filter(function(g){return fipsList.indexOf(+g.id)!==-1;});}
+var stateGeoms=geomsForFips(STATES_1850);stateGeoms.forEach(function(geom){var feature=topojson.feature(us,geom);g.append('path').datum(feature).attr('class','region-path region-state').attr('d',path).on('mousemove',function(event){var name=FIPS_TO_NAME[+geom.id]||'Unknown';tooltip.textContent=name+' (State)';tooltip.style.opacity='1';var rect=wrap.getBoundingClientRect();var x=event.clientX-rect.left+12;var y=event.clientY-rect.top-30;if(x+180>rect.width)x=x-200;if(y<0)y=event.clientY-rect.top+18;tooltip.style.left=x+'px';tooltip.style.top=y+'px';}).on('mouseleave',function(){tooltip.style.opacity='0';});});
+TERRITORY_GROUPS.forEach(function(group){var geoms=geomsForFips(group.fips);if(geoms.length===0)return;var merged=topojson.merge(us,geoms);g.append('path').datum(merged).attr('class','region-path '+group.cls).attr('d',path).on('mousemove',function(event){tooltip.textContent=group.name;tooltip.style.opacity='1';var rect=wrap.getBoundingClientRect();var x=event.clientX-rect.left+12;var y=event.clientY-rect.top-30;if(x+180>rect.width)x=x-200;if(y<0)y=event.clientY-rect.top+18;tooltip.style.left=x+'px';tooltip.style.top=y+'px';}).on('mouseleave',function(){tooltip.style.opacity='0';});});
+var stateGeoms2=geomsForFips(STATES_1850);g.append('path').datum(topojson.mesh(us,{type:'GeometryCollection',geometries:stateGeoms2},function(a,b){return a!==b&&STATES_1850.indexOf(+a.id)!==-1&&STATES_1850.indexOf(+b.id)!==-1;})).attr('fill','none').attr('stroke','rgba(27,94,32,0.4)').attr('stroke-width','0.5').attr('d',path).style('pointer-events','none');
+}).catch(function(err){console.error('Failed to load US map data:',err);wrap.innerHTML='<p style="color:var(--text-secondary);text-align:center;">Failed to load map data. Please try again.</p>';});}
+if(typeof topojson!=='undefined'){init();}else{var check=setInterval(function(){if(typeof topojson!=='undefined'){clearInterval(check);init();}},100);setTimeout(function(){clearInterval(check);},10000);}
+})();</script><script id="zoom-controls-script">(function(){function waitForSvg(){var svg=d3.select('#hist-map-svg');if(svg.empty()){setTimeout(waitForSvg,200);return;}var zoomBehavior=null;svg.each(function(){var z=d3.zoomTransform(this);if(z)zoomBehavior=true;});var zoomHandler=d3.zoom().scaleExtent([1,12]).on('zoom',function(event){d3.select('#map-zoom-group').attr('transform',event.transform);});document.getElementById('zoom-in-btn').addEventListener('click',function(){svg.transition().duration(300).call(zoomHandler.scaleBy,1.5);});document.getElementById('zoom-out-btn').addEventListener('click',function(){svg.transition().duration(300).call(zoomHandler.scaleBy,1/1.5);});document.getElementById('zoom-reset-btn').addEventListener('click',function(){svg.transition().duration(400).call(zoomHandler.transform,d3.zoomIdentity);});svg.call(zoomHandler);}waitForSvg();})();</script><script id="detail-card-script">(function(){
+var MARKER_DATA = [
+  {
+    name: 'San Francisco',
+    lat: 37.7749, lon: -122.4194,
+    subtitle: 'Boomtown of the Gold Rush',
+    description: 'San Francisco exploded from a tiny settlement called Yerba Buena into a roaring city of tens of thousands almost overnight after gold was discovered at Sutter\'s Mill in 1848. By 1850 it was the commercial capital of the Pacific Coast, with ships abandoned in the harbor as crews deserted for the goldfields.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~25,000 (up from ~200 in 1846)' },
+      { icon: '📅', label: 'Statehood', value: 'California admitted Sept 9, 1850' },
+      { icon: '⛏️', label: 'Gold Rush', value: 'Primary port of entry for 49ers' },
+      { icon: '🚢', label: 'Harbor', value: 'Hundreds of abandoned ships in the bay' },
+      { icon: '🏗️', label: 'Growth', value: '6 major fires between 1849–1851' }
+    ],
+    suggestedQuestions: ['What was daily life like during the Gold Rush?', 'How did the fires shape the city?', 'What happened to all the abandoned ships?']
+  },
+  {
+    name: 'Sacramento',
+    lat: 38.5816, lon: -121.4944,
+    subtitle: 'Gateway to the Goldfields',
+    description: 'Sacramento grew up around Sutter\'s Fort and became the main supply depot and jumping-off point for miners heading to the Sierra Nevada goldfields. It was incorporated as a city in 1850 and became the state capital in 1854.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~6,800' },
+      { icon: '⛏️', label: 'Role', value: 'Primary supply hub for gold miners' },
+      { icon: '🏰', label: 'Sutter\'s Fort', value: 'Founded 1839 by John Sutter' },
+      { icon: '🌊', label: 'Floods', value: 'Devastating floods in 1850 and 1852' },
+      { icon: '🛒', label: 'Economy', value: 'Merchants often wealthier than miners' }
+    ],
+    suggestedQuestions: ['Who was John Sutter?', 'How did supplies reach Sacramento?', 'What was the journey from Sacramento to the mines like?']
+  },
+  {
+    name: 'Salt Lake City',
+    lat: 40.7608, lon: -111.8910,
+    subtitle: 'Zion in the Desert — Mormon Settlement',
+    description: 'Founded in 1847 by Brigham Young and the Latter-day Saints, Salt Lake City was the center of the Utah Territory established by the Compromise of 1850. By 1850 it was a well-organized community of several thousand, with an ambitious irrigation system transforming the arid valley.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~6,000' },
+      { icon: '⛪', label: 'Founded', value: 'July 24, 1847 by Brigham Young' },
+      { icon: '🏛️', label: 'Territory', value: 'Utah Territory est. Sept 1850' },
+      { icon: '💧', label: 'Innovation', value: 'Pioneering irrigation agriculture' },
+      { icon: '🛤️', label: 'Trail Stop', value: 'Key resupply point on California Trail' }
+    ],
+    suggestedQuestions: ['Why did the Mormons settle here?', 'How did irrigation work in the desert?', 'What was the relationship with the federal government?']
+  },
+  {
+    name: 'Santa Fe',
+    lat: 35.6870, lon: -105.9378,
+    subtitle: 'Ancient Capital of the Southwest',
+    description: 'Santa Fe was one of the oldest European-founded cities in North America, serving as the capital of New Mexico since 1610. Captured by the U.S. during the Mexican-American War in 1846, it became the capital of the New Mexico Territory in 1850. The Santa Fe Trail connected it to Missouri.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~4,800' },
+      { icon: '📅', label: 'Founded', value: '1610 — over 240 years old by 1850' },
+      { icon: '🛤️', label: 'Santa Fe Trail', value: '~900 miles from Independence, MO' },
+      { icon: '🏛️', label: 'Territory', value: 'New Mexico Territory capital, 1850' },
+      { icon: '🏠', label: 'Architecture', value: 'Adobe buildings, Spanish colonial style' }
+    ],
+    suggestedQuestions: ['What was the Santa Fe Trail like?', 'How did U.S. annexation change the city?', 'What cultures mixed in Santa Fe?']
+  },
+  {
+    name: 'Portland',
+    lat: 45.5152, lon: -122.6784,
+    subtitle: 'The Clearing in Oregon Country',
+    description: 'Portland was founded in 1845 and incorporated in 1851. Situated at the confluence of the Willamette and Columbia rivers, it quickly became the principal port and trading center of the Oregon Territory, serving settlers arriving via the Oregon Trail.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~800' },
+      { icon: '📅', label: 'Founded', value: '1845 — named by coin toss' },
+      { icon: '🌲', label: 'Economy', value: 'Lumber, shipping, and trade' },
+      { icon: '🚢', label: 'Port', value: 'Deep-water access to Pacific via Columbia' },
+      { icon: '🛤️', label: 'Oregon Trail', value: 'Terminus for many overland emigrants' }
+    ],
+    suggestedQuestions: ['How was Portland named by a coin toss?', 'What was the Oregon Trail journey like?', 'How did Portland compete with Oregon City?']
+  },
+  {
+    name: 'Oregon City',
+    lat: 45.3573, lon: -122.6068,
+    subtitle: 'End of the Oregon Trail',
+    description: 'Oregon City was the first incorporated city west of the Rocky Mountains (1844) and served as the original capital of the Oregon Territory. Located at Willamette Falls, it was the official end of the Oregon Trail and a center of early government and industry.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~900' },
+      { icon: '📅', label: 'Incorporated', value: '1844 — first city west of Rockies' },
+      { icon: '🏛️', label: 'Capital', value: 'Oregon Territory capital 1848–1851' },
+      { icon: '🌊', label: 'Willamette Falls', value: 'Powered sawmills and flour mills' },
+      { icon: '📰', label: 'Newspaper', value: 'Oregon Spectator — first newspaper on Pacific Coast (1846)' }
+    ],
+    suggestedQuestions: ['What was it like arriving at the end of the Oregon Trail?', 'Why did the capital move away?', 'How important were the falls?']
+  },
+  {
+    name: 'Los Angeles',
+    lat: 34.0522, lon: -118.2437,
+    subtitle: 'A Quiet Pueblo Awakening',
+    description: 'In 1850, Los Angeles was a small but growing pueblo that had just been incorporated as a city when California achieved statehood. It was a rough frontier town known for cattle ranching, with a diverse population of Californios, Americans, and Native peoples.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~1,600' },
+      { icon: '📅', label: 'Founded', value: '1781 as a Spanish pueblo' },
+      { icon: '🐄', label: 'Economy', value: 'Cattle ranching and hide trade' },
+      { icon: '⚖️', label: 'Incorporated', value: 'April 4, 1850' },
+      { icon: '🌍', label: 'Culture', value: 'Mix of Californio, American, and Native peoples' }
+    ],
+    suggestedQuestions: ['What were the Californio ranchos like?', 'How rough was frontier Los Angeles?', 'How did the Gold Rush affect LA?']
+  },
+  {
+    name: 'San Diego',
+    lat: 32.7157, lon: -117.1611,
+    subtitle: 'California\'s Birthplace',
+    description: 'San Diego was the site of the first European settlement in California (Mission San Diego, 1769). By 1850 it was a small but strategic town near the Mexican border, serving as a military post and hoping to become a major port city.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~650' },
+      { icon: '📅', label: 'Mission Founded', value: '1769 — first in California' },
+      { icon: '🏰', label: 'Military', value: 'U.S. Army garrison established' },
+      { icon: '🌊', label: 'Harbor', value: 'Excellent natural deep-water port' },
+      { icon: '🇲🇽', label: 'Border', value: 'Near new U.S.–Mexico boundary' }
+    ],
+    suggestedQuestions: ['What was the mission system?', 'How did the Mexican-American War affect San Diego?', 'Why didn\'t San Diego grow as fast as San Francisco?']
+  },
+  {
+    name: 'Independence',
+    lat: 39.0911, lon: -94.4155,
+    subtitle: 'Jumping-Off Point for the West',
+    description: 'Independence, Missouri was the most famous "jumping-off" town for westward emigrants. It was the eastern terminus of the Santa Fe, Oregon, and California trails. Every spring, thousands of wagons gathered here before heading west across the plains.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~3,000' },
+      { icon: '🛤️', label: 'Trails', value: 'Start of Oregon, California & Santa Fe Trails' },
+      { icon: '🛒', label: 'Outfitting', value: 'Major supply center for wagon trains' },
+      { icon: '📅', label: 'Peak Years', value: '1843–1855 for overland emigration' },
+      { icon: '🐂', label: 'Wagon Trains', value: 'Thousands departed each spring' }
+    ],
+    suggestedQuestions: ['What supplies did emigrants need?', 'How long did the journey west take?', 'What was the competition between jumping-off towns?']
+  },
+  {
+    name: 'Council Bluffs',
+    lat: 41.2619, lon: -95.8608,
+    subtitle: 'Missouri River Crossing',
+    description: 'Council Bluffs (originally Kanesville) was a major outfitting point and Missouri River crossing for emigrants heading west, particularly Mormon pioneers. It competed with Independence and St. Joseph as a primary departure point for the overland trails.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~2,000' },
+      { icon: '🛤️', label: 'Role', value: 'Major Missouri River crossing point' },
+      { icon: '⛪', label: 'Mormon Trail', value: 'Key staging area for LDS emigrants' },
+      { icon: '🌊', label: 'River', value: 'Ferries carried wagons across the Missouri' },
+      { icon: '📛', label: 'Name', value: 'Called Kanesville until 1853' }
+    ],
+    suggestedQuestions: ['Why was the Missouri River crossing so important?', 'What was the Mormon Trail?', 'How did Council Bluffs develop?']
+  },
+  {
+    name: 'St. Joseph',
+    lat: 39.7687, lon: -94.8466,
+    subtitle: 'Rival Gateway to the West',
+    description: 'St. Joseph, Missouri was a booming frontier town and major rival to Independence as a jumping-off point for the western trails. Located further north on the Missouri River, it offered a shorter route west and became the eastern terminus of the Pony Express in 1860.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~3,400' },
+      { icon: '🛤️', label: 'Trails', value: 'Alternative start for Oregon & California Trails' },
+      { icon: '📈', label: 'Growth', value: 'Fastest-growing town in Missouri' },
+      { icon: '🏪', label: 'Commerce', value: 'Thriving outfitting and trade center' },
+      { icon: '📬', label: 'Future', value: 'Pony Express terminus (1860)' }
+    ],
+    suggestedQuestions: ['How did St. Joseph compete with Independence?', 'What made it a good jumping-off point?', 'What was commerce like here?']
+  },
+  {
+    name: 'Monterey',
+    lat: 36.6002, lon: -121.8947,
+    subtitle: 'Former Capital of Alta California',
+    description: 'Monterey served as the capital of Alta California under both Spain and Mexico. The U.S. flag was raised here in 1846 during the Mexican-American War. California\'s constitutional convention was held in Monterey\'s Colton Hall in 1849.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~1,100' },
+      { icon: '🏛️', label: 'Historic Role', value: 'Capital of Alta California' },
+      { icon: '📜', label: 'Constitution', value: 'CA Constitution drafted here, 1849' },
+      { icon: '🐋', label: 'Economy', value: 'Whaling, fishing, and trade' },
+      { icon: '🇺🇸', label: 'U.S. Capture', value: 'July 7, 1846 by Commodore Sloat' }
+    ],
+    suggestedQuestions: ['What happened at the constitutional convention?', 'Why did the capital move to Sacramento?', 'What was Monterey like under Mexican rule?']
+  },
+  {
+    name: 'Tucson',
+    lat: 32.2226, lon: -110.9747,
+    subtitle: 'Desert Presidio of the Southwest',
+    description: 'Tucson was an ancient settlement site with a Spanish presidio (fort) established in 1775. In 1850 it was part of Mexico — it wouldn\'t become U.S. territory until the Gadsden Purchase of 1854. It was a small but vital stop on southern routes to California.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~500' },
+      { icon: '🏰', label: 'Presidio', value: 'Spanish fort established 1775' },
+      { icon: '🇲🇽', label: 'Sovereignty', value: 'Still part of Mexico in 1850' },
+      { icon: '🌵', label: 'Geography', value: 'Sonoran Desert oasis' },
+      { icon: '🛤️', label: 'Routes', value: 'On southern emigrant trail to California' }
+    ],
+    suggestedQuestions: ['What was the Gadsden Purchase?', 'Who lived in Tucson in 1850?', 'What was the southern route to California?']
+  },
+  {
+    name: 'Olympia',
+    lat: 47.0379, lon: -122.9007,
+    subtitle: 'Settlement on Puget Sound',
+    description: 'Olympia was one of the earliest American settlements on Puget Sound, founded in 1846. It served as the customs house for the region and would become the capital of Washington Territory when it was split from Oregon Territory in 1853.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~300' },
+      { icon: '📅', label: 'Founded', value: '1846 by Edmund Sylvester & Levi Smith' },
+      { icon: '🏛️', label: 'Future Capital', value: 'Washington Territory capital (1853)' },
+      { icon: '🌲', label: 'Economy', value: 'Lumber and maritime trade' },
+      { icon: '🏔️', label: 'Setting', value: 'Southern tip of Puget Sound' }
+    ],
+    suggestedQuestions: ['What was life like on Puget Sound?', 'How did Oregon Territory govern this area?', 'What drew settlers to the Pacific Northwest?']
+  },
+  {
+    name: 'Stockton',
+    lat: 37.9577, lon: -121.2908,
+    subtitle: 'Supply Depot of the Southern Mines',
+    description: 'Founded in 1849 by Captain Charles Weber, Stockton was a critical supply center for the southern gold mining regions. Located on the San Joaquin River, it provided water access from San Francisco Bay to the interior goldfields.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~1,000' },
+      { icon: '📅', label: 'Founded', value: '1849 by Captain Charles Weber' },
+      { icon: '⛏️', label: 'Role', value: 'Supply hub for southern gold mines' },
+      { icon: '🚢', label: 'River Access', value: 'Steamboats from San Francisco Bay' },
+      { icon: '🏪', label: 'Commerce', value: 'Booming mercantile center' }
+    ],
+    suggestedQuestions: ['How did river transport work in the Gold Rush?', 'What were the southern mines?', 'Who was Captain Weber?']
+  },
+  {
+    name: 'El Paso',
+    lat: 31.7619, lon: -106.4850,
+    subtitle: 'The Pass of the North',
+    description: 'El Paso del Norte was a strategic crossing point on the Rio Grande. The American settlement on the north bank grew after the Mexican-American War. It was a key stop on the southern overland route to California and a military outpost on the new border.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~200 (U.S. side)' },
+      { icon: '🏰', label: 'Military', value: 'Fort Bliss established 1849' },
+      { icon: '🛤️', label: 'Routes', value: 'Southern Overland Trail to California' },
+      { icon: '🌊', label: 'Rio Grande', value: 'Major river crossing point' },
+      { icon: '🇲🇽', label: 'Border', value: 'New international boundary at the river' }
+    ],
+    suggestedQuestions: ['What was the southern route to California?', 'Why was Fort Bliss established?', 'What was life like on the border?']
+  },
+  {
+    name: 'Astoria',
+    lat: 46.1879, lon: -123.8313,
+    subtitle: 'Oldest American Settlement West of the Rockies',
+    description: 'Founded in 1811 as a fur trading post by John Jacob Astor\'s Pacific Fur Company, Astoria was the first permanent American settlement on the Pacific Coast. By 1850 it was a small but historic town at the mouth of the Columbia River.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~250' },
+      { icon: '📅', label: 'Founded', value: '1811 — oldest U.S. settlement on Pacific' },
+      { icon: '🦫', label: 'Fur Trade', value: 'Originally Pacific Fur Company post' },
+      { icon: '🌊', label: 'Location', value: 'Mouth of the Columbia River' },
+      { icon: '🐟', label: 'Economy', value: 'Fishing, timber, and river trade' }
+    ],
+    suggestedQuestions: ['What was the fur trade like?', 'Who was John Jacob Astor?', 'How dangerous was the Columbia River bar?']
+  },
+  {
+    name: 'San Jose',
+    lat: 37.3382, lon: -121.8863,
+    subtitle: 'First Capital of California',
+    description: 'San Jose was California\'s first state capital when it was admitted to the Union in 1850. Founded as a Spanish pueblo in 1777, it was one of the oldest settlements in California and served as a farming community supplying the Gold Rush miners.',
+    facts: [
+      { icon: '👥', label: 'Population (1850)', value: '~3,000' },
+      { icon: '🏛️', label: 'Capital', value: 'First California state capital (1850–51)' },
+      { icon: '📅', label: 'Founded', value: '1777 as Pueblo de San José' },
+      { icon: '🌾', label: 'Economy', value: 'Agriculture supplying gold miners' },
+      { icon: '🏠', label: 'Character', value: 'Mix of Californio and American settlers' }
+    ],
+    suggestedQuestions: ['Why was San Jose chosen as the first capital?', 'What crops were grown here?', 'What was the Californio culture like?']
+  }
+];
+
+var currentItem = null;
+var chatHistory = [];
+
+function waitForMap(){
+var g=document.getElementById('map-zoom-group');
+if(!g||!g.querySelector('.region-path')){setTimeout(waitForMap,300);return;}
+plotMarkers(g);
+}
+
+function plotMarkers(zoomGroup){
+if(MARKER_DATA.length===0)return;
+var projection=d3.geoAlbersUsa().scale(1280).translate([480,300]);
+var g=d3.select(zoomGroup);
+MARKER_DATA.forEach(function(item){
+var pt=projection([item.lon,item.lat]);
+if(!pt)return;
+var marker=g.append('g').attr('class','city-marker').attr('transform','translate('+pt[0]+','+pt[1]+')');
+marker.append('circle').attr('class','marker-glow').attr('r',8);
+marker.append('circle').attr('class','marker-dot').attr('r',3);
+marker.append('text').attr('class','marker-label').attr('y',-12).text(item.name);
+marker.append('circle').attr('class','marker-hit').attr('r',14);
+marker.on('click',function(event){event.stopPropagation();openCard(item);});
+});
+}
+
+function openCard(item){
+var card=document.getElementById('detail-card');
+var backdrop=document.getElementById('card-backdrop');
+if(!card)return;
+document.getElementById('card-title').textContent=item.name;
+document.getElementById('card-subtitle').textContent=item.subtitle||'';
+var body=document.getElementById('card-body');
+var html='';
+if(item.facts&&item.facts.length){
+item.facts.forEach(function(f){
+html+='<div class="fact-row"><div class="fact-icon">'+f.icon+'</div><div class="fact-content"><div class="fact-label">'+f.label+'</div><div class="fact-value">'+f.value+'</div></div></div>';
+});
+}
+if(item.description){
+if(html)html+='<div class="card-divider"></div>';
+html+='<div class="card-description">'+item.description+'</div>';
+}
+body.innerHTML=html||'<div class="card-description" style="color:var(--text-secondary);">No facts available.</div>';
+if(!currentItem||currentItem.name!==item.name){
+chatHistory=[];
+var msgArea=document.getElementById('detail-chat-messages');
+msgArea.innerHTML='<div class="chat-welcome">Select the <strong>Ask Me</strong> tab to ask questions about <strong>'+item.name+'</strong>.</div>';
+}
+currentItem=item;
+updateSuggestedQuestions(item);
+card.classList.add('visible');
+if(backdrop)backdrop.classList.add('visible');
+setActiveTab('facts');
+}
+
+function closeCard(){
+var card=document.getElementById('detail-card');
+var backdrop=document.getElementById('card-backdrop');
+if(card)card.classList.remove('visible');
+if(backdrop)backdrop.classList.remove('visible');
+currentItem=null;
+}
+
+function setActiveTab(tabName){
+document.querySelectorAll('#detail-card .card-tab').forEach(function(t){
+t.classList.toggle('active',t.getAttribute('data-tab')===tabName);
+});
+document.querySelectorAll('#detail-card .tab-pane').forEach(function(p){
+if(tabName==='facts')p.classList.toggle('active',p.id==='facts-pane');
+else p.classList.toggle('active',p.id==='chat-pane');
+});
+if(tabName==='chat'){
+var input=document.getElementById('detail-chat-input');
+if(input)setTimeout(function(){input.focus();},100);
+scrollChatToBottom();
+}
+}
+
+function addChatBubble(text,isUser){
+var area=document.getElementById('detail-chat-messages');
+var welcome=area.querySelector('.chat-welcome');
+if(welcome)welcome.remove();
+var bubble=document.createElement('div');
+bubble.className='chat-bubble '+(isUser?'user-bubble':'ai-bubble');
+bubble.textContent=text;
+area.appendChild(bubble);
+scrollChatToBottom();
+return bubble;
+}
+
+function addLoadingBubble(){
+var area=document.getElementById('detail-chat-messages');
+var bubble=document.createElement('div');
+bubble.className='chat-bubble ai-bubble loading';
+bubble.id='detail-loading-bubble';
+bubble.innerHTML='<div class="typing-dots"><span></span><span></span><span></span></div>';
+area.appendChild(bubble);
+scrollChatToBottom();
+return bubble;
+}
+
+function removeLoadingBubble(){
+var el=document.getElementById('detail-loading-bubble');
+if(el)el.remove();
+}
+
+function scrollChatToBottom(){
+var area=document.getElementById('detail-chat-messages');
+if(area)area.scrollTop=area.scrollHeight;
+}
+
+function updateSuggestedQuestions(item){
+var container=document.getElementById('detail-suggested-q');
+var questions=(item.suggestedQuestions&&item.suggestedQuestions.length)
+?item.suggestedQuestions
+:['What was it like here?','Tell me more about this place.','Why was this important?'];
+container.innerHTML='';
+questions.forEach(function(q){
+var btn=document.createElement('button');
+btn.className='suggested-q';
+btn.textContent=q;
+btn.addEventListener('click',function(){sendChat(q);});
+container.appendChild(btn);
+});
+}
+
+function buildPrompt(userQuestion){
+var parts=[];
+parts.push('You are a knowledgeable historian specializing in the American West circa 1850. Answer questions about '+currentItem.name+' based on the provided context and your historical knowledge.');
+parts.push('');
+parts.push('Location: '+currentItem.name);
+if(currentItem.subtitle)parts.push('Summary: '+currentItem.subtitle);
+if(currentItem.description)parts.push('Description: '+currentItem.description);
+if(currentItem.facts&&currentItem.facts.length){
+parts.push('Key facts:');
+currentItem.facts.forEach(function(f){parts.push('- '+f.label+': '+f.value);});
+}
+parts.push('');
+parts.push('RULES:');
+parts.push('- Keep answers concise (2-4 short paragraphs max)');
+parts.push('- Be accurate and informative about the 1850s era');
+parts.push('- If you do not know something, say so honestly');
+parts.push('');
+if(chatHistory.length>0){
+parts.push('Recent conversation:');
+var recent=chatHistory.slice(-10);
+recent.forEach(function(turn){
+parts.push((turn.role==='user'?'User: ':'Assistant: ')+turn.text);
+});
+parts.push('');
+}
+parts.push('User question: '+userQuestion);
+return parts.join('\n');
+}
+
+async function sendChat(message){
+if(!message||!message.trim()||!currentItem)return;
+var input=document.getElementById('detail-chat-input');
+var sendBtn=document.getElementById('detail-chat-send');
+message=message.trim();
+input.value='';
+sendBtn.disabled=true;
+setActiveTab('chat');
+addChatBubble(message,true);
+chatHistory.push({role:'user',text:message});
+addLoadingBubble();
+try{
+var prompt=buildPrompt(message);
+var result=await synthos.generate.completion({prompt:prompt,temperature:0.7});
+removeLoadingBubble();
+var answer=result.answer||'I wasn\'t able to generate a response. Please try again.';
+addChatBubble(answer,false);
+chatHistory.push({role:'assistant',text:answer});
+if(chatHistory.length>20)chatHistory=chatHistory.slice(-20);
+}catch(err){
+removeLoadingBubble();
+addChatBubble('Something went wrong. Please try again in a moment.',false);
+console.error('Detail card chat error:',err);
+}
+sendBtn.disabled=false;
+input.focus();
+}
+
+document.getElementById('card-close-btn').addEventListener('click',function(e){e.stopPropagation();closeCard();});
+document.getElementById('card-backdrop').addEventListener('click',function(e){e.stopPropagation();closeCard();});
+document.querySelectorAll('#detail-card .card-tab').forEach(function(tab){
+tab.addEventListener('click',function(e){e.stopPropagation();setActiveTab(tab.getAttribute('data-tab'));});
+});
+document.getElementById('detail-chat-send').addEventListener('click',function(e){
+e.stopPropagation();sendChat(document.getElementById('detail-chat-input').value);
+});
+document.getElementById('detail-chat-input').addEventListener('keydown',function(e){
+if(e.key==='Enter'){e.preventDefault();e.stopPropagation();sendChat(this.value);}
+});
+document.getElementById('detail-chat-input').addEventListener('click',function(e){e.stopPropagation();});
+
+waitForMap();
+})();</script><script id="page-helpers" src="/api/page-helpers.js?v=2" data-locked="true"></script><script id="page-script" src="/api/page-script.js?v=2" data-locked="true"></script></body></html>

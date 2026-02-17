@@ -6,18 +6,16 @@ export interface AnthropicArgs {
     model: string;
     baseURL?: string;
     temperature?: number;
-    maxTokens?: number;
     maxRetries?: number;
 }
 
 export function anthropic(args: AnthropicArgs): completePrompt {
-    const { apiKey, model, baseURL, temperature = 0.0, maxTokens = 1000, maxRetries } = args;
+    const { apiKey, model, baseURL, temperature = 0.0, maxRetries } = args;
 
     const client = new Anthropic({ apiKey, baseURL, maxRetries });
 
     return async (completionArgs: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
         const reqTemp = completionArgs.temperature ?? temperature;
-        const reqMaxTokens = completionArgs.maxTokens ?? maxTokens;
 
         // Build messages array from history + prompt
         const messages: Anthropic.MessageParam[] = [];
@@ -44,16 +42,21 @@ export function anthropic(args: AnthropicArgs): completePrompt {
         }
 
         try {
-            const response = await client.messages.create({
+            const stream = await client.messages.create({
                 model,
-                max_tokens: reqMaxTokens,
+                max_tokens: 32768,
                 temperature: reqTemp,
                 system: systemContent,
                 messages,
+                stream: true,
             });
 
-            const textBlock = response.content.find(b => b.type === 'text');
-            let text = textBlock ? (textBlock as Anthropic.TextBlock).text : '';
+            let text = '';
+            for await (const event of stream) {
+                if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+                    text += event.delta.text;
+                }
+            }
 
             if (useJsonPrefill) {
                 text = '{' + text;

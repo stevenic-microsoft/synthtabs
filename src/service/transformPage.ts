@@ -12,7 +12,6 @@ export interface TransformPageArgs extends AgentArgs {
     pagesFolder: string;
     pageState: string;
     message: string;
-    maxTokens: number;
     instructions?: string;
     /** Provider-specific formatting instructions injected into the prompt. */
     modelInstructions?: string;
@@ -53,7 +52,7 @@ export interface TransformPageResult {
 }
 
 export async function transformPage(args: TransformPageArgs): Promise<AgentCompletion<TransformPageResult>> {
-    const { pagesFolder, pageState, message, maxTokens, completePrompt } = args;
+    const { pagesFolder, pageState, message, completePrompt } = args;
 
     // 1. Assign data-node-id to every element
     const { html: annotatedHtml } = assignNodeIds(pageState);
@@ -118,7 +117,7 @@ export async function transformPage(args: TransformPageArgs): Promise<AgentCompl
         };
 
         // 3. Call model
-        const result = await completePrompt({ prompt, system, maxTokens });
+        const result = await completePrompt({ prompt, system });
         if (!result.completed) {
             return { completed: false, error: result.error };
         }
@@ -153,8 +152,7 @@ export async function transformPage(args: TransformPageArgs): Promise<AgentCompl
                     content: repairUSER_MESSAGE
                 };
 
-                const repairMaxTokens = Math.min(maxTokens, 4096);
-                const repairResult = await completePrompt({ prompt: repairPrompt, system: repairSystem, maxTokens: repairMaxTokens });
+                const repairResult = await completePrompt({ prompt: repairPrompt, system: repairSystem });
 
                 if (repairResult.completed) {
                     const repairChanges = parseChangeList(repairResult.value);

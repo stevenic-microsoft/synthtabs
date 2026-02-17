@@ -164,6 +164,7 @@ async function migrateFlatPages(pagesFolder: string): Promise<void> {
                 title,
                 categories: [category],
                 pinned: false,
+                showInAll: true,
                 createdDate: now,
                 lastModified: now,
                 pageVersion: 1,
@@ -201,6 +202,7 @@ async function copyDefaultPages(srcFolder: string, destFolder: string): Promise<
             title: typeof metadata.title === 'string' ? metadata.title : '',
             categories: Array.isArray(metadata.categories) ? metadata.categories : [],
             pinned: typeof metadata.pinned === 'boolean' ? metadata.pinned : false,
+            showInAll: typeof metadata.showInAll === 'boolean' ? metadata.showInAll : true,
             createdDate: now,
             lastModified: now,
             pageVersion: typeof metadata.pageVersion === 'number' ? metadata.pageVersion

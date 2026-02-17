@@ -7,7 +7,6 @@ export type ProviderName = 'Anthropic' | 'OpenAI' | 'FireworksAI';
 export interface ProviderConfig {
     apiKey: string;
     model: string;
-    maxTokens: number;
 }
 
 export interface ModelEntry {
@@ -59,7 +58,6 @@ export interface PromptCompletionArgs {
     system?: SystemMessage;
     history?: Message[];
     temperature?: number;
-    maxTokens?: number;
     jsonMode?: boolean;
     /** JSON schema for structured output. When provided, the model is asked to return JSON conforming to this schema. */
     jsonSchema?: Record<string, unknown>;

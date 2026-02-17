@@ -2,7 +2,31 @@
     if (window.__synthOSChatPanel) return;
     window.__synthOSChatPanel = true;
 
-    // 0. Themed tooltips for chat panel controls
+    // 0. First-run greeting — replace default greeting when ?firstRun=true
+    (function() {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('firstRun') !== 'true') return;
+        var greeting = document.getElementById('defaultGreeting');
+        if (!greeting) return;
+        greeting.innerHTML =
+            '<p><strong>Welcome to SynthOS!</strong></p>' +
+            '<p>You\'re all set up and ready to start creating. This is the <strong>Builder</strong> — your main workspace. Just type what you want to build into the chat and SynthOS will generate it for you as a live, interactive page.</p>' +
+            '<p>You can create just about anything: dashboards, tools, games, visualizations, forms, calculators — if it can be expressed as a web page, you can build it here through conversation.</p>' +
+            '<p><strong>How pages work:</strong></p>' +
+            '<ul>' +
+                '<li>Each creation lives on its own <strong>page</strong>. When you save, it gets a name and becomes part of your collection.</li>' +
+                '<li>The <strong>Pages</strong> button (in the link bar above) takes you to the <strong>Pages Gallery</strong> where you can browse, open, and manage all your saved creations.</li>' +
+            '</ul>' +
+            '<p><strong>Key actions:</strong></p>' +
+            '<ul>' +
+                '<li><strong>Save</strong> — saves your current page. You\'ll be prompted for a name the first time. <em>Save often!</em> Your work only persists when you save it.</li>' +
+                '<li><strong>Reset</strong> — clears the current page back to a blank slate. Useful when you want to start fresh on something new.</li>' +
+            '</ul>' +
+            '<p>When you\'re ready, we recommend trying the <a href="/solar_tutorial">Solar Tutorial</a> — it\'s a guided walkthrough that will show you the basics of creating with SynthOS step by step.</p>' +
+            '<p>Have fun building!</p>';
+    })();
+
+    // 1. Themed tooltips for chat panel controls
     (function() {
         var style = document.createElement('style');
         style.textContent =

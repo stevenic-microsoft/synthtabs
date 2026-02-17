@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SynthOS</title>
+    <script id="theme-info" src="/api/theme-info.js" data-locked="true"></script>
+    <link id="theme-css" rel="stylesheet" href="/api/theme.css" data-locked="true">
+    <style>.idle-container{position:absolute;width:100%;height:100%;pointer-events:none;opacity:1;transition:opacity 1s ease-out}.idle-container.hidden{opacity:0}.breathing-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(102,126,234,.15) 0,transparent 70%);animation:4s ease-in-out infinite breathe}.breathing-orb::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:rgba(183,148,246,.6);box-shadow:0 0 20px rgba(183,148,246,.4);animation:4s ease-in-out infinite core-pulse}@keyframes breathe{0%,100%{width:80px;height:80px;opacity:.3}50%{width:120px;height:120px;opacity:.6}}@keyframes core-pulse{0%,100%{opacity:.4;box-shadow:0 0 20px rgba(183,148,246,.3)}50%{opacity:.8;box-shadow:0 0 30px rgba(183,148,246,.5)}}.orbit-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;border:1px solid rgba(102,126,234,.1);border-radius:50%;animation:20s linear infinite orbit-rotate}.orbit-ring::after{content:'';position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:6px;height:6px;background:rgba(240,147,251,.5);border-radius:50%;box-shadow:0 0 10px rgba(240,147,251,.3)}@keyframes orbit-rotate{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.0/mermaid.min.js"></script>
+    <script id="page-info" src="/api/page-info.js?page=builder"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js" id="topojson-lib"></script><style id="us-map-styles">
+#us-map-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  position: relative;
+  overflow: hidden;
+}
+#us-map-container h2 {
+  color: var(--text-primary);
+  margin: 0;
+  padding: 12px 0 4px 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+#us-map-svg {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+#us-map-svg .state {
+  fill: var(--accent-primary);
+  stroke: var(--bg-primary);
+  stroke-width: 1;
+  cursor: pointer;
+  transition: fill 0.2s ease;
+}
+#us-map-svg .state:hover {
+  fill: var(--accent-tertiary);
+}
+#us-map-svg .state-border {
+  fill: none;
+  stroke: var(--bg-primary);
+  stroke-width: 1.5;
+}
+#us-map-svg .nation-border {
+  fill: none;
+  stroke: var(--text-secondary);
+  stroke-width: 1.5;
+}
+#map-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 10;
+}
+.light-mode #us-map-svg .state {
+  fill: var(--accent-primary);
+  stroke: var(--bg-primary);
+}
+.light-mode #us-map-svg .state:hover {
+  fill: var(--accent-tertiary);
+}
+</style></head>
+<body>
+    <div class="chat-panel" data-locked="true">
+        <div class="chat-header" data-locked="true">SynthOS</div>
+        <div class="chat-messages" id="chatMessages" data-locked="true">
+            <div class="chat-message" id="defaultGreeting"><p><strong>SynthOS:</strong> Here's your interactive US map! You can customize it by adding data to visualize — just tell me what you'd like to overlay. Here are a couple of ideas:
+<ul style="margin:8px 0 4px 0;padding-left:20px;">
+<li><strong>Population by state</strong> — color-coded choropleth showing population density</li>
+<li><strong>Election results</strong> — red/blue map of voting outcomes by state</li>
+<li><strong>Custom data</strong> — provide your own values per state (sales figures, temperatures, rankings, etc.)</li>
+</ul>
+What data would you like to see on the map?</p></div>
+            
+        </div>
+        <div class="link-group" data-locked="true">
+            <a href="#" id="saveLink" data-locked="true">Save</a>
+            <a href="/pages" id="pagesLink" data-locked="true">Pages</a>
+            <a href="#" id="resetLink" data-locked="true">Reset</a>
+        </div>
+        <form action="/" method="POST" id="chatForm" data-locked="true">
+            <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message..." data-locked="true">
+            <button type="submit" class="chat-submit" data-locked="true">Send</button>
+        </form>
+    </div>
+    <div class="viewer-panel full-viewer" id="viewerPanel"><div id="us-map-container">
+  <h2>United States</h2>
+  <svg id="us-map-svg"></svg>
+  <div id="map-tooltip"></div>
+</div>
+<div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div></div>
+    <div id="instructions" style="display: none;" data-locked="true"></div>
+    <div id="thoughts" style="display: none;" data-locked="true"></div>
+    <script id="idle-animation">function hideIdleAnimation(){const idleContainer=document.getElementById("idleAnimation");idleContainer&&(idleContainer.classList.add("hidden"),setTimeout(()=>{idleContainer.style.display="none"},1e3))}function showIdleAnimation(){const idleContainer=document.getElementById("idleAnimation");idleContainer&&(idleContainer.style.display="block",setTimeout(()=>{idleContainer.classList.remove("hidden")},10))}</script>
+    <button class="chat-toggle" aria-label="Toggle chat panel">
+        <span class="chat-toggle-dots">
+            <span class="chat-toggle-dot"></span>
+            <span class="chat-toggle-dot"></span>
+            <span class="chat-toggle-dot"></span>
+        </span>
+    </button>
+
+
+<script id="us-map-script">
+(function() {
+  function initMap() {
+    if (typeof topojson === 'undefined') {
+      setTimeout(initMap, 100);
+      return;
+    }
+
+    const container = document.getElementById('us-map-container');
+    const svg = d3.select('#us-map-svg');
+    const tooltip = document.getElementById('map-tooltip');
+
+    const width = container.clientWidth;
+    const height = container.clientHeight - 50;
+
+    svg.attr('viewBox', `0 0 ${width} ${height}`)
+       .attr('preserveAspectRatio', 'xMidYMid meet');
+
+    const projection = d3.geoAlbersUsa()
+      .fitSize([width - 40, height - 20], { type: 'Sphere' })
+      .translate([width / 2, height / 2]);
+
+    const path = d3.geoPath().projection(projection);
+
+    d3.json('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json').then(function(us) {
+      const states = topojson.feature(us, us.objects.states);
+
+      svg.selectAll('.state')
+        .data(states.features)
+        .enter()
+        .append('path')
+        .attr('class', 'state')
+        .attr('d', path)
+        .on('mousemove', function(event, d) {
+          tooltip.textContent = d.properties.name;
+          tooltip.style.opacity = '1';
+          const rect = container.getBoundingClientRect();
+          const x = event.clientX - rect.left + 12;
+          const y = event.clientY - rect.top - 30;
+          tooltip.style.left = x + 'px';
+          tooltip.style.top = y + 'px';
+        })
+        .on('mouseleave', function() {
+          tooltip.style.opacity = '0';
+        });
+
+      svg.append('path')
+        .datum(topojson.mesh(us, us.objects.states, (a, b) => a !== b))
+        .attr('class', 'state-border')
+        .attr('d', path);
+
+      svg.append('path')
+        .datum(topojson.mesh(us, us.objects.nation))
+        .attr('class', 'nation-border')
+        .attr('d', path);
+    }).catch(function(err) {
+      console.error('Failed to load US map data:', err);
+      container.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:2rem;">Failed to load map data. Please try again.</p>';
+    });
+
+    window.addEventListener('resize', function() {
+      const w = container.clientWidth;
+      const h = container.clientHeight - 50;
+      svg.attr('viewBox', `0 0 ${w} ${h}`);
+      projection.fitSize([w - 40, h - 20], { type: 'Sphere' }).translate([w / 2, h / 2]);
+      svg.selectAll('path').attr('d', path);
+    });
+  }
+
+  initMap();
+})();
+</script><script id="page-helpers" src="/api/page-helpers.js?v=2" data-locked="true"></script><script id="page-script" src="/api/page-script.js?v=2" data-locked="true"></script></body></html>
