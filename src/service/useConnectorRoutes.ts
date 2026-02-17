@@ -38,7 +38,8 @@ export function useConnectorRoutes(config: SynthOSConfig, app: Application): voi
                         description: def.description,
                         configured: isOAuth
                             ? !!oauthCfg && oauthCfg.enabled && !!oauthCfg.accessToken
-                            : !!cfg && cfg.enabled && !!cfg.apiKey
+                            : !!cfg && cfg.enabled && !!cfg.apiKey,
+                        enabled: !!cfg?.enabled
                     };
                 });
 

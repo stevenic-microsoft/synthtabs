@@ -20,10 +20,10 @@ export const OpenAIProvider: Provider = {
 
 export const FireworksAIProvider: Provider = {
     name: 'FireworksAI',
-    builderModels: ['glm-5'],
-    chatModels: ['glm-5'],
+    builderModels: ['fireworks-glm-5'],
+    chatModels: ['fireworks-minimax-m2p5', 'fireworks-kimi-k2p5', 'fireworks-glm-5'],
     detectModel(model: string): boolean {
-        return model.startsWith('glm-') || model.includes('fireworks');
+        return model.startsWith('fireworks-');
     }
 };
 

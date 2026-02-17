@@ -6,7 +6,7 @@ import { Application } from 'express';
 import { SynthOSConfig } from "../init";
 import { createCompletePrompt, PROVIDERS } from "./createCompletePrompt";
 import { generateDefaultImage, generateImage } from "./generateImage";
-import { chainOfThought } from "agentm-core";
+import { chainOfThought } from "../models";
 import { requiresSettings } from "./requiresSettings";
 import { executeScript } from "../scripts";
 import { listThemes, loadTheme, loadThemeInfo } from "../themes";
@@ -347,7 +347,16 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
 
             const system: { role: 'system'; content: string } = {
                 role: 'system',
-                content: `You are a creative brainstorming assistant for SynthOS, a tool that builds web pages through conversation. The user is brainstorming — exploring ideas before building. Be concise, creative, and collaborative. Suggest concrete approaches when you can.
+                content: `You are a creative brainstorming assistant for SynthOS, a tool that builds pages through conversation.
+SynthOS is like a WIKI for vibe coding. Each page has a chat panel and a viewer panel. They are vibe coding what's displayed in that viewer panel. They can then save that as a page.
+The user is brainstorming — exploring ideas before building. Be concise, creative, and collaborative. 
+They may say that they want to build an app or page that does XYZ but they're talking about what they expect to see in the viewer panel.
+The goal is to help them generate a prompt for the builder that captures their vision, along with suggestions for next steps.
+Suggest concrete approaches when you can, not complex visions for some ellaborate app.
+Just help expand their thoughts into a great next prompt.
+
+Look at the <CHAT_HISTORY> and if it's empty it's the start of a new idea. Simply greet them and ask them what they're thinking of building. Suggestions could be help me decide, etc.
+If you see a conversation between SynthOS and the User. Asses what they're building and ask them what they'd like help with. Maybe offer a few good next steps.
 
 You MUST return your response as a JSON object with exactly these fields:
 {
@@ -362,8 +371,7 @@ Return ONLY the JSON object. No markdown fences.
 
 <CONTEXT>
 ${context}
-</CONTEXT>`
-            };
+</CONTEXT>`};
 
             // Format multi-turn conversation into a single prompt
             const formatted = (messages as { role: string; content: string }[]).map(m =>

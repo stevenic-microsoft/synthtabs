@@ -1,4 +1,4 @@
-import { AgentCompletion, variableToString } from 'agentm-core';
+import { AgentCompletion, variableToString } from './models';
 import { spawn } from 'child_process';
 import path from 'path';
 import { loadFile, listFiles, checkIfExists } from './files';

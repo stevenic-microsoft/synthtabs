@@ -526,8 +526,16 @@
 
         function getBrainstormContext() {
             var chatEl = document.getElementById('chatMessages');
-            var chatHistory = chatEl ? chatEl.innerText : '';
-            return '<CHAT_HISTORY>\n' + chatHistory;
+            if (!chatEl) return '<CHAT_HISTORY>\n';
+            var msgs = chatEl.querySelectorAll('.chat-message');
+            var lines = [];
+            var started = false;
+            for (var i = 0; i < msgs.length; i++) {
+                var text = msgs[i].innerText;
+                if (!started && /^User:/i.test(text.trim())) started = true;
+                if (started) lines.push(text);
+            }
+            return '<CHAT_HISTORY>\n' + lines.join('\n');
         }
 
         // Send from the input field

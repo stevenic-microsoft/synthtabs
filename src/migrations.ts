@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio';
 import * as fs from 'fs/promises';
 import path from 'path';
-import { completePrompt } from 'agentm-core';
+import { completePrompt } from './models';
 import { deduplicateInlineScripts } from './service/transformPage';
 
 /**

@@ -19,11 +19,11 @@
     "types": "./dist/index.d.ts",
     "bin": "./bin/synthos.js",
     "dependencies": {
-        "agentm-core": "0.7.2",
+        "@anthropic-ai/sdk": "^0.39.0",
         "cheerio": "^1.2.0",
         "express": "^4.19.2",
         "open": "^10.1.0",
-        "openai": "^4.57.0",
+        "openai": "^4.104.0",
         "uuid": "^10.0.0",
         "yargs": "^17.7.2"
     },

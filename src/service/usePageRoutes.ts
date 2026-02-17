@@ -5,7 +5,7 @@ import { transformPage } from "./transformPage";
 import { getModelInstructions } from "./modelInstructions";
 import { SynthOSConfig } from "../init";
 import { createCompletePrompt } from "./createCompletePrompt";
-import { completePrompt } from "agentm-core";
+import { completePrompt } from "../models";
 import { green, red, dim, estimateTokens } from "./debugLog";
 import { loadThemeInfo } from "../themes";
 import * as cheerio from 'cheerio';

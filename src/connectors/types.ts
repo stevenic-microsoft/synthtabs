@@ -71,6 +71,7 @@ export interface ConnectorSummary {
     category: string;
     description: string;
     configured: boolean;
+    enabled: boolean;
 }
 
 export interface ConnectorDetail extends ConnectorDefinition {

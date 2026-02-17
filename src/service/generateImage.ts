@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { AgentCompletion, RequestError } from "agentm-core";
+import { AgentCompletion, RequestError } from "../models";
 import { loadFile } from "../files";
 import path from "path";
 
@@ -81,7 +81,7 @@ export async function generateImage(args: OpenaiGenerateImageArgs): Promise<Agen
             style
         });
     
-        if (response.data.length > 0 && response.data[0].b64_json !== undefined) {
+        if (response.data && response.data.length > 0 && response.data[0].b64_json !== undefined) {
             const url = `data:image/png;base64,${response.data[0].b64_json}`
             return { completed: true, value: { url } };
         } else {

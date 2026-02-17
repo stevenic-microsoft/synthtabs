@@ -1,4 +1,4 @@
-import { AgentArgs, AgentCompletion, SystemMessage, UserMessage } from "agentm-core";
+import { AgentArgs, AgentCompletion, SystemMessage, UserMessage } from "../models";
 import { listScripts } from "../scripts";
 import * as cheerio from "cheerio";
 import { ThemeInfo } from "../themes";

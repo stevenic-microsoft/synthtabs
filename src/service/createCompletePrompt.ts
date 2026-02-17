@@ -1,4 +1,4 @@
-import {anthropic, completePrompt, logCompletePrompt, openai} from 'agentm-core';
+import { anthropic, completePrompt, fireworksai, logCompletePrompt, openai } from '../models';
 import { getModelEntry, loadSettings } from '../settings';
 import { PROVIDERS } from '../models';
 
@@ -23,12 +23,7 @@ export async function createCompletePrompt(pagesFolder: string, use: 'builder' |
     if (entry.provider === 'Anthropic') {
         modelInstance = anthropic({apiKey, model});
     } else if (entry.provider === 'FireworksAI') {
-        // Map short model names to Fireworks full model paths
-        const fireworksModelMap: Record<string, string> = {
-            'glm-5': 'accounts/fireworks/models/glm-5',
-        };
-        const fireworksModel = fireworksModelMap[model] || model;
-        modelInstance = openai({apiKey, model: fireworksModel, baseURL: 'https://api.fireworks.ai/inference/v1'});
+        modelInstance = fireworksai({apiKey, model});
     } else {
         modelInstance = openai({apiKey, model});
     }
