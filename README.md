@@ -80,6 +80,8 @@ On your first launch, SynthOS walks you through a **guided setup experience**. I
 | OpenAI | GPT-5.2 | [platform.openai.com](https://platform.openai.com/api-keys) |
 | Fireworks AI | GLM-5 | [fireworks.ai](https://fireworks.ai/) |
 
+> **Don't let "API key" scare you.** Signing up for a developer account is just like signing up for any other online service. Create an account, generate a key, and paste it in. Many providers, like Anthropic, offer free credits to new developers — just start with those. Familiarize yourself with your provider's dashboard and keep an eye on your spending for the first few weeks.
+
 ### 3. Start Building
 
 Type what you want to create. That's it.
