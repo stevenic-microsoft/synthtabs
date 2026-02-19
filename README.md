@@ -1,4 +1,4 @@
-# SynthOS — The Hyper-Personalized App Builder That Turns Anyone Into a Programmer
+# SynthOS — The Hyper-Personalized App Builder That Turns Everyone Into a Programmer
 
 **Build real apps by describing what you want.** No coding experience required.
 
