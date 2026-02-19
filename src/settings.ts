@@ -1,6 +1,7 @@
 import {checkIfExists, loadFile, saveFile} from './files';
 import path from 'path';
 import { ModelEntry, ProviderName, detectProvider } from './models';
+import { AgentConfig } from './agents';
 
 let _settings: Partial<SettingsV2>|undefined;
 
@@ -37,6 +38,7 @@ export interface SettingsV2 {
     features: string[];
     services?: ServicesConfig;
     connectors?: ServicesConfig;
+    agents?: AgentConfig[];
 }
 
 export const DefaultSettings: SettingsV2 = {
@@ -62,7 +64,8 @@ export const DefaultSettings: SettingsV2 = {
     ],
     features: [],
     services: {},
-    connectors: {}
+    connectors: {},
+    agents: [],
 };
 
 /**

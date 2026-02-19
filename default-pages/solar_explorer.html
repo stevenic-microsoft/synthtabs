@@ -163,18 +163,7 @@
   color: #f093fb;
 }
 </style><style id="settings-modal-styles">
-.settings-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.6);
-  z-index: 9999;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-.settings-overlay.active {
-  display: flex;
-}
+/* .settings-overlay extends .modal-overlay from theme CSS */
 .settings-modal {
   background: rgba(15, 15, 35, 0.95);
   backdrop-filter: blur(16px);
@@ -535,7 +524,7 @@
             <button id="openSettings">⚙️ Settings</button>
         </div>
         <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
-    <div id="settingsOverlay" class="settings-overlay">
+    <div id="settingsOverlay" class="modal-overlay settings-overlay">
   <div class="settings-modal">
     <h2>⚙️ Explorer Settings</h2>
     
@@ -1845,11 +1834,11 @@ animate();
     // Always reload from server when opening to ensure fresh data
     await loadSettings();
     applySettingsToUI();
-    overlay.classList.add('active');
+    overlay.classList.add('show');
   });
 
   cancelBtn.addEventListener('click', function() {
-    overlay.classList.remove('active');
+    overlay.classList.remove('show');
     applySettingsToUI(); // revert UI to saved
   });
 
@@ -1857,7 +1846,7 @@ animate();
   overlay.addEventListener('mousedown', function(e) { overlayMouseDownTarget = e.target; });
   overlay.addEventListener('click', function(e) {
     if (e.target === overlay && overlayMouseDownTarget === overlay) {
-      overlay.classList.remove('active');
+      overlay.classList.remove('show');
       applySettingsToUI();
     }
     overlayMouseDownTarget = null;
@@ -1865,7 +1854,7 @@ animate();
 
   saveBtn.addEventListener('click', async function() {
     await saveSettings();
-    overlay.classList.remove('active');
+    overlay.classList.remove('show');
   });
 
   // Helper to build audience instruction for prompts

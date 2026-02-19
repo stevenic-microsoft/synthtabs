@@ -3,6 +3,7 @@ import { listScripts } from "../scripts";
 import * as cheerio from "cheerio";
 import { ThemeInfo } from "../themes";
 import { CONNECTOR_REGISTRY, ConnectorsConfig, ConnectorOAuthConfig } from "../connectors";
+import { AgentConfig } from "../agents";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -21,6 +22,8 @@ export interface TransformPageArgs extends AgentArgs {
     mode?: 'unlocked' | 'locked';
     /** User's configured connectors (from settings). */
     configuredConnectors?: ConnectorsConfig;
+    /** User's configured A2A agents (from settings). */
+    configuredAgents?: AgentConfig[];
 }
 
 export type ChangeOp =
@@ -70,7 +73,7 @@ export async function transformPage(args: TransformPageArgs): Promise<AgentCompl
             const colorList = Object.entries(colors)
                 .map(([name, value]) => `  --${name}: ${value}`)
                 .join('\n');
-            themeBlock += `Mode: ${mode}\nCSS custom properties (use instead of hardcoded values):\n${colorList}\n\nShared shell classes (pre-styled by theme, do not redefine):\n  .chat-panel — Left sidebar container (30% width)\n  .chat-header — Chat panel title bar\n  .chat-messages — Scrollable message container\n  .chat-message — Individual message wrapper\n  .link-group — Navigation links row (Save, Pages, Reset)\n  .chat-input — Message text input\n  .chat-submit — Send button\n  .viewer-panel — Right content area (70% width)\n  .loading-overlay — Full-screen loading overlay\n  .spinner — Animated loading spinner\n\nPage title bars: To align with the chat header, apply these styles:\n  min-height: var(--header-min-height);\n  padding: var(--header-padding-vertical) var(--header-padding-horizontal);\n  line-height: var(--header-line-height);\n  display: flex; align-items: center; justify-content: center; box-sizing: border-box;\n\nFull-viewer mode: For games, animations, or full-screen content, add class "full-viewer" to the viewer-panel element to remove its padding.\n\nChat panel behaviours (auto-injected via page script — do NOT recreate in page code):\n  The server injects page-v2.js after transformation. It provides:\n  - Form submit handler: sets action to window.location.pathname, shows #loadingOverlay, disables inputs\n  - Save/Reset link handlers (#saveLink, #resetLink)\n  - Chat scroll to bottom (#chatMessages)\n  - Chat toggle button (.chat-toggle) — created dynamically if not in markup\n  - .chat-input-wrapper — wraps #chatInput with a brainstorm icon button\n  - Brainstorm modal (#brainstormModal) — LLM-powered brainstorm UI, created dynamically\n  - Focus management — keeps keyboard input directed to #chatInput\n\n  Do NOT:\n  - Create your own form submit handler, toggle button, or input wrapper\n  - Modify or replace .chat-panel, .chat-header, .link-group, #chatForm, or .chat-toggle\n  - INSERT new <script> blocks that duplicate existing ones — when fixing JavaScript, UPDATE or REPLACE the existing script's nodeId instead. Always give inline scripts a unique id attribute.\n  - Set the form action attribute (page-v2.js sets it dynamically)\n  - Include these CSS rules (in the theme): #loadingOverlay position, .chat-submit:disabled, .chat-input:disabled\n\n  To add chat messages: use insert with parentId of #chatMessages and position "append".\n  #chatMessages is the only unlocked element inside .chat-panel.\n\nThe <html> element has class "${mode}-mode". Always add .light-mode CSS overrides for any page-specific styles so the page works in both light and dark themes, unless the user has explicitly requested a very specific color scheme.`;
+            themeBlock += `Mode: ${mode}\nCSS custom properties (use instead of hardcoded values):\n${colorList}\n\nShared shell classes (pre-styled by theme, do not redefine):\n  .chat-panel — Left sidebar container (30% width)\n  .chat-header — Chat panel title bar\n  .chat-messages — Scrollable message container\n  .chat-message — Individual message wrapper\n  .link-group — Navigation links row (Save, Pages, Reset)\n  .chat-input — Message text input\n  .chat-submit — Send button\n  .viewer-panel — Right content area (70% width)\n  .loading-overlay — Full-screen loading overlay\n  .spinner — Animated loading spinner\n  .modal-overlay — Full-screen modal backdrop (position:fixed, z-index:2000, backdrop-filter:blur). Add class "show" to display.\n  .modal-content — Centered modal container\n  .modal-header — Gradient header bar\n  .modal-body — Modal content area\n  .modal-footer — Bottom action bar (flex, space-between)\n  .modal-footer-right — Right-aligned button group\n\nModals and popups: ALWAYS use the theme\'s .modal-overlay class for any modal or popup overlay. Do NOT create custom overlay classes with position:fixed and z-index. Structure:\n  <div class="modal-overlay" id="myModal">\n    <div class="modal-content">\n      <div class="modal-header">Title</div>\n      <div class="modal-body">Content</div>\n      <div class="modal-footer"><div class="modal-footer-right"><button>OK</button></div></div>\n    </div>\n  </div>\nShow/hide by toggling the "show" class: el.classList.add(\'show\') / el.classList.remove(\'show\'). This ensures correct z-index layering above the chat toggle and other UI elements.\n\nPage title bars: To align with the chat header, apply these styles:\n  min-height: var(--header-min-height);\n  padding: var(--header-padding-vertical) var(--header-padding-horizontal);\n  line-height: var(--header-line-height);\n  display: flex; align-items: center; justify-content: center; box-sizing: border-box;\n\nFull-viewer mode: For games, animations, or full-screen content, add class "full-viewer" to the viewer-panel element to remove its padding.\n\nChat panel behaviours (auto-injected via page script — do NOT recreate in page code):\n  The server injects page-v2.js after transformation. It provides:\n  - Form submit handler: sets action to window.location.pathname, shows #loadingOverlay, disables inputs\n  - Save/Reset link handlers (#saveLink, #resetLink)\n  - Chat scroll to bottom (#chatMessages)\n  - Chat toggle button (.chat-toggle) — created dynamically if not in markup\n  - .chat-input-wrapper — wraps #chatInput with a brainstorm icon button\n  - Brainstorm modal (#brainstormModal) — LLM-powered brainstorm UI, created dynamically\n  - Focus management — keeps keyboard input directed to #chatInput\n\n  Do NOT:\n  - Create your own form submit handler, toggle button, or input wrapper\n  - Modify or replace .chat-panel, .chat-header, .link-group, #chatForm, or .chat-toggle\n  - INSERT new <script> blocks that duplicate existing ones — when fixing JavaScript, UPDATE or REPLACE the existing script's nodeId instead. Always give inline scripts a unique id attribute.\n  - Set the form action attribute (page-v2.js sets it dynamically)\n  - Include these CSS rules (in the theme): #loadingOverlay position, .chat-submit:disabled, .chat-input:disabled\n\n  To add chat messages: use insert with parentId of #chatMessages and position "append".\n  #chatMessages is the only unlocked element inside .chat-panel.\n\nThe <html> element has class "${mode}-mode". Always add .light-mode CSS overrides for any page-specific styles so the page works in both light and dark themes, unless the user has explicitly requested a very specific color scheme.`;
         }
 
         // Build configured-connectors block
@@ -102,7 +105,26 @@ export async function transformPage(args: TransformPageArgs): Promise<AgentCompl
             }
         }
 
-        const systemMessage = [currentPage, serverAPIs, serverScripts, connectorsBlock, themeBlock, messageFormat].filter(s => s).join('\n\n');
+        // Build configured-agents block (only enabled agents)
+        let agentsBlock = '';
+        const enabledAgents = (args.configuredAgents ?? []).filter(a => a.enabled);
+        if (enabledAgents.length > 0) {
+            const agentBlocks = enabledAgents.map(a => {
+                let block = `- ${a.name} (id: "${a.id}", provider: ${a.provider})`;
+                block += `\n  Description: ${a.description}`;
+                if (a.capabilities?.streaming) {
+                    block += `\n  Supports streaming: yes`;
+                }
+                if (a.skills && a.skills.length > 0) {
+                    const skillList = a.skills.map(s => `    - ${s.name}: ${s.description}`).join('\n');
+                    block += `\n  Skills:\n${skillList}`;
+                }
+                return block;
+            });
+            agentsBlock = `<CONFIGURED_AGENTS>\nThe user has configured these agents:\n\n${agentBlocks.join('\n\n')}\n\n${AGENT_API_REFERENCE}`;
+        }
+
+        const systemMessage = [currentPage, serverAPIs, serverScripts, connectorsBlock, agentsBlock, themeBlock, messageFormat].filter(s => s).join('\n\n');
         const system: SystemMessage = {
             role: 'system',
             content: systemMessage
@@ -648,6 +670,40 @@ Return ONLY the JSON array. Example:
   { "op": "insert", "parentId": "3", "position": "append", "html": "<div class=\\"msg\\">New message</div>" }
 ]`;
 
+const AGENT_API_REFERENCE =
+`## Agent API
+
+Check availability first (required):
+  const agents = await synthos.agents.list({ enabled: true });
+
+Send a message (returns full response):
+  const result = await synthos.agents.send(agentId, message);
+  // result: { kind: 'message', text: 'response text', raw: {...} }
+
+Send with file/image attachments:
+  const result = await synthos.agents.send(agentId, message, [
+    { fileName: 'photo.jpg', mimeType: 'image/jpeg', content: '<base64-string>' }
+  ]);
+
+Stream a response (token-by-token deltas):
+  const handle = synthos.agents.sendStream(agentId, message, function(event) {
+    switch (event.kind) {
+      case 'text':   // event.data = text delta string — append to output
+      case 'status': // event.data = status info object
+      case 'done':   // stream complete — stop processing
+      case 'error':  // event.data = error message string
+    }
+  });
+  handle.close(); // call to abort the stream early
+
+Stream with attachments:
+  synthos.agents.sendStream(agentId, message, onEvent, [
+    { fileName: 'doc.pdf', mimeType: 'application/pdf', content: '<base64>' }
+  ]);
+
+IMPORTANT: Always check synthos.agents.list({ enabled: true }) before calling an agent.
+If no agents are configured, show the user a link to Settings > Agents (/settings?tab=agents).`;
+
 const serverAPIs =
 `<SERVER_APIS>
 GET /api/data/:page/:table
@@ -706,6 +762,20 @@ description: Search the web using Brave Search (must be enabled in Settings > Co
 request: { query: string, count?: number, country?: string, freshness?: string }
 response: { results: [{ title: string, url: string, description: string }] }
 
+GET /api/agents
+description: List configured agents (A2A and OpenClaw). Supports ?enabled=true and ?provider=a2a|openclaw filters.
+response: [{ id: string, name: string, description: string, url: string, enabled: boolean, provider: 'a2a'|'openclaw', capabilities?: object }]
+
+POST /api/agents/:id/send
+description: Send a text message to an agent (works for both A2A and OpenClaw protocols) and receive a normalized response
+request: { message: string, attachments?: [{ fileName: string, mimeType: string, content: string }] }
+response: { kind: 'message'|'task', text?: string, raw: object }
+
+POST /api/agents/:id/stream
+description: Send a message and receive a streaming SSE response (text/event-stream). Each event is JSON: { kind: 'text'|'status'|'artifact'|'done'|'error', data: any }
+request: { message: string, attachments?: [{ fileName: string, mimeType: string, content: string }] }
+response: SSE stream
+
 GET /api/connectors
 description: List available connectors (REST API proxies). Supports ?category=X and ?id=X filters.
 response: [{ id: string, name: string, category: string, configured: boolean }]
@@ -734,6 +804,11 @@ PAGE HELPERS (available globally as window.synthos):
   synthos.search.web(query, opts?)      — POST /api/search/web  (opts: { count?, country?, freshness? })
   synthos.connectors.call(connector, method, path, opts?) — POST /api/connectors  (proxy call; opts: { headers?, body?, query? })
   synthos.connectors.list(opts?)        — GET /api/connectors  (opts: { category?, id? })
+  synthos.agents.list(opts?)             — GET /api/agents  (returns configured agents; opts: { enabled?, provider? }; returns [{ id, name, description, url, enabled, provider, capabilities }])
+  synthos.agents.send(agentId, message, attachments?) — POST /api/agents/:id/send  (sends a text message to any agent, returns normalized { kind, text, raw }; attachments: [{ fileName, mimeType, content }])
+  synthos.agents.sendStream(agentId, message, onEvent, attachments?) — POST /api/agents/:id/stream  (SSE streaming; onEvent receives { kind, data }; returns { close() } handle; attachments: [{ fileName, mimeType, content }])
+  synthos.agents.isEnabled(agentId)     — checks if an agent is enabled (returns Promise<boolean>)
+  synthos.agents.getCapabilities(agentId) — returns agent capabilities object (streaming, skills, etc.)
 All methods return Promises. Prefer these helpers over raw fetch().`;
 
 const repairUSER_MESSAGE =

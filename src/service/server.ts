@@ -4,6 +4,7 @@ import { useApiRoutes } from './useApiRoutes';
 import { SynthOSConfig } from '../init';
 import { useDataRoutes } from './useDataRoutes';
 import { useConnectorRoutes } from './useConnectorRoutes';
+import { useAgentRoutes } from './useAgentRoutes';
 import { cyan, yellow, formatTime } from './debugLog';
 
 export function server(config: SynthOSConfig): Application {
@@ -35,6 +36,9 @@ export function server(config: SynthOSConfig): Application {
 
     // Connector routes
     useConnectorRoutes(config, app);
+
+    // Agent routes
+    useAgentRoutes(config, app);
 
     // Data routes
     useDataRoutes(config, app);
