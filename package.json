@@ -21,6 +21,7 @@
     "dependencies": {
         "@a2a-js/sdk": "^0.3.10",
         "@anthropic-ai/sdk": "^0.75.0",
+        "adm-zip": "^0.5.16",
         "cheerio": "^1.2.0",
         "express": "^4.19.2",
         "open": "^10.1.0",
@@ -29,6 +30,7 @@
         "yargs": "^17.7.2"
     },
     "devDependencies": {
+        "@types/adm-zip": "^0.5.7",
         "@types/assert": "^1.5.3",
         "@types/cheerio": "^0.22.35",
         "@types/express": "^4.17.21",

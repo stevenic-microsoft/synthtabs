@@ -1,8 +1,11 @@
 import path from "path";
+import fs from "fs/promises";
+import AdmZip from "adm-zip";
 import { listPages, loadPageMetadata, PageMetadata, savePageMetadata, REQUIRED_PAGES, deletePage, copyPage, loadPageState, savePageState, PAGE_VERSION } from "../pages";
-import { checkIfExists, copyFile, copyFolderRecursive, deleteFile, loadFile } from "../files";
+import { checkIfExists, copyFile, copyFolderRecursive, deleteFile, ensureFolderExists, loadFile } from "../files";
 import {getModelEntry, loadSettings, saveSettings, ServicesConfig } from "../settings";
 import { Application } from 'express';
+import express from 'express';
 import { SynthOSConfig } from "../init";
 import { createCompletePrompt, PROVIDERS } from "./createCompletePrompt";
 import { generateDefaultImage, generateImage } from "./generateImage";
@@ -50,6 +53,96 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
     app.get('/api/pages', async (req, res) => {
         const pages = await listPages(config.pagesFolder, config.requiredPagesFolder);
         res.json(pages);
+    });
+
+    // Import a page from a zip file
+    app.post('/api/pages/import', express.raw({ type: 'application/zip', limit: '50mb' }), async (req, res) => {
+        try {
+            const zipBuffer = req.body as Buffer;
+            if (!zipBuffer || zipBuffer.length === 0) {
+                res.status(400).json({ error: 'Empty request body' });
+                return;
+            }
+
+            let zip: AdmZip;
+            try {
+                zip = new AdmZip(zipBuffer);
+            } catch {
+                res.status(400).json({ error: 'Invalid zip file' });
+                return;
+            }
+
+            const entries = zip.getEntries();
+            if (entries.length === 0) {
+                res.status(400).json({ error: 'Zip file is empty' });
+                return;
+            }
+
+            // Determine top-level folder name and validate structure
+            const firstEntry = entries[0].entryName;
+            const topFolder = firstEntry.split('/')[0];
+            const hasPageHtml = entries.some(e => e.entryName === `${topFolder}/page.html`);
+            if (!hasPageHtml) {
+                res.status(400).json({ error: 'Zip must contain a <folder>/page.html entry' });
+                return;
+            }
+
+            // Sanitize page name from folder name
+            let pageName = topFolder.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+            if (!pageName) {
+                res.status(400).json({ error: 'Could not derive a valid page name from zip contents' });
+                return;
+            }
+
+            // Auto-append _1, _2, etc. on name conflicts
+            let finalName = pageName;
+            let suffix = 0;
+            while (await checkIfExists(path.join(config.pagesFolder, 'pages', finalName))) {
+                suffix++;
+                finalName = `${pageName}_${suffix}`;
+            }
+
+            const targetDir = path.join(config.pagesFolder, 'pages', finalName);
+            await ensureFolderExists(targetDir);
+
+            // Extract entries with path traversal protection
+            for (const entry of entries) {
+                if (entry.isDirectory) continue;
+
+                // Strip the top-level folder prefix to get relative path
+                const relativePath = entry.entryName.substring(topFolder.length + 1);
+                if (!relativePath) continue;
+
+                const resolvedPath = path.resolve(targetDir, relativePath);
+                if (!resolvedPath.startsWith(path.resolve(targetDir))) {
+                    // Path traversal — skip this entry
+                    continue;
+                }
+
+                await ensureFolderExists(path.dirname(resolvedPath));
+                await fs.writeFile(resolvedPath, entry.getData());
+            }
+
+            // Update metadata: set createdDate and lastModified to now
+            const now = new Date().toISOString();
+            const existingMeta = await loadPageMetadata(config.pagesFolder, finalName);
+            const metadata: PageMetadata = {
+                title: existingMeta?.title ?? '',
+                categories: existingMeta?.categories ?? [],
+                pinned: existingMeta?.pinned ?? false,
+                showInAll: existingMeta?.showInAll ?? true,
+                createdDate: now,
+                lastModified: now,
+                pageVersion: existingMeta?.pageVersion ?? PAGE_VERSION,
+                mode: existingMeta?.mode ?? 'unlocked',
+            };
+            await savePageMetadata(config.pagesFolder, finalName, metadata);
+
+            res.status(201).json({ name: finalName, title: metadata.title });
+        } catch (err: unknown) {
+            console.error(err);
+            res.status(500).json({ error: (err as Error).message });
+        }
     });
 
     // Get page metadata
@@ -716,6 +809,55 @@ Return ONLY the JSON object.`};
             await savePageMetadata(config.pagesFolder, name, metadata);
 
             res.json({ upgraded: true, fromVersion: currentVersion, toVersion: PAGE_VERSION });
+        } catch (err: unknown) {
+            console.error(err);
+            res.status(500).json({ error: (err as Error).message });
+        }
+    });
+
+    // Export a page as a zip file
+    app.get('/api/pages/:name/export', async (req, res) => {
+        try {
+            const { name } = req.params;
+
+            // Try user pages folder first, then required pages
+            const userPageDir = path.join(config.pagesFolder, 'pages', name);
+            const requiredPageFile = path.join(config.requiredPagesFolder, `${name}.html`);
+            let sourceDir: string | null = null;
+
+            if (await checkIfExists(path.join(userPageDir, 'page.html'))) {
+                sourceDir = userPageDir;
+            } else if (await checkIfExists(requiredPageFile)) {
+                // For required pages, create a temp-like zip with just the HTML
+                const zip = new AdmZip();
+                const html = await loadFile(requiredPageFile);
+                zip.addFile(`${name}/page.html`, Buffer.from(html, 'utf-8'));
+
+                // Include page.json if it exists
+                const requiredMetaFile = path.join(config.requiredPagesFolder, `${name}.json`);
+                if (await checkIfExists(requiredMetaFile)) {
+                    const meta = await loadFile(requiredMetaFile);
+                    zip.addFile(`${name}/page.json`, Buffer.from(meta, 'utf-8'));
+                }
+
+                const zipBuffer = zip.toBuffer();
+                res.set('Content-Type', 'application/zip');
+                res.set('Content-Disposition', `attachment; filename="${name}.zip"`);
+                res.send(zipBuffer);
+                return;
+            } else {
+                res.status(404).json({ error: `Page "${name}" not found` });
+                return;
+            }
+
+            // Zip the entire page folder
+            const zip = new AdmZip();
+            zip.addLocalFolder(sourceDir, name);
+            const zipBuffer = zip.toBuffer();
+
+            res.set('Content-Type', 'application/zip');
+            res.set('Content-Disposition', `attachment; filename="${name}.zip"`);
+            res.send(zipBuffer);
         } catch (err: unknown) {
             console.error(err);
             res.status(500).json({ error: (err as Error).message });
