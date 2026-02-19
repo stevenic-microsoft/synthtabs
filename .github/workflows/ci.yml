@@ -26,7 +26,7 @@ jobs:
         run: npm run build
 
       - name: Run tests with coverage
-        run: nyc --reporter=lcov --reporter=text ts-mocha tests/**/*.spec.ts
+        run: npx nyc --reporter=lcov --reporter=text ts-mocha tests/**/*.spec.ts
 
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2
