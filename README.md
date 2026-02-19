@@ -1,124 +1,258 @@
-# SynthOS: An AI Powered Interactive Shell Experience
+# SynthOS — The Hyper-Personalized App Builder That Turns Anyone Into a Programmer
 
-[SynthOS](https://github.com/Stevenic/synthos) is an interactive shell experience powered by generative AI, featuring a user interface that is entirely AI-generated. Similar to a wiki, it organizes everything into pages, but with a twist: these pages are self-modifying and can transform into anything. Each page includes a chat panel and a content viewer. Entering a command into the chat panel prompts the configured Large Language Model (LLM) to completely rewrite the current page. The page can morph into anything—from providing answers to questions to becoming a tool that assists you with complex tasks. It supports the latest language models like Claude-Opus-4.5 and GPT-5.2.
+**Build real apps by describing what you want.** No coding experience required.
 
-SynthOS has access to tools in the form of APIs and scripts. Built-in APIs enable SynthOS to read and write objects to local storage or make additional generative AI calls. Scripts are user-defined extensions that allow SynthOS to perform local actions on your machine. You can add scripts that let SynthOS start a build, make a Git commit, or run a cURL command.
+SynthOS is a local AI-powered environment where you create fully functional applications — tools, games, dashboards, utilities — just by chatting. Describe what you need, refine it conversationally, and watch it appear in real time. Every app is a living page that you can save, share, and keep evolving.
 
-> Version 0.4.0 is coming... Create complex presentations in less then 2 minutes. [Star Trek Computer Deck](https://tinyurl.com/StarTrekComputer)  
+<!-- SCREENSHOT: Hero shot — the builder page with a finished app in the viewport (something visually impressive like a dashboard or interactive tool) -->
 
-You can create anything you want from animations:
+---
 
-<img width="1901" height="988" alt="image" src="https://github.com/user-attachments/assets/8da6dedd-e568-48d3-b2ac-106a8ab50117" />
+## Why SynthOS?
 
-To games:
+Most "no-code" tools give you templates and drag-and-drop. SynthOS gives you a **conversation**. Tell it what you want in plain English and it builds it — HTML, CSS, JavaScript — all running live in your browser. You don't need to understand the code. But if you're curious, it's all right there, teaching you as you go.
 
-<img width="1888" height="979" alt="image" src="https://github.com/user-attachments/assets/496b0be0-39f5-4bbf-9a40-2d6877f8a6cc" />
+- **Zero programming knowledge needed** — just describe what you want
+- **Unlimited flexibility** — if you can imagine it, SynthOS can build it
+- **Learn by doing** — every app you create is real, inspectable code
+- **Runs locally** — your data and API keys never leave your machine
+- **Iterative refinement** — keep chatting to tweak, extend, and polish
 
-To developer tools:
+---
 
-<img width="1891" height="987" alt="image" src="https://github.com/user-attachments/assets/951053f0-f025-45d3-8799-7bcd33942b80" />
+## What Can You Build?
 
-SynthOS is like a wiki for apps. You can save the apps you create to your pages directory;
+Anything that runs in a browser. Here are a few examples:
 
-<img width="1888" height="976" alt="image" src="https://github.com/user-attachments/assets/5c727cf5-30de-4d08-80ee-54eed7b64d20" />
+### Interactive Tools & Utilities
 
-## Installing SynthOS
+Build JSON formatters, unit converters, note-taking apps, task managers — any productivity tool you can describe.
 
-To get started using SynthOS you'll need to first install a recent version of [Node.js](https://nodejs.org/en/download/package-manager/current). I use version `22.20.0` but any version >20 should work. 
+<!-- SCREENSHOT: A productivity tool or utility app (e.g., JSON Tools or My Notes) -->
 
-Open a terminal window and run the following commands:
+### Games
+
+From arcade shooters to text adventures — SynthOS ships with Neon Asteroids (a synthwave space shooter) and Oregon Trail (complete with an AI trail guide named Dusty).
+
+<!-- SCREENSHOT: Neon Asteroids or another game running in the viewport -->
+
+### Data Dashboards & Visualizations
+
+Interactive charts, maps, and dashboards powered by D3.js. Describe the data you want to see and SynthOS builds the visualization.
+
+<!-- SCREENSHOT: A data visualization — US Map or a chart/dashboard -->
+
+### Interactive Educational Experiences
+
+Create rich learning experiences with built-in AI. Solar Explorer lets you click through a 3D-style solar system to learn about planets and orbital mechanics. Oregon Trail teaches frontier history through an AI guide that answers kids' questions at every stop. Western Cities 1850 pairs an interactive map with an AI historian at each location.
+
+<!-- SCREENSHOT: Solar Explorer showing the interactive solar system with a planet info panel -->
+
+Your apps are saved as HTML pages that run within SynthOS. Share them with anyone else running SynthOS, or keep building on them later.
+
+---
+
+## Getting Started
+
+### 1. Install
+
+You'll need [Node.js](https://nodejs.org/en/download/package-manager/current) v20 or later.
 
 ```bash
 npm install --global synthos
 synthos start
 ```
 
-This will install the CLI and start the SynthOS server running. This terminal window needs to stay open to keep the server running.  You should see a message saying `SynthOS's server is running on http://localhost:4242`.  You can open your browser to that link and you should land on the `settings` page.
+This starts the SynthOS server at `http://localhost:4242`. Keep the terminal open while you work.
 
-## Configuring Your Model
+### 2. Follow the First-Run Experience
 
-When the server first runs it's going to show you a settings dialog. You'll need to pick the model you;d like to use and configure it with a developer key. 
+On your first launch, SynthOS walks you through a **guided setup experience**. It will help you configure your AI model, enter your API key, and learn the basics of building with SynthOS. No reading docs, no guesswork — you'll be creating your first app within minutes.
 
-<img width="1885" height="975" alt="image" src="https://github.com/user-attachments/assets/34c662c2-3ea5-421d-bad2-4c98d13c72f3" />
+<!-- SCREENSHOT: The first-run experience / settings page showing model selection and API key input -->
 
-For Opus (recomended) you'll want to sign up for a developer account at [Anthropics Developer Platform](https://platform.claude.com/login) You can then generate an API key [here](https://platform.claude.com/settings/keys). For GPT-5.2 you can sign up for an [OpenAI Developer account](https://auth.openai.com/create-account) and then generate an API key [here](https://platform.openai.com/api-keys)
+| Provider | Recommended Model | Get an API Key |
+|----------|-------------------|----------------|
+| Anthropic | Claude Opus | [platform.claude.com](https://platform.claude.com/settings/keys) |
+| OpenAI | GPT-5.2 | [platform.openai.com](https://platform.openai.com/api-keys) |
+| Fireworks AI | GLM-5 | [fireworks.ai](https://fireworks.ai/) |
 
-## Using SynthOS
+### 3. Start Building
 
-Once you've configured your model you will be then sent to the builder page. You can then specify any thing you want to create and it will be rendered to the display port.
+Type what you want to create. That's it.
 
-<img width="1882" height="980" alt="image" src="https://github.com/user-attachments/assets/57cb01c7-f060-4dfc-8100-de85d850b104" />
+<!-- SCREENSHOT: The builder page with a user prompt and the resulting app being generated -->
 
-You can make as many changes as you want to the app and you have controlls above the chat box that let you save the app to the pages gallery, reset the view port, or navigate to the pages gallery:
+Use the controls above the chat box to **save** your app, **reset** the viewport, or browse your **pages gallery**.
 
-<img width="542" height="155" alt="image" src="https://github.com/user-attachments/assets/34acf4a0-4dde-4a0f-b766-e5aec46a6496" />
+<!-- SCREENSHOT: Close-up of the chat controls (save, reset, pages buttons) -->
 
-Each saved page is as stand alone HTML page that can be found in a `.synthos` folder in the directory where you started the server, There are system pages which can't be deleted but you can save changes to them and SynthOS will use those over the defaults. If you wish to delete a page/app just delete it from your `.synthos` folder:
+---
 
-<img width="825" height="589" alt="image" src="https://github.com/user-attachments/assets/2e7c8432-24d2-4f49-a608-3207bf1c1cda" />
+## Tips for Best Results
 
-## Application Templates
+- **Claude Opus is recommended** for the best experience overall. It produces the highest quality apps right out of the box.
 
-There are a set of pre-built application templates that give you a good starting point.
+- **Using GPT-5.2 or GLM-5?** Start with **Brainstorming Mode**. Click the brainstorm icon in the chat input to open an AI-powered ideation assistant that helps you explore and refine your idea before building. It generates a clean, optimized build prompt that gets dramatically better results from any model. This is especially useful with non-Opus models where prompt quality makes a bigger difference.
 
-The `[application]` template is great for creating tools:
+<!-- SCREENSHOT: Brainstorming Mode modal showing a conversation with suggestions and the "Build It" button -->
 
-<img width="1891" height="984" alt="image" src="https://github.com/user-attachments/assets/6216c1fc-e1f8-4db8-86d3-d6041cbbf841" />
+- **Save often, reset freely.** Save your app whenever you hit a version you like. Use **Reset** to return to your last save point and take things in a different direction. Think of it like checkpoints — experiment boldly knowing you can always go back.
 
-The `[markdown]` template has a rich built-in markdown viewer:
+---
 
-<img width="1887" height="979" alt="image" src="https://github.com/user-attachments/assets/99828cac-bb95-4de5-85c6-d164b37c8505" />
+## How It Works
 
-The `[sidebar]` template allows for rich content that's not markdown based:
-
-<img width="1876" height="976" alt="image" src="https://github.com/user-attachments/assets/0a9ae38b-354f-4709-b92a-b466458aa3ba" />
-
-The `[split-application]` template has two panes with a movable splitter:
-
-<img width="1882" height="975" alt="image" src="https://github.com/user-attachments/assets/770b17c5-e9c3-44d4-8015-5cf401efba26" />
-
-## API Explorer
-
-One of the more powerful capabilities of SynthOS is that it has built in APIs for things like storage that you're apps can use to persist data. You can use the API Explorer to test the API's out:
-
-<img width="1882" height="973" alt="image" src="https://github.com/user-attachments/assets/6a1e2823-7313-429c-9b28-79c5687fdef7" />
-
-## Script Editor
-
-You can also create custom scripts that your apps can invoke vi a scripts API:
-
-<img width="1889" height="982" alt="image" src="https://github.com/user-attachments/assets/8047d3c3-e5d3-4be8-b403-88169610b3b2" />
-
-## Contributing with Claude Code
-
-This repo includes a `SHARED-MEMORIES.md` file that gives Claude Code project-level context (architecture, APIs, folder structure). When you first clone the repo and start working with Claude Code, ask it:
-
-> "Initialize my personal MEMORY.md file using SHARED-MEMORIES.md"
-
-Claude will create a personal `MEMORY.md` inside `~/.claude/projects/` with the shared knowledge as a starting point.
-
-You can then personalize it by telling Claude:
-- What OS you're on
-- Where your checkout lives on disk
-- Your editor and path conventions (e.g. VS Code with forward-slash paths)
-
-These personal details stay in your `MEMORY.md` and are never checked in.
-
-Here's an example of what a developer's `MEMORY.md` might look like:
-
-```markdown
-# Synthos — Developer-Specific Memory
-
-Shared project knowledge (architecture, APIs, folder structure, etc.) lives in
-`SHARED-MEMORIES.md` at the project root. This file holds per-developer context only.
-
-## Session Start
-- **Always** read `SHARED-MEMORIES.md` from the project root at the start of every new coding session to load project-level context.
-
-## Environment
-- **Windows** machine
-- When opening files in VS Code, use `code "C:/source/synthos/<path>"` (quoted, forward slashes)
-- **Auto-run VS Code launches** — when opening files in VS Code via `code`, run the Bash command without asking for permission
+```
+You describe what you want
+        ↓
+   AI writes the code
+        ↓
+  App appears instantly
+        ↓
+ You refine with chat
+        ↓
+   Save & reuse
 ```
 
-> **Note:** The `## Environment` section is entirely developer-specific. Your entries will differ based on your OS, editor, file paths, and workflow preferences. This is the right place to capture anything unique to your local setup.
+Every app is a self-contained HTML page. Behind the scenes, SynthOS sends your conversation and the current page state to your chosen LLM, which returns precise, surgical edits — not a full rewrite. The page updates in place — no reloads, no lost state.
+
+---
+
+## Templates — A Head Start
+
+SynthOS ships with starter templates so you don't have to start from scratch:
+
+| Template | Best For |
+|----------|----------|
+| **Application** | Tools, utilities, single-pane apps |
+| **Two-Panel Page** | Side-by-side layouts with a draggable splitter |
+| **Sidebar Page** | Content with navigation or controls on the side |
+| **US Map** | Interactive D3.js map visualization as a starting point |
+
+Plus ready-to-use apps like **My Notes** (a full note-taking app with rich text editing), **Neon Asteroids**, and **Solar Explorer** — all built entirely within SynthOS.
+
+<!-- SCREENSHOT: One or two template examples showing the layout structure -->
+
+---
+
+## Your Apps, Your Machine
+
+Everything SynthOS creates lives in a `.synthos` folder wherever you started the server. Apps are plain HTML files you can:
+
+- Open directly in any browser
+- Copy to another machine
+- Edit by hand if you want to
+- Delete when you're done
+
+<!-- SCREENSHOT: File explorer showing the .synthos folder structure with saved pages -->
+
+---
+
+## Themes
+
+SynthOS ships with dark and light themes out of the box:
+
+- **Nebula Dusk** — a synthwave dark theme with glowing purple and magenta accents
+- **Nebula Dawn** — a soft pastel light theme with the same color palette
+
+Switch themes in Settings and every page adapts automatically.
+
+<!-- SCREENSHOT: Side-by-side or before/after showing Nebula Dusk and Nebula Dawn -->
+
+---
+
+## Power Features
+
+### Built-in Storage API
+
+Your apps can save and retrieve data locally — no database setup needed. Just call `synthos.data.save("tasks", {title: "Buy milk"})` and it works. Build todo lists, note-taking apps, inventory trackers, and more.
+
+### AI Inside Your Apps
+
+Apps can make their own AI calls using `synthos.generate.completion()`. This is how Oregon Trail's "Dusty" guide and Western Cities' AI historian work — your apps can talk back to users intelligently.
+
+### Custom Scripts
+
+Create shell scripts that your apps can invoke. Start builds, run Git commands, call APIs — extend SynthOS to automate anything on your machine.
+
+### API Explorer
+
+Test and explore all of SynthOS's built-in APIs interactively from the APIs system page.
+
+<!-- SCREENSHOT: The API Explorer page -->
+
+---
+
+## Connectors — 28 External Services (Preview)
+
+Connect your apps to real-world APIs without writing any authentication code. SynthOS handles credentials and proxies requests automatically.
+
+**Search & News** — Brave Search, NewsAPI, RSS2JSON
+**Developer Tools** — GitHub, Jira
+**Social Media** — Instagram (full OAuth2)
+**Databases** — Airtable, Notion
+**Communication** — Twilio, SendGrid, Resend, ElevenLabs
+**Maps & Weather** — Mapbox, OpenWeatherMap
+**Media** — Unsplash, Pexels, Imgur, Giphy, Cloudinary, Stability AI
+**Finance** — Alpha Vantage, Open Exchange Rates
+**Knowledge** — NASA, Wolfram Alpha, YouTube Data, Hugging Face, DeepL
+**Food** — Spoonacular
+
+Configure a connector in Settings, and the AI automatically knows how to use it when building your apps.
+
+<!-- SCREENSHOT: The Connectors section in Settings showing a few configured services -->
+
+---
+
+## Agents (Preview)
+
+Integrate external AI agents into your apps. SynthOS supports two protocols:
+
+- **A2A (Agent-to-Agent)** — standard HTTP-based agent communication with streaming support
+- **OpenClaw** — WebSocket-based protocol with session management, chat history, and SSH tunnel support for secure remote agents
+
+Your apps can send messages to agents, stream responses in real time, and maintain conversation history — all through `synthos.agents.*`.
+
+<!-- SCREENSHOT: The Agents section in Settings showing a configured agent -->
+
+---
+
+## From User to Developer
+
+SynthOS isn't just a tool — it's a bridge. You never need to look at the code, but the skills you build while using SynthOS are real programming skills:
+
+1. **Break problems down** — you'll learn to describe what you want in smaller, concrete pieces
+2. **Think in components** — headers, sidebars, buttons, data — you'll start seeing how apps are assembled
+3. **Iterate and refine** — building through conversation teaches you the same feedback loop every developer uses
+4. **Debug by describing** — when something isn't right, you'll get better at pinpointing what to change
+5. **Build confidence** — every app you ship is proof that you can create real software
+
+You don't have to become a programmer. But if you want to, SynthOS meets you where you are.
+
+---
+
+## Contributing
+
+This is an open-source project. Contributions are welcome.
+
+The repo includes a `SHARED-MEMORIES.md` that gives AI coding assistants (like Claude Code) full project context. If you're contributing with Claude Code:
+
+1. Clone the repo
+2. Ask Claude: *"Initialize my personal MEMORY.md file using SHARED-MEMORIES.md"*
+3. Start building
+
+---
+
+## License
+
+MIT
+
+---
+
+**Ready to build something?**
+
+```bash
+npm install --global synthos
+synthos start
+```
