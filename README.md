@@ -1,4 +1,4 @@
-# SynthOS — The Hyper-Personalized App Builder That Turns Everyone Into a Programmer
+# SynthOS — The Hyper-Personalized App Builder That Turns Everyone into a Programmer
 
 [![Build](https://github.com/Stevenic/synthos/actions/workflows/ci.yml/badge.svg)](https://github.com/Stevenic/synthos/actions/workflows/ci.yml)
 [![Coverage Status](https://coveralls.io/repos/github/Stevenic/synthos/badge.svg?branch=main)](https://coveralls.io/github/Stevenic/synthos?branch=main)
