@@ -1,8 +1,8 @@
 {
     "name": "synthos",
     "author": "Steven Ickman",
-    "description": "An AI powered shell experience.",
-    "version": "0.7.2",
+    "description": "The Hyper-Personalized App Builder That Turns Everyone Into a Programmer.",
+    "version": "0.8.0",
     "license": "MIT",
     "keywords": [
         "synthos",

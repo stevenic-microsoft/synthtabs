@@ -3,6 +3,7 @@ import path from "path";
 import { checkIfExists, copyFile, copyFiles, deleteFile, ensureFolderExists, listFiles, saveFile } from "./files";
 import { PAGE_VERSION } from "./pages";
 import { DefaultSettings } from "./settings";
+import { getOutdatedThemes, parseThemeFilename } from "./themes";
 
 export interface SynthOSConfig {
     pagesFolder: string;
@@ -112,6 +113,30 @@ async function repairMissingFolders(config: SynthOSConfig): Promise<void> {
         console.log(`Restoring default themes to .synthos folder...`);
         await ensureFolderExists(themesFolder);
         await copyFiles(config.defaultThemesFolder, themesFolder);
+    } else {
+        // Upgrade outdated themes — copy newer versioned CSS from defaults
+        const outdated = await getOutdatedThemes(config);
+        if (outdated.length > 0) {
+            console.log(`Upgrading ${outdated.length} theme(s): ${outdated.join(', ')}...`);
+            const defaultFiles = await listFiles(config.defaultThemesFolder);
+            for (const themeName of outdated) {
+                // Remove old versioned CSS files for this theme
+                const localFiles = await listFiles(themesFolder);
+                for (const f of localFiles) {
+                    const parsed = parseThemeFilename(f);
+                    if (parsed && parsed.name === themeName) {
+                        await deleteFile(path.join(themesFolder, f));
+                    }
+                }
+                // Copy the new versioned CSS from defaults
+                for (const f of defaultFiles) {
+                    const parsed = parseThemeFilename(f);
+                    if (parsed && parsed.name === themeName) {
+                        await copyFile(path.join(config.defaultThemesFolder, f), themesFolder);
+                    }
+                }
+            }
+        }
     }
 
     // Ensure pages/ subfolder exists

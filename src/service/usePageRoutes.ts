@@ -206,6 +206,19 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
                 pageState = $.html();
             }
 
+            // Inject save-line marker at the end of chat messages (skip for locked pages)
+            const sourceMetadata = await loadPageMetadata(config.pagesFolder, page, config.requiredPagesFolder);
+            if (sourceMetadata?.mode !== 'locked') {
+                const $ = cheerio.load(pageState);
+                // Remove any existing save-line first
+                $('#chatMessages .save-line').remove();
+                // Append new save-line
+                $('#chatMessages').append(
+                    '<div class="save-line" data-locked="true"><span class="save-line-label">Saved</span></div>'
+                );
+                pageState = $.html();
+            }
+
             // Save as new page
             await savePageState(config.pagesFolder, saveAs, pageState, title, categories);
 
