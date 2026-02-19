@@ -4,7 +4,8 @@
 
 SynthOS is a local AI-powered environment where you create fully functional applications — tools, games, dashboards, utilities — just by chatting. Describe what you need, refine it conversationally, and watch it appear in real time. Every app is a living page that you can save, share, and keep evolving.
 
-<!-- SCREENSHOT: Hero shot — the builder page with a finished app in the viewport (something visually impressive like a dashboard or interactive tool) -->
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/a16125b7-d0ff-4193-ae03-d3c1e1286a14" />
+
 
 ---
 
@@ -28,25 +29,27 @@ Anything that runs in a browser. Here are a few examples:
 
 Build JSON formatters, unit converters, note-taking apps, task managers — any productivity tool you can describe.
 
-<!-- SCREENSHOT: A productivity tool or utility app (e.g., JSON Tools or My Notes) -->
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/b19f382b-3efd-4f3f-912e-f8bcea1666a5" />
+
 
 ### Games
 
 From arcade shooters to text adventures — SynthOS ships with Neon Asteroids (a synthwave space shooter) and Oregon Trail (complete with an AI trail guide named Dusty).
 
-<!-- SCREENSHOT: Neon Asteroids or another game running in the viewport -->
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/f3ae0783-1f05-4ed7-ad28-a007e53c020b" />
 
 ### Data Dashboards & Visualizations
 
 Interactive charts, maps, and dashboards powered by D3.js. Describe the data you want to see and SynthOS builds the visualization.
 
-<!-- SCREENSHOT: A data visualization — US Map or a chart/dashboard -->
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/7e20039c-9632-42a3-8e16-c6c58d419421" />
 
 ### Interactive Educational Experiences
 
 Create rich learning experiences with built-in AI. Solar Explorer lets you click through a 3D-style solar system to learn about planets and orbital mechanics. Oregon Trail teaches frontier history through an AI guide that answers kids' questions at every stop. Western Cities 1850 pairs an interactive map with an AI historian at each location.
 
-<!-- SCREENSHOT: Solar Explorer showing the interactive solar system with a planet info panel -->
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/f741e352-de45-499b-b6e2-24fb31f79420" />
+
 
 Your apps are saved as HTML pages that run within SynthOS. Share them with anyone else running SynthOS, or keep building on them later.
 
@@ -69,7 +72,7 @@ This starts the SynthOS server at `http://localhost:4242`. Keep the terminal ope
 
 On your first launch, SynthOS walks you through a **guided setup experience**. It will help you configure your AI model, enter your API key, and learn the basics of building with SynthOS. No reading docs, no guesswork — you'll be creating your first app within minutes.
 
-<!-- SCREENSHOT: The first-run experience / settings page showing model selection and API key input -->
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/f48549d8-859b-4d4b-b5b1-0481d2a3b036" />
 
 | Provider | Recommended Model | Get an API Key |
 |----------|-------------------|----------------|
@@ -81,11 +84,13 @@ On your first launch, SynthOS walks you through a **guided setup experience**. I
 
 Type what you want to create. That's it.
 
-<!-- SCREENSHOT: The builder page with a user prompt and the resulting app being generated -->
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/58ec2419-8618-4707-936a-ffb61640ec63" />
+
 
 Use the controls above the chat box to **save** your app, **reset** the viewport, or browse your **pages gallery**.
 
-<!-- SCREENSHOT: Close-up of the chat controls (save, reset, pages buttons) -->
+<img width="554" height="173" alt="image" src="https://github.com/user-attachments/assets/4d09d377-b829-4bf0-890c-aff915b00756" />
+
 
 ---
 
@@ -95,7 +100,7 @@ Use the controls above the chat box to **save** your app, **reset** the viewport
 
 - **Using GPT-5.2 or GLM-5?** Start with **Brainstorming Mode**. Click the brainstorm icon in the chat input to open an AI-powered ideation assistant that helps you explore and refine your idea before building. It generates a clean, optimized build prompt that gets dramatically better results from any model. This is especially useful with non-Opus models where prompt quality makes a bigger difference.
 
-<!-- SCREENSHOT: Brainstorming Mode modal showing a conversation with suggestions and the "Build It" button -->
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/cdc8b572-b120-47bc-bc98-cbd882f35d7a" />
 
 - **Save often, reset freely.** Save your app whenever you hit a version you like. Use **Reset** to return to your last save point and take things in a different direction. Think of it like checkpoints — experiment boldly knowing you can always go back.
 
@@ -132,7 +137,10 @@ SynthOS ships with starter templates so you don't have to start from scratch:
 
 Plus ready-to-use apps like **My Notes** (a full note-taking app with rich text editing), **Neon Asteroids**, and **Solar Explorer** — all built entirely within SynthOS.
 
-<!-- SCREENSHOT: One or two template examples showing the layout structure -->
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/49767432-315a-4d95-800d-68758cf587f9" />
+
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/8c95a267-1ab7-4fed-a97b-8c6a80a26906" />
+
 
 ---
 
@@ -145,7 +153,9 @@ Everything SynthOS creates lives in a `.synthos` folder wherever you started the
 - Edit by hand if you want to
 - Delete when you're done
 
-<!-- SCREENSHOT: File explorer showing the .synthos folder structure with saved pages -->
+
+<img width="373" height="318" alt="image" src="https://github.com/user-attachments/assets/d50ae36a-b797-4ecf-8c10-08e93d0c3da2" />
+
 
 ---
 
@@ -158,7 +168,7 @@ SynthOS ships with dark and light themes out of the box:
 
 Switch themes in Settings and every page adapts automatically.
 
-<!-- SCREENSHOT: Side-by-side or before/after showing Nebula Dusk and Nebula Dawn -->
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/ffbbcd1a-dbfa-4be5-bbcb-dbebff4bfea4" />
 
 ---
 
@@ -180,7 +190,7 @@ Create shell scripts that your apps can invoke. Start builds, run Git commands, 
 
 Test and explore all of SynthOS's built-in APIs interactively from the APIs system page.
 
-<!-- SCREENSHOT: The API Explorer page -->
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/40704373-50ea-4a27-b41e-1b3e86b893bc" />
 
 ---
 
@@ -201,7 +211,7 @@ Connect your apps to real-world APIs without writing any authentication code. Sy
 
 Configure a connector in Settings, and the AI automatically knows how to use it when building your apps.
 
-<!-- SCREENSHOT: The Connectors section in Settings showing a few configured services -->
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/84b9b343-48cb-454f-bc39-0832384d5b89" />
 
 ---
 
@@ -214,7 +224,7 @@ Integrate external AI agents into your apps. SynthOS supports two protocols:
 
 Your apps can send messages to agents, stream responses in real time, and maintain conversation history — all through `synthos.agents.*`.
 
-<!-- SCREENSHOT: The Agents section in Settings showing a configured agent -->
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/4f058355-85eb-484b-aa32-acdd70d18e55" />
 
 ---
 
