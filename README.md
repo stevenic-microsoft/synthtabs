@@ -1,5 +1,9 @@
 # SynthOS — The Hyper-Personalized App Builder That Turns Everyone Into a Programmer
 
+[![Build](https://github.com/Stevenic/synthos/actions/workflows/ci.yml/badge.svg)](https://github.com/Stevenic/synthos/actions/workflows/ci.yml)
+[![Coverage Status](https://coveralls.io/repos/github/Stevenic/synthos/badge.svg?branch=main)](https://coveralls.io/github/Stevenic/synthos?branch=main)
+![License](https://img.shields.io/github/license/Stevenic/synthos)
+
 **Build real apps by describing what you want.** No coding experience required.
 
 SynthOS is a local AI-powered environment where you create fully functional applications — tools, games, dashboards, utilities — just by chatting. Describe what you need, refine it conversationally, and watch it appear in real time. Every app is a living page that you can save, share, and keep evolving.
