@@ -1,4 +1,7 @@
 import assert from 'assert';
+import * as fs from 'fs/promises';
+import * as os from 'os';
+import path from 'path';
 import {
     assignNodeIds,
     stripNodeIds,
@@ -6,8 +9,11 @@ import {
     parseChangeList,
     injectError,
     deduplicateInlineScripts,
+    transformPage,
     ChangeList,
+    TransformPageArgs,
 } from '../src/service/transformPage';
+import { AgentCompletion, PromptCompletionArgs } from '../src/models/types';
 
 // ---------------------------------------------------------------------------
 // assignNodeIds
@@ -229,6 +235,42 @@ describe('applyChangeList', () => {
         assert.ok(!result.includes('Old child'));
     });
 
+    it('warns but does not throw on missing node for replace', () => {
+        const changes: ChangeList = [
+            { op: 'replace', nodeId: '999', html: '<span>Ghost</span>' },
+        ];
+        const result = applyChangeList(annotated, changes);
+        assert.ok(!result.includes('Ghost'));
+    });
+
+    it('skips replace on a data-locked element', () => {
+        const lockedHtml = '<html><head></head><body>' +
+            '<div data-node-id="10"><p data-node-id="11" data-locked>Locked</p></div>' +
+            '</body></html>';
+        const changes: ChangeList = [
+            { op: 'replace', nodeId: '11', html: '<span>Replaced</span>' },
+        ];
+        const result = applyChangeList(lockedHtml, changes);
+        assert.ok(result.includes('Locked'));
+        assert.ok(!result.includes('Replaced'));
+    });
+
+    it('warns but does not throw on missing node for delete', () => {
+        const changes: ChangeList = [
+            { op: 'delete', nodeId: '999' },
+        ];
+        const result = applyChangeList(annotated, changes);
+        // Should not throw, original content preserved
+        assert.ok(result.includes('Old text'));
+    });
+
+    it('throws on unknown insert position', () => {
+        const changes = [
+            { op: 'insert', parentId: '10', position: 'sideways', html: '<em>Oops</em>' },
+        ] as unknown as ChangeList;
+        assert.throws(() => applyChangeList(annotated, changes), /unknown position/);
+    });
+
     it('throws on unknown op', () => {
         const changes = [{ op: 'explode', nodeId: '10' }] as unknown as ChangeList;
         assert.throws(() => applyChangeList(annotated, changes), /Unknown change op/);
@@ -410,5 +452,480 @@ describe('deduplicateInlineScripts — ID-based dedup', () => {
             const matches = result.match(new RegExp(`id="${sysId}"`, 'g'));
             assert.strictEqual(matches?.length, 2, `Expected 2 scripts with id="${sysId}" to be preserved`);
         }
+    });
+});
+
+// ---------------------------------------------------------------------------
+// transformPage (integration with stub completePrompt)
+// ---------------------------------------------------------------------------
+
+describe('transformPage', () => {
+    let tmpDir: string;
+
+    // Minimal page with a viewer-panel and thoughts div
+    const testPage = `<html><head></head><body>
+        <div class="chat-panel" data-locked>
+            <div id="chatMessages"><div class="chat-message"><p><strong>SynthOS:</strong> Welcome!</p></div></div>
+        </div>
+        <div class="viewer-panel"><p id="content">Hello world</p></div>
+        <div id="thoughts" style="display: none;"></div>
+    </body></html>`;
+
+    beforeEach(async () => {
+        tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'synthos-tp-test-'));
+    });
+
+    afterEach(async () => {
+        await fs.rm(tmpDir, { recursive: true, force: true });
+    });
+
+    /** Extract the data-node-id for an element identified by a CSS-style attribute (e.g. id="content") from annotated HTML. */
+    function findNodeId(annotatedHtml: string, idAttr: string): string {
+        // Match a tag that contains both data-node-id="X" and the target id, in either order
+        const pattern1 = new RegExp(`data-node-id="(\\d+)"[^>]*${idAttr}`);
+        const pattern2 = new RegExp(`${idAttr}[^>]*data-node-id="(\\d+)"`);
+        const m = annotatedHtml.match(pattern1) || annotatedHtml.match(pattern2);
+        return m ? m[1] : '99999';
+    }
+
+    function makeArgs(stub: (args: PromptCompletionArgs) => Promise<AgentCompletion<string>>, pageState?: string): TransformPageArgs {
+        return {
+            completePrompt: stub,
+            pagesFolder: tmpDir,
+            pageState: pageState ?? testPage,
+            message: 'Change the content',
+        };
+    }
+
+    it('happy path — applies valid change list and returns transformed HTML', async () => {
+        const stub = async (args: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
+            const sys = args.system?.content ?? '';
+            const nodeId = findNodeId(sys, 'id="content"');
+            return {
+                completed: true,
+                value: JSON.stringify([
+                    { op: 'update', nodeId, html: 'Updated content' },
+                ]),
+            };
+        };
+
+        const result = await transformPage(makeArgs(stub));
+        assert.strictEqual(result.completed, true);
+        assert.ok(result.value);
+        assert.ok(result.value.html.includes('Updated content'));
+        assert.strictEqual(result.value.changeCount, 1);
+        // Should not contain data-node-id attributes
+        assert.ok(!result.value.html.includes('data-node-id'));
+    });
+
+    it('returns error when completePrompt fails', async () => {
+        const stub = async (): Promise<AgentCompletion<string>> => ({
+            completed: false,
+            error: new Error('API quota exceeded'),
+        });
+
+        const result = await transformPage(makeArgs(stub));
+        assert.strictEqual(result.completed, false);
+        assert.strictEqual(result.error?.message, 'API quota exceeded');
+    });
+
+    it('injects error block when response is not valid JSON', async () => {
+        const stub = async (): Promise<AgentCompletion<string>> => ({
+            completed: true,
+            value: 'I cannot help with that request.',
+        });
+
+        const result = await transformPage(makeArgs(stub));
+        // Should still complete (error is injected into HTML, not thrown)
+        assert.strictEqual(result.completed, true);
+        assert.ok(result.value);
+        assert.strictEqual(result.value.changeCount, 0);
+        assert.ok(result.value.html.includes('id="error"'));
+    });
+
+    it('handles failed ops and triggers repair pass', async () => {
+        let callCount = 0;
+        const stub = async (args: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
+            callCount++;
+            const sys = args.system?.content ?? '';
+            if (callCount === 1) {
+                const contentNodeId = findNodeId(sys, 'id="content"');
+                return {
+                    completed: true,
+                    value: JSON.stringify([
+                        { op: 'update', nodeId: contentNodeId, html: 'First pass change' },
+                        { op: 'update', nodeId: '9999', html: 'Ghost node' }, // will fail
+                    ]),
+                };
+            } else {
+                // Repair call: target an element that exists in re-annotated HTML
+                const thoughtsNodeId = findNodeId(sys, 'id="thoughts"');
+                return {
+                    completed: true,
+                    value: JSON.stringify([
+                        { op: 'update', nodeId: thoughtsNodeId, html: 'Repaired content' },
+                    ]),
+                };
+            }
+        };
+
+        const result = await transformPage(makeArgs(stub));
+        assert.strictEqual(result.completed, true);
+        assert.ok(result.value);
+        // Should have made 2 calls (initial + repair)
+        assert.strictEqual(callCount, 2);
+        // changeCount should be 2 (1 success from first pass + 1 from repair)
+        assert.strictEqual(result.value.changeCount, 2);
+    });
+
+    it('keeps partial result when repair pass LLM call fails', async () => {
+        let callCount = 0;
+        const stub = async (args: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
+            callCount++;
+            if (callCount === 1) {
+                const sys = args.system?.content ?? '';
+                const contentNodeId = findNodeId(sys, 'id="content"');
+                return {
+                    completed: true,
+                    value: JSON.stringify([
+                        { op: 'update', nodeId: contentNodeId, html: 'Partial update' },
+                        { op: 'update', nodeId: '9999', html: 'Ghost' },
+                    ]),
+                };
+            } else {
+                // Repair call fails
+                return { completed: false, error: new Error('Repair failed') };
+            }
+        };
+
+        const result = await transformPage(makeArgs(stub));
+        assert.strictEqual(result.completed, true);
+        assert.ok(result.value);
+        assert.ok(result.value.html.includes('Partial update'));
+        assert.strictEqual(result.value.changeCount, 1);
+    });
+
+    it('handles repair pass returning empty array (no repairs needed)', async () => {
+        let callCount = 0;
+        const stub = async (args: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
+            callCount++;
+            if (callCount === 1) {
+                return {
+                    completed: true,
+                    value: JSON.stringify([
+                        { op: 'update', nodeId: '9999', html: 'Ghost' },
+                    ]),
+                };
+            } else {
+                return { completed: true, value: '[]' };
+            }
+        };
+
+        const result = await transformPage(makeArgs(stub));
+        assert.strictEqual(result.completed, true);
+        assert.strictEqual(callCount, 2);
+    });
+
+    it('includes instructions and modelInstructions in prompt', async () => {
+        let capturedPrompt: string | undefined;
+        const stub = async (args: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
+            capturedPrompt = args.prompt.content;
+            return { completed: true, value: '[]' };
+        };
+
+        await transformPage({
+            ...makeArgs(stub),
+            instructions: 'Be creative',
+            modelInstructions: 'Return concise JSON',
+        });
+
+        assert.ok(capturedPrompt);
+        assert.ok(capturedPrompt.includes('Be creative'));
+        assert.ok(capturedPrompt.includes('Return concise JSON'));
+    });
+
+    it('includes theme info in system prompt when provided', async () => {
+        let capturedSystem: string | undefined;
+        const stub = async (args: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
+            capturedSystem = args.system?.content;
+            return { completed: true, value: '[]' };
+        };
+
+        await transformPage({
+            ...makeArgs(stub),
+            themeInfo: {
+                mode: 'dark',
+                colors: { 'accent-primary': '#ff0000', 'text-primary': '#ffffff' },
+            },
+        });
+
+        assert.ok(capturedSystem);
+        assert.ok(capturedSystem.includes('Mode: dark'));
+        assert.ok(capturedSystem.includes('--accent-primary: #ff0000'));
+    });
+
+    it('includes connector info in system prompt when provided', async () => {
+        let capturedSystem: string | undefined;
+        const stub = async (args: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
+            capturedSystem = args.system?.content;
+            return { completed: true, value: '[]' };
+        };
+
+        await transformPage({
+            ...makeArgs(stub),
+            configuredConnectors: {
+                'brave-search': { enabled: true, apiKey: 'test-key' } as any,
+            },
+        });
+
+        assert.ok(capturedSystem);
+        assert.ok(capturedSystem.includes('CONFIGURED_CONNECTORS'));
+    });
+
+    it('includes agent info in system prompt when provided', async () => {
+        let capturedSystem: string | undefined;
+        const stub = async (args: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
+            capturedSystem = args.system?.content;
+            return { completed: true, value: '[]' };
+        };
+
+        await transformPage({
+            ...makeArgs(stub),
+            configuredAgents: [{
+                id: 'test-agent',
+                name: 'Test Agent',
+                description: 'A test agent',
+                url: 'http://localhost:3000',
+                enabled: true,
+                provider: 'a2a' as any,
+            }],
+        });
+
+        assert.ok(capturedSystem);
+        assert.ok(capturedSystem.includes('CONFIGURED_AGENTS'));
+        assert.ok(capturedSystem.includes('Test Agent'));
+    });
+
+    it('includes agent capabilities and skills in system prompt', async () => {
+        let capturedSystem: string | undefined;
+        const stub = async (args: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
+            capturedSystem = args.system?.content;
+            return { completed: true, value: '[]' };
+        };
+
+        await transformPage({
+            ...makeArgs(stub),
+            configuredAgents: [{
+                id: 'agent-1',
+                name: 'Streaming Agent',
+                description: 'Agent with streaming',
+                url: 'http://localhost:3000',
+                enabled: true,
+                provider: 'a2a',
+                capabilities: { streaming: true },
+                skills: [
+                    { id: 'summarize', name: 'summarize', description: 'Summarizes text', tags: [] },
+                ],
+            }],
+        });
+
+        assert.ok(capturedSystem);
+        assert.ok(capturedSystem.includes('Supports streaming: yes'));
+        assert.ok(capturedSystem.includes('summarize'));
+        assert.ok(capturedSystem.includes('Summarizes text'));
+    });
+
+    it('exercises replace, delete, insert, and style-element ops through pipeline', async () => {
+        const stub = async (args: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
+            const sys = args.system?.content ?? '';
+            const contentNodeId = findNodeId(sys, 'id="content"');
+            const viewerNodeId = findNodeId(sys, 'class="viewer-panel"');
+            return {
+                completed: true,
+                value: JSON.stringify([
+                    { op: 'replace', nodeId: contentNodeId, html: '<p id="content">Replaced</p>' },
+                    { op: 'insert', parentId: viewerNodeId, position: 'append', html: '<span>Appended</span>' },
+                    { op: 'style-element', nodeId: viewerNodeId, style: 'background: blue' },
+                ]),
+            };
+        };
+
+        const result = await transformPage(makeArgs(stub));
+        assert.strictEqual(result.completed, true);
+        assert.ok(result.value);
+        assert.ok(result.value.html.includes('Replaced'));
+        assert.ok(result.value.html.includes('Appended'));
+        assert.ok(result.value.html.includes('background: blue'));
+        assert.strictEqual(result.value.changeCount, 3);
+    });
+
+    it('reports failed replace on locked element and triggers repair', async () => {
+        // Use a page where the content is data-locked
+        const lockedPage = `<html><head></head><body>
+            <div class="chat-panel" data-locked>
+                <div id="chatMessages"><div class="chat-message"><p><strong>SynthOS:</strong> Welcome!</p></div></div>
+            </div>
+            <div class="viewer-panel"><p id="content" data-locked>Locked content</p></div>
+            <div id="thoughts" style="display: none;"></div>
+        </body></html>`;
+
+        let callCount = 0;
+        const stub = async (args: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
+            callCount++;
+            const sys = args.system?.content ?? '';
+            if (callCount === 1) {
+                const contentNodeId = findNodeId(sys, 'id="content"');
+                return {
+                    completed: true,
+                    value: JSON.stringify([
+                        { op: 'replace', nodeId: contentNodeId, html: '<p>Should fail</p>' },
+                    ]),
+                };
+            } else {
+                // Repair: return empty array (nothing to fix)
+                return { completed: true, value: '[]' };
+            }
+        };
+
+        const result = await transformPage(makeArgs(stub, lockedPage));
+        assert.strictEqual(result.completed, true);
+        assert.strictEqual(callCount, 2);
+        // Original locked content should still be present
+        assert.ok(result.value!.html.includes('Locked content'));
+    });
+
+    it('handles repair pass that throws an error', async () => {
+        let callCount = 0;
+        const stub = async (args: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
+            callCount++;
+            if (callCount === 1) {
+                return {
+                    completed: true,
+                    value: JSON.stringify([
+                        { op: 'update', nodeId: '9999', html: 'Ghost' },
+                    ]),
+                };
+            } else {
+                // Repair call returns invalid JSON that will cause parseChangeList to throw
+                return { completed: true, value: 'not valid json at all' };
+            }
+        };
+
+        const result = await transformPage(makeArgs(stub));
+        assert.strictEqual(result.completed, true);
+        assert.strictEqual(callCount, 2);
+        // Should have kept partial result from first pass
+        assert.ok(result.value);
+    });
+
+    it('reports failed insert on missing parent through pipeline', async () => {
+        let callCount = 0;
+        const stub = async (args: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
+            callCount++;
+            if (callCount === 1) {
+                return {
+                    completed: true,
+                    value: JSON.stringify([
+                        { op: 'insert', parentId: '9999', position: 'append', html: '<span>Ghost</span>' },
+                    ]),
+                };
+            } else {
+                return { completed: true, value: '[]' };
+            }
+        };
+
+        const result = await transformPage(makeArgs(stub));
+        assert.strictEqual(result.completed, true);
+        assert.strictEqual(callCount, 2);
+    });
+
+    it('reports failed delete on locked element through pipeline', async () => {
+        const lockedPage = `<html><head></head><body>
+            <div class="chat-panel" data-locked>
+                <div id="chatMessages"><div class="chat-message"><p><strong>SynthOS:</strong> Welcome!</p></div></div>
+            </div>
+            <div class="viewer-panel"><p id="content" data-locked>Locked</p></div>
+            <div id="thoughts" style="display: none;"></div>
+        </body></html>`;
+
+        let callCount = 0;
+        const stub = async (args: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
+            callCount++;
+            const sys = args.system?.content ?? '';
+            if (callCount === 1) {
+                const contentNodeId = findNodeId(sys, 'id="content"');
+                return {
+                    completed: true,
+                    value: JSON.stringify([
+                        { op: 'delete', nodeId: contentNodeId },
+                    ]),
+                };
+            } else {
+                return { completed: true, value: '[]' };
+            }
+        };
+
+        const result = await transformPage(makeArgs(stub, lockedPage));
+        assert.strictEqual(result.completed, true);
+        assert.ok(result.value!.html.includes('Locked'));
+    });
+
+    it('reports failed style-element on locked element through pipeline', async () => {
+        const lockedPage = `<html><head></head><body>
+            <div class="chat-panel" data-locked>
+                <div id="chatMessages"><div class="chat-message"><p><strong>SynthOS:</strong> Welcome!</p></div></div>
+            </div>
+            <div class="viewer-panel"><p id="content" data-locked>Styled</p></div>
+            <div id="thoughts" style="display: none;"></div>
+        </body></html>`;
+
+        let callCount = 0;
+        const stub = async (args: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
+            callCount++;
+            const sys = args.system?.content ?? '';
+            if (callCount === 1) {
+                const contentNodeId = findNodeId(sys, 'id="content"');
+                return {
+                    completed: true,
+                    value: JSON.stringify([
+                        { op: 'style-element', nodeId: contentNodeId, style: 'color: red' },
+                    ]),
+                };
+            } else {
+                return { completed: true, value: '[]' };
+            }
+        };
+
+        const result = await transformPage(makeArgs(stub, lockedPage));
+        assert.strictEqual(result.completed, true);
+        // Locked element should not have the style applied
+        assert.ok(!result.value!.html.includes('color: red'));
+    });
+
+    it('repair pass with remaining failures keeps partial result', async () => {
+        let callCount = 0;
+        const stub = async (args: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
+            callCount++;
+            if (callCount === 1) {
+                return {
+                    completed: true,
+                    value: JSON.stringify([
+                        { op: 'update', nodeId: '9999', html: 'Ghost' },
+                    ]),
+                };
+            } else {
+                // Repair also fails — targets non-existent node
+                return {
+                    completed: true,
+                    value: JSON.stringify([
+                        { op: 'update', nodeId: '8888', html: 'Still ghost' },
+                    ]),
+                };
+            }
+        };
+
+        const result = await transformPage(makeArgs(stub));
+        assert.strictEqual(result.completed, true);
+        assert.strictEqual(callCount, 2);
     });
 });

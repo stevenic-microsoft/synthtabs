@@ -122,7 +122,7 @@ function spawnProcess(command: string, args: string[]): Promise<ExecuteScriptRes
     });
 }
 
-function composeArguments(template: string, variables: Record<string, any>): string {
+export function composeArguments(template: string, variables: Record<string, any>): string {
     return template.replace(/{{\s*([^}\s]+)\s*}}/g, (match, name) => {
         // Convert the variable to a string and replace double quotes and line feeds with spaces
         return variableToString(variables[name]);

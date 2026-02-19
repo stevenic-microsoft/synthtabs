@@ -9,37 +9,50 @@ export interface AnthropicArgs {
     maxRetries?: number;
 }
 
+/**
+ * Build the messages array and system content for an Anthropic API request.
+ * Pure function — no SDK dependency.
+ */
+export function buildAnthropicRequest(args: PromptCompletionArgs, defaultTemp: number): {
+    messages: { role: string; content: string }[];
+    system: string | undefined;
+    temperature: number;
+} {
+    const reqTemp = args.temperature ?? defaultTemp;
+
+    const messages: { role: string; content: string }[] = [];
+    if (args.history) {
+        for (const msg of args.history) {
+            messages.push({ role: msg.role, content: msg.content });
+        }
+    }
+
+    const useJsonPrefill = args.jsonMode || args.jsonSchema;
+    if (useJsonPrefill) {
+        messages.push({ role: 'user', content: args.prompt.content });
+        messages.push({ role: 'assistant', content: '{' });
+    } else {
+        messages.push({ role: 'user', content: args.prompt.content });
+    }
+
+    let system = args.system?.content;
+    if (args.jsonSchema) {
+        const schemaInstruction = `\n\nYou must return valid JSON conforming to this schema:\n${JSON.stringify(args.jsonSchema)}`;
+        system = system ? system + schemaInstruction : schemaInstruction;
+    }
+
+    return { messages, system, temperature: reqTemp };
+}
+
 export function anthropic(args: AnthropicArgs): completePrompt {
     const { apiKey, model, baseURL, temperature = 0.0, maxRetries } = args;
 
     const client = new Anthropic({ apiKey, baseURL, maxRetries });
 
     return async (completionArgs: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
-        const reqTemp = completionArgs.temperature ?? temperature;
-
-        // Build messages array from history + prompt
-        const messages: Anthropic.MessageParam[] = [];
-        if (completionArgs.history) {
-            for (const msg of completionArgs.history) {
-                messages.push({ role: msg.role as 'user' | 'assistant', content: msg.content });
-            }
-        }
+        const { messages, system: systemContent, temperature: reqTemp } = buildAnthropicRequest(completionArgs, temperature);
 
         const useJsonPrefill = completionArgs.jsonMode || completionArgs.jsonSchema;
-        if (useJsonPrefill) {
-            // JSON mode: append prompt then prefill with '{'
-            messages.push({ role: 'user', content: completionArgs.prompt.content });
-            messages.push({ role: 'assistant', content: '{' });
-        } else {
-            messages.push({ role: 'user', content: completionArgs.prompt.content });
-        }
-
-        // When a JSON schema is provided, include it in the system prompt
-        let systemContent = completionArgs.system?.content;
-        if (completionArgs.jsonSchema) {
-            const schemaInstruction = `\n\nYou must return valid JSON conforming to this schema:\n${JSON.stringify(completionArgs.jsonSchema)}`;
-            systemContent = systemContent ? systemContent + schemaInstruction : schemaInstruction;
-        }
 
         try {
             const stream = await client.messages.create({
@@ -47,7 +60,7 @@ export function anthropic(args: AnthropicArgs): completePrompt {
                 max_tokens: 32768,
                 temperature: reqTemp,
                 system: systemContent,
-                messages,
+                messages: messages as Anthropic.MessageParam[],
                 stream: true,
             });
 

@@ -41,7 +41,8 @@
       "Bash(echo:*)",
       "Bash(test:*)",
       "WebFetch(domain:docs.openclaw.ai)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npm run test:mocha:*)"
     ]
   }
 }

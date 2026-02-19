@@ -20,7 +20,7 @@ const FIREWORKS_BASE_URL = 'https://api.fireworks.ai/inference/v1';
  * Extract JSON from a string that may be wrapped in markdown fences or prose.
  * Returns the original string if no JSON object/array is found.
  */
-function extractJSON(text: string): string {
+export function extractJSON(text: string): string {
     // Strip markdown code fences (```json ... ``` or ``` ... ```)
     const fenceMatch = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
     if (fenceMatch) {
@@ -53,37 +53,58 @@ function extractJSON(text: string): string {
     return text.slice(start);
 }
 
+/**
+ * Resolve a short Fireworks model name to the full API path.
+ * Returns the input unchanged if not a known short name.
+ */
+export function resolveFireworksModel(model: string): string {
+    return FIREWORKS_MODEL_MAP[model] || model;
+}
+
+/**
+ * Build the messages array, temperature, and JSON flag for a FireworksAI request.
+ * Pure function — no SDK dependency.
+ */
+export function buildFireworksRequest(args: PromptCompletionArgs, defaultTemp: number): {
+    messages: { role: string; content: string }[];
+    temperature: number;
+    useJson: boolean;
+} {
+    const temperature = args.temperature ?? defaultTemp;
+    const useJson = !!(args.jsonMode || args.jsonSchema);
+
+    const messages: { role: string; content: string }[] = [];
+    if (args.system) {
+        messages.push({ role: 'system', content: args.system.content });
+    }
+    if (args.history) {
+        for (const msg of args.history) {
+            messages.push({ role: msg.role, content: msg.content });
+        }
+    }
+
+    let userContent = args.prompt.content;
+    if (useJson) {
+        userContent += '\n\nRespond with valid JSON only. No markdown fences.';
+    }
+    messages.push({ role: 'user', content: userContent });
+
+    return { messages, temperature, useJson };
+}
+
 export function fireworksai(args: FireworksAIArgs): completePrompt {
     const { apiKey, temperature = 0.0 } = args;
-    const model = FIREWORKS_MODEL_MAP[args.model] || args.model;
+    const model = resolveFireworksModel(args.model);
 
     const client = new OpenAI({ apiKey, baseURL: FIREWORKS_BASE_URL });
 
     return async (completionArgs: PromptCompletionArgs): Promise<AgentCompletion<string>> => {
-        const reqTemp = completionArgs.temperature ?? temperature;
-        const useJson = completionArgs.jsonMode || completionArgs.jsonSchema;
-
-        // Build chat messages
-        const messages: OpenAI.ChatCompletionMessageParam[] = [];
-        if (completionArgs.system) {
-            messages.push({ role: 'system', content: completionArgs.system.content });
-        }
-        if (completionArgs.history) {
-            for (const msg of completionArgs.history) {
-                messages.push({ role: msg.role as 'user' | 'assistant', content: msg.content });
-            }
-        }
-
-        let userContent = completionArgs.prompt.content;
-        if (useJson) {
-            userContent += '\n\nRespond with valid JSON only. No markdown fences.';
-        }
-        messages.push({ role: 'user', content: userContent });
+        const { messages, temperature: reqTemp, useJson } = buildFireworksRequest(completionArgs, temperature);
 
         try {
             const response = await client.chat.completions.create({
                 model,
-                messages,
+                messages: messages as OpenAI.ChatCompletionMessageParam[],
                 temperature: reqTemp,
                 max_tokens: 32768,
                 ...(useJson ? { response_format: { type: 'json_object' } } : {}),
