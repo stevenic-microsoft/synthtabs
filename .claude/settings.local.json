@@ -45,7 +45,8 @@
       "Bash(npm run test:mocha:*)",
       "Bash(git -C \"C:/source/synthos\" log --oneline)",
       "Bash(git -C \"C:/source/synthos\" log --oneline --all)",
-      "Bash(git -C C:/source/synthos log --oneline --all)"
+      "Bash(git -C C:/source/synthos log --oneline --all)",
+      "Bash(wc:*)"
     ]
   }
 }
