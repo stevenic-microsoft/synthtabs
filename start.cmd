@@ -1,2 +1,2 @@
 @echo off
-npm run build && node bin\synthos.js start %*
+npm run build && node bin\synthtabs.js start %*
