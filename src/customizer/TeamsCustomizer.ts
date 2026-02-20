@@ -36,7 +36,9 @@ export class TeamsCustomizer extends Customizer {
     }
 }
 
-const transformInstructions = `<COMPONENTS>
+const transformInstructions = `Prefer using the <UI_COMPONENTS> below when designing pages:
+
+<UI_COMPONENTS>
 
 ## Button
 <button class="mt-btn" data-style="accent" data-size="md">Button</button>

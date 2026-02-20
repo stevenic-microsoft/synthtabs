@@ -150,30 +150,13 @@ body {
 .chat-panel {
     width: 30%;
     background: var(--bg-secondary);
-    box-shadow: 1px 0 2px rgba(0,0,0,0.35);
+    box-shadow: -1px 0 2px rgba(0,0,0,0.35);
     padding: 20px;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid var(--border-color);
+    border-left: 1px solid var(--border-color);
     position: relative;
-    transition: margin-left 0.3s ease, border-right-color 0.3s ease;
-}
-
-.chat-header {
-    font-size: 24px;
-    min-height: var(--header-min-height);
-    padding: var(--header-padding-vertical) var(--header-padding-horizontal);
-    line-height: var(--header-line-height);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    background: var(--accent-primary);
-    color: #fff;
-    border-radius: 6px;
-    box-shadow: var(--shadow-sm);
-    letter-spacing: 1px;
-    font-weight: 700;
+    transition: margin-right 0.3s ease, border-left-color 0.3s ease;
 }
 
 .chat-messages {
@@ -293,7 +276,7 @@ form {
 .viewer-panel {
     flex: 1;
     min-width: 0;
-    padding: 20px 20px 20px 44px;
+    padding: 20px 44px 20px 20px;
     background: var(--bg-tertiary);
     display: flex;
     flex-direction: column;
@@ -365,22 +348,22 @@ form {
 /* ---- Chat Toggle ---- */
 .chat-toggle {
     position: fixed;
-    left: 30%;
+    right: 30%;
     top: 50%;
     transform: translateY(-50%);
     width: 24px;
     height: 80px;
     background: var(--bg-secondary);
     border: none;
-    border-left: 1px solid var(--border-color);
-    border-radius: 0 6px 6px 0;
+    border-right: 1px solid var(--border-color);
+    border-radius: 6px 0 0 6px;
     cursor: pointer;
     z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
-    transition: left 0.3s ease, background 0.2s ease;
+    transition: right 0.3s ease, background 0.2s ease;
 }
 
 .chat-toggle:hover {
@@ -406,12 +389,12 @@ form {
 }
 
 body.chat-collapsed .chat-panel {
-    margin-left: -30%;
-    border-right-color: transparent;
+    margin-right: -30%;
+    border-left-color: transparent;
 }
 
 body.chat-collapsed .chat-toggle {
-    left: 0;
+    right: 0;
 }
 
 /* ---- Modal ---- */
