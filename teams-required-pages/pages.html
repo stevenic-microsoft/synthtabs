@@ -1,81 +1,103 @@
 <!DOCTYPE html><html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SynthOS - Pages</title>
+    <title>Teams - Pages</title>
     <script id="theme-info" src="/api/theme-info.js" data-locked="true"></script>
     <link id="theme-css" rel="stylesheet" href="/api/theme.css" data-locked="true">
     <style>
+        /* Override theme's .viewer-panel > div { flex:1 } which makes every child grow */
+        .viewer-panel { overflow-y: auto; padding: 0 20px }
+        .viewer-panel > div { flex: none }
+
         /* Advanced options */
         .advanced-options { margin-top: 8px }
-        .advanced-toggle { background: 0 0; border: none; color: var(--text-secondary); font-size: 13px; cursor: pointer; padding: 8px 0; display: flex; align-items: center; gap: 6px; transition: color .2s }
+        .advanced-toggle { background: none; border: none; color: var(--text-secondary); font-size: 13px; cursor: pointer; padding: 8px 0; display: flex; align-items: center; gap: 6px; transition: color 0.2s }
         .advanced-toggle:hover { color: var(--accent-primary) }
-        .toggle-icon { font-size: 10px; transition: transform .2s }
+        .toggle-icon { font-size: 10px; transition: transform 0.2s }
         .toggle-icon.open { transform: rotate(90deg) }
         .advanced-content { padding-left: 16px; border-left: 2px solid var(--border-color); margin-left: 4px }
 
         /* Header */
-        .saved-pages { font-size: 22px; font-weight: 700; min-height: var(--header-min-height); padding: var(--header-padding-vertical) var(--header-padding-horizontal); line-height: var(--header-line-height); display: flex; align-items: center; justify-content: center; box-sizing: border-box; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: #fff; border-radius: 12px; width: 100%; box-shadow: 0 6px 25px var(--accent-glow); position: relative; z-index: 1; margin-bottom: 20px }
+        .saved-pages { font-size: 18px; font-weight: 700; padding: 14px 20px; display: flex; align-items: center; justify-content: center; box-sizing: border-box; background: var(--accent-primary); color: var(--accent-contrast, #fff); border-radius: 6px; width: 100%; box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.08)); position: relative; z-index: 1; margin-bottom: 16px }
 
         /* Category sections */
         .page-category { width: 100%; margin-bottom: 20px; position: relative; z-index: 1 }
-        .category-title { font-size: 16px; color: var(--text-secondary); margin-bottom: 12px; padding-left: 5px; border-left: 3px solid var(--accent-tertiary) }
+        .category-title { font-size: 15px; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px; padding-left: 8px; border-left: 3px solid var(--accent-primary) }
         .page-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px }
 
         /* Page links */
-        .page-link { padding: 12px 16px; background: linear-gradient(135deg, rgba(102,126,234,.15) 0, rgba(118,75,162,.15) 100%); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-primary); text-decoration: none; text-align: center; font-size: 14px; transition: .3s; cursor: pointer; user-select: none; white-space: nowrap; overflow: hidden; position: relative }
-        .page-link:hover { background: linear-gradient(135deg, rgba(102,126,234,.3) 0, rgba(118,75,162,.3) 100%); border-color: var(--text-secondary); box-shadow: 0 4px 15px var(--accent-glow); color: var(--accent-tertiary); transform: translateY(-2px) }
+        .page-link { padding: 12px 16px; background: var(--surface, var(--bg-primary)); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); text-decoration: none; text-align: center; font-size: 14px; transition: background 0.2s, border-color 0.2s, transform 0.2s; cursor: pointer; user-select: none; white-space: nowrap; overflow: hidden; position: relative }
+        .page-link:hover { background: var(--surface-hover, var(--bg-tertiary)); border-color: var(--accent-primary); color: var(--accent-primary); transform: translateY(-1px); box-shadow: var(--shadow-sm) }
         .page-link .scroll-text { display: inline-block; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis }
         .page-link.scrolling .scroll-text { text-overflow: clip; overflow: visible; animation: scrollText var(--scroll-duration, 3s) linear infinite }
         @keyframes scrollText { 0%, 10% { transform: translateX(0) } 100%, 90% { transform: translateX(var(--scroll-distance, -50%)) } }
 
         /* Pinned pages */
-        .page-link.pinned { background: linear-gradient(135deg, rgba(102,126,234,.35) 0, rgba(118,75,162,.35) 100%); border: 2px solid var(--accent-tertiary); box-shadow: 0 2px 12px var(--accent-glow) }
-        .page-link.pinned:hover { background: linear-gradient(135deg, rgba(102,126,234,.5) 0, rgba(118,75,162,.5) 100%); box-shadow: 0 4px 20px var(--accent-glow) }
+        .page-link.pinned { background: var(--accent-glow); border: 2px solid var(--accent-primary); box-shadow: none }
+        .page-link.pinned:hover { background: var(--accent-glow); border-color: var(--accent-secondary); box-shadow: var(--shadow-sm) }
 
         /* Builder page */
-        .page-link.builder-page { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: #fff; border: none; box-shadow: 0 4px 20px var(--accent-glow); font-weight: 600 }
-        .page-link.builder-page:hover { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); filter: brightness(1.1); box-shadow: 0 6px 25px var(--accent-glow); color: #fff; transform: translateY(-2px) }
-
-        /* Light mode pinned overrides */
-        .light-mode .page-link.pinned { background: linear-gradient(135deg, rgba(102,126,234,.3) 0, rgba(192,84,212,.25) 100%); border-color: var(--accent-secondary) }
-        .light-mode .page-link.pinned:hover { background: linear-gradient(135deg, rgba(102,126,234,.45) 0, rgba(192,84,212,.4) 100%) }
+        .page-link.builder-page { background: var(--accent-primary); color: var(--accent-contrast, #fff); border: none; box-shadow: var(--shadow-sm); font-weight: 600 }
+        .page-link.builder-page:hover { background: var(--accent-hover); box-shadow: var(--shadow-lg, 0 6px 18px rgba(0,0,0,0.18)); color: var(--accent-contrast, #fff); transform: translateY(-1px) }
 
         /* Filter bar */
         .filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: nowrap }
         .filter-buttons-container { display: flex; gap: 8px; flex-shrink: 1; min-width: 0; overflow: hidden }
-        .filter-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: 0 0; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: .2s; white-space: nowrap; flex-shrink: 0 }
+        .filter-btn { padding: 6px 14px; border-radius: 4px; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: 0.2s; white-space: nowrap; flex-shrink: 0 }
         .filter-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary) }
-        .filter-btn.active { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: #fff; border-color: transparent }
+        .filter-btn.active { background: var(--accent-primary); color: var(--accent-contrast, #fff); border-color: transparent }
 
         /* More dropdown */
         .more-dropdown { position: relative; flex-shrink: 0 }
         .more-btn { position: relative }
-        .more-menu { position: absolute; top: 100%; left: 0; margin-top: 4px; min-width: 150px; max-height: 250px; overflow-y: auto; border-radius: 8px; padding: 4px 0; box-shadow: 0 8px 30px rgba(0,0,0,.4); display: none; border: 1px solid var(--border-color); background: rgba(30,30,50,.95); z-index: 100 }
+        .more-menu { position: absolute; top: 100%; left: 0; margin-top: 4px; min-width: 150px; max-height: 250px; overflow-y: auto; border-radius: 6px; padding: 4px 0; box-shadow: var(--menu-shadow, 0 6px 18px rgba(0,0,0,0.18)); display: none; border: 1px solid var(--menu-border, var(--border-color)); background: var(--menu-bg, var(--bg-primary)); z-index: 100 }
         .more-menu.show { display: block }
-        .more-menu-item { padding: 8px 16px; font-size: 13px; cursor: pointer; color: var(--text-primary); transition: background .15s; white-space: nowrap }
-        .more-menu-item:hover { background: linear-gradient(135deg, rgba(102,126,234,.3) 0, rgba(118,75,162,.3) 100%) }
-        .more-menu-item.active { background: linear-gradient(135deg, rgba(102,126,234,.2) 0, rgba(118,75,162,.2) 100%); color: var(--accent-tertiary) }
+        .more-menu-item { padding: 8px 16px; font-size: 13px; cursor: pointer; color: var(--text-primary); transition: background 0.15s; white-space: nowrap }
+        .more-menu-item:hover { background: var(--surface-hover, var(--bg-tertiary)) }
+        .more-menu-item.active { background: var(--accent-glow); color: var(--accent-primary) }
 
         /* Search */
-        .search-input { margin-left: auto; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-color); background: 0 0; color: var(--text-primary); font-size: 13px; outline: 0; width: 180px; min-width: 120px; flex-shrink: 0; transition: border-color .2s }
-        .search-input:focus { border-color: var(--accent-primary) }
-        .search-input::placeholder { color: var(--text-secondary) }
+        .search-input { margin-left: auto; padding: 6px 12px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--input-bg, var(--bg-primary)); color: var(--text-primary); font-size: 13px; outline: 0; width: 180px; min-width: 120px; flex-shrink: 0; transition: border-color 0.2s }
+        .search-input:focus { outline: none; box-shadow: inset 0 -2px 0 var(--accent-primary) }
+        .search-input::placeholder { color: var(--text-disabled, var(--text-secondary)) }
 
         /* Context menu */
-        .context-menu { position: fixed; z-index: 1000; min-width: 180px; border-radius: 8px; padding: 4px 0; box-shadow: 0 8px 30px rgba(0,0,0,.4); display: none; border: 1px solid var(--border-color); background: rgba(30,30,50,.95) }
-        .context-menu-item { padding: 8px 16px; font-size: 13px; cursor: pointer; color: var(--text-primary); transition: background .15s }
-        .context-menu-item:hover { background: linear-gradient(135deg, rgba(102,126,234,.3) 0, rgba(118,75,162,.3) 100%) }
-        .light-mode .context-menu, .light-mode .more-menu { background: rgba(255,255,255,.97); box-shadow: 0 8px 30px rgba(0,0,0,.15) }
+        .context-menu { position: fixed; z-index: 1000; min-width: 180px; border-radius: 6px; padding: 4px 0; box-shadow: var(--menu-shadow, 0 6px 18px rgba(0,0,0,0.18)); display: none; border: 1px solid var(--menu-border, var(--border-color)); background: var(--menu-bg, var(--bg-primary)) }
+        .context-menu-item { padding: 8px 16px; font-size: 13px; cursor: pointer; color: var(--text-primary); transition: background 0.15s }
+        .context-menu-item:hover { background: var(--surface-hover, var(--bg-tertiary)) }
 
         /* Upgrade badge & toast */
-        .version-badge { display: block; font-size: 10px; color: var(--accent-tertiary); margin-top: 4px; opacity: .8 }
-        .page-link.needs-upgrade { border: 1px dashed var(--accent-tertiary); background: linear-gradient(135deg, rgba(102,126,234,.08) 0, rgba(118,75,162,.08) 100%); animation: 3s ease-in-out infinite upgradeGlow; overflow: visible; z-index: 2 }
-        .page-link.needs-upgrade:hover { background: linear-gradient(135deg, rgba(102,126,234,.2) 0, rgba(118,75,162,.2) 100%); border-color: var(--accent-primary) }
-        @keyframes upgradeGlow { 0%, 100% { box-shadow: 0 0 0 transparent } 50% { box-shadow: 0 0 12px var(--accent-glow) } }
-        .upgrade-badge { position: absolute; top: -6px; right: -6px; font-size: 9px; color: #fff; font-weight: 600; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); padding: 2px 7px; border-radius: 10px; line-height: 1.3; box-shadow: 0 2px 8px var(--accent-glow); pointer-events: none; z-index: 10 }
-        .light-mode .page-link.needs-upgrade { background: linear-gradient(135deg, rgba(102,126,234,.06) 0, rgba(192,84,212,.06) 100%) }
-        .upgrade-toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: #fff; border-radius: 8px; font-size: 13px; box-shadow: 0 4px 15px var(--accent-glow); z-index: 2000; opacity: 0; transform: translateY(10px); transition: opacity .3s, transform .3s }
+        .version-badge { display: block; font-size: 10px; color: var(--accent-primary); margin-top: 4px; opacity: 0.8 }
+        .page-link.needs-upgrade { border: 1px dashed var(--accent-primary); background: var(--accent-glow); overflow: visible; z-index: 2 }
+        .page-link.needs-upgrade:hover { background: var(--accent-glow); border-color: var(--accent-primary) }
+        .upgrade-badge { position: absolute; top: -6px; right: -6px; font-size: 9px; color: var(--accent-contrast, #fff); font-weight: 600; background: var(--accent-primary); padding: 2px 7px; border-radius: 10px; line-height: 1.3; box-shadow: var(--shadow-sm); pointer-events: none; z-index: 10 }
+        .upgrade-toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: var(--accent-primary); color: var(--accent-contrast, #fff); border-radius: 6px; font-size: 13px; box-shadow: var(--shadow-sm); z-index: 2000; opacity: 0; transform: translateY(10px); transition: opacity 0.3s, transform 0.3s }
         .upgrade-toast.show { opacity: 1; transform: translateY(0) }
+
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--scrim, rgba(0,0,0,0.5)); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(4px) }
+        .modal-overlay.show { display: flex }
+        .modal-content { background: var(--surface, var(--bg-primary)); border: 1px solid var(--border-color); border-radius: 8px; padding: 0; max-width: 480px; width: 90%; box-shadow: var(--shadow-lg, 0 6px 18px rgba(0,0,0,0.18)) }
+        .modal-header { font-size: 16px; font-weight: 700; color: var(--accent-contrast, #fff); background: var(--accent-primary); padding: 16px 20px; border-bottom: 1px solid var(--border-color); border-radius: 8px 8px 0 0 }
+        .modal-body { padding: 16px 20px }
+        .modal-footer { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-top: 1px solid var(--border-color) }
+        .modal-footer-right { display: flex; gap: 8px; margin-left: auto }
+
+        /* Modal buttons */
+        .modal-btn { padding: 8px 16px; border: none; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s }
+        .modal-btn-primary { background: var(--accent-primary); color: var(--accent-contrast, #fff) }
+        .modal-btn-primary:hover { background: var(--accent-hover) }
+        .modal-btn-secondary { background: transparent; border: 1px solid var(--border-color); color: var(--text-primary) }
+        .modal-btn-secondary:hover { background: var(--surface-hover, var(--bg-tertiary)) }
+        .modal-btn-danger { background: var(--danger, #d13438); color: #fff }
+        .modal-btn-danger:hover { opacity: 0.85 }
+
+        /* Form fields */
+        .form-group { margin-bottom: 12px }
+        .form-label { display: block; margin-bottom: 6px; color: var(--text-secondary); font-weight: 600; font-size: 13px }
+        .form-input { width: 100%; padding: 10px 14px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--input-bg, var(--bg-primary)); color: var(--text-primary); font-size: 14px; transition: border-color 0.2s; box-sizing: border-box }
+        .form-input:focus { outline: none; box-shadow: inset 0 -2px 0 var(--accent-primary) }
+        .checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
@@ -84,26 +106,8 @@
 </head>
 
 <body>
-    <div class="chat-panel" data-locked="true">
-        <div class="chat-header" data-locked="true">SynthOS</div>
-        <div class="chat-messages" id="chatMessages" data-locked="true">
-            <div class="chat-message">
-                <p><strong>SynthOS:</strong> Here are all of the created pages. Right-click any page to pin it to
-                    favorites, edit its definition, or copy it to a new page.</p>
-            </div>
-        </div>
-        <div class="link-group" data-locked="true">
-            <a href="#" id="saveLink" data-locked="true">Save</a>
-            <a href="/pages" id="pagesLink" data-locked="true">Pages</a>
-            <a href="#" id="resetLink" data-locked="true">Reset</a>
-        </div>
-        <form action="/" method="POST" id="chatForm" data-locked="true">
-            <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message..." data-locked="true">
-            <button type="submit" class="chat-submit" data-locked="true">Send</button>
-        </form>
-    </div>
     <div class="viewer-panel" id="viewerPanel" style="justify-content: flex-start; align-items: stretch;">
-        <div class="saved-pages">Pages<button id="importBtn" style="position: absolute; right: 16px; padding: 4px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.15); color: #fff; font-size: 13px; cursor: pointer; transition: background .2s; line-height: 1.4;" onmouseover="this.style.background='rgba(255,255,255,.3)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">Import</button></div>
+        <div class="saved-pages">Pages<button id="importBtn" style="position:absolute;right:16px;padding:6px 14px;border-radius:4px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;font-size:13px;cursor:pointer;transition:background 0.2s;line-height:1.4;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">Import</button></div>
         <input type="file" id="importFileInput" accept=".zip" style="display:none">
 
         <!-- Favorites section (hidden when empty) -->
@@ -232,6 +236,25 @@
             </div>
         </div>
         <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
+    </div>
+    <div class="chat-rail" aria-label="Open chat panel"><span class="chat-rail-label">Tab Designer</span></div>
+    <div class="chat-panel" data-locked="true">
+        <div class="chat-panel-header" data-locked="true"><span class="chat-panel-header__title">Tab Designer</span><button class="chat-panel-close" aria-label="Close chat panel">&times;</button></div>
+        <div class="chat-messages" id="chatMessages" data-locked="true">
+            <div class="chat-message">
+                <p><strong>Teams:</strong> Here are all of the created pages. Right-click any page to pin it to
+                    favorites, edit its definition, or copy it to a new page.</p>
+            </div>
+        </div>
+        <div class="link-group" data-locked="true">
+            <a href="#" id="saveLink" data-locked="true">Save</a>
+            <a href="/pages" id="pagesLink" data-locked="true">Pages</a>
+            <a href="#" id="resetLink" data-locked="true">Reset</a>
+        </div>
+        <form action="/" method="POST" id="chatForm" data-locked="true">
+            <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message..." data-locked="true">
+            <button type="submit" class="chat-submit" data-locked="true">Send</button>
+        </form>
     </div>
 
     <!-- Context menu -->

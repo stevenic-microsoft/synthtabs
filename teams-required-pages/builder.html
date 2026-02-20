@@ -18,14 +18,9 @@
         </div>
         <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
     </div>
-    <button class="chat-toggle" aria-label="Toggle chat panel">
-        <span class="chat-toggle-dots">
-            <span class="chat-toggle-dot"></span>
-            <span class="chat-toggle-dot"></span>
-            <span class="chat-toggle-dot"></span>
-        </span>
-    </button>
+    <div class="chat-rail" aria-label="Open chat panel"><span class="chat-rail-label">Tab Designer</span></div>
     <div class="chat-panel" data-locked="true">
+        <div class="chat-panel-header" data-locked="true"><span class="chat-panel-header__title">Tab Designer</span><button class="chat-panel-close" aria-label="Close chat panel">&times;</button></div>
         <div class="chat-messages" id="chatMessages" data-locked="true">
             <div class="chat-message" id="defaultGreeting"><p><strong>Teams:</strong> What can I create for you? Ask "what can you do?" or "how does this work?" to learn more. Remember to save often!</p></div>
         </div>

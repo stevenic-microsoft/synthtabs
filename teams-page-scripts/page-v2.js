@@ -97,9 +97,7 @@
         window.__synthOSTooltip = attach;
     })();
 
-    // 1. Initial focus
     var chatInput = document.getElementById('chatInput');
-    if (chatInput) chatInput.focus();
 
     // 2. Form submit handler — show overlay + disable inputs
     var chatForm = document.getElementById('chatForm');
@@ -358,34 +356,30 @@
         });
     }
 
-    // 6. Chat toggle button — create (if not already in markup), persist in localStorage
+    // 6. Chat panel header close + rail expand, persist in localStorage
     (function() {
-        var btn = document.querySelector('.chat-toggle');
-        if (!btn) {
-            btn = document.createElement('button');
-            btn.className = 'chat-toggle';
-            btn.setAttribute('aria-label', 'Toggle chat panel');
-            var dots = document.createElement('span');
-            dots.className = 'chat-toggle-dots';
-            for (var i = 0; i < 3; i++) {
-                var dot = document.createElement('span');
-                dot.className = 'chat-toggle-dot';
-                dots.appendChild(dot);
-            }
-            btn.appendChild(dots);
-            document.body.appendChild(btn);
-        }
-
         var STORAGE_KEY = 'synthos-chat-collapsed';
+        var closeBtn = document.querySelector('.chat-panel-close');
+        var rail = document.querySelector('.chat-rail');
 
         if (localStorage.getItem(STORAGE_KEY) === 'true') {
             document.body.classList.add('chat-collapsed');
         }
 
-        btn.addEventListener('click', function() {
-            document.body.classList.toggle('chat-collapsed');
-            localStorage.setItem(STORAGE_KEY, document.body.classList.contains('chat-collapsed'));
-        });
+        function collapse() {
+            document.body.classList.add('chat-collapsed');
+            localStorage.setItem(STORAGE_KEY, 'true');
+        }
+
+        function expand() {
+            document.body.classList.remove('chat-collapsed');
+            localStorage.setItem(STORAGE_KEY, 'false');
+            var ci = document.getElementById('chatInput');
+            if (ci) ci.focus();
+        }
+
+        if (closeBtn) closeBtn.addEventListener('click', collapse);
+        if (rail) rail.addEventListener('click', expand);
     })();
 
     // 7. Focus management — prevent viewer content from stealing keystrokes
@@ -653,4 +647,9 @@
             }
         });
     })();
+
+    // Initial focus — run after all setup (including chat-collapsed check)
+    if (chatInput && !document.body.classList.contains('chat-collapsed')) {
+        chatInput.focus();
+    }
 })();

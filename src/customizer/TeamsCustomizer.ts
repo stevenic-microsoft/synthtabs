@@ -36,7 +36,9 @@ export class TeamsCustomizer extends Customizer {
     }
 }
 
-const transformInstructions = `Prefer using the <UI_COMPONENTS> below when designing pages:
+const transformInstructions = `The viewer panel automatically fills the full available space. App content stretches to fill the full viewer width and height so do not add the "full-viewer" class to the viewer-panel element.
+Chat panel collapse/expand: The chat panel uses a header bar (.chat-panel-header) with a close button (.chat-panel-close) and a collapsed rail (.chat-rail) instead of the floating .chat-toggle button. Do NOT create or reference .chat-toggle elements. The page script handles close/expand behaviour and localStorage persistence automatically.
+Prefer using the <UI_COMPONENTS> below when designing pages:
 
 <UI_COMPONENTS>
 
@@ -368,5 +370,4 @@ const transformInstructions = `Prefer using the <UI_COMPONENTS> below when desig
 ## Tooltip
 <button class="mt-btn" data-style="neutral" aria-describedby="tt1">Hover me</button>
 <div id="tt1" class="mt-tooltip" role="tooltip" data-placement="top" data-open="true">Tooltip</div>
-
-</COMPONENTS>`;
+`;
