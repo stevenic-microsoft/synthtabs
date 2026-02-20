@@ -117,9 +117,9 @@ export function usePageRoutes(config: SynthOSConfig, app: Application, customize
         const metadata = await loadPageMetadata(config.pagesFolder, page, config.requiredPagesFolder);
         const pageVersion = metadata?.pageVersion ?? 0;
 
-        // Block outdated pages (redirect to /pages so user sees upgrade UI)
+        // Block outdated pages (redirect to tabs list so user sees upgrade UI)
         if (pageVersion < PAGE_VERSION && !REQUIRED_PAGES.includes(page)) {
-            res.redirect('/pages');
+            res.redirect(customizer?.tabsListRoute ?? '/pages');
             return;
         }
 

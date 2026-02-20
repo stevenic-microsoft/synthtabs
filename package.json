@@ -1,23 +1,24 @@
 {
-    "name": "synthos",
+    "name": "synthtabs",
     "author": "Steven Ickman",
-    "description": "The Hyper-Personalized App Builder That Turns Everyone Into a Programmer.",
-    "version": "0.8.0",
+    "description": "Dynamic vibe coded Tab Apps for Microsoft Teams.",
+    "version": "0.1.0",
     "license": "MIT",
     "keywords": [
         "synthos",
-        "ai"
+        "ai",
+        "teams"
     ],
     "bugs": {
-        "url": "https://github.com/Stevenic/synthos/issues"
+        "url": "https://github.com/Stevenic-microsoft/synthtabs/issues"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/Stevenic/synthos.git"
+        "url": "https://github.com/Stevenic-microsoft/synthtabs.git"
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
-    "bin": "./bin/synthos.js",
+    "bin": "./bin/synthtabs.js",
     "dependencies": {
         "@a2a-js/sdk": "^0.3.10",
         "@anthropic-ai/sdk": "^0.75.0",
@@ -47,21 +48,21 @@
     "scripts": {
         "build": "tsc -b",
         "clean": "rimraf dist tsconfig.tsbuildinfo node_modules",
-        "start": "node ./bin/synthos.js",
+        "start": "node ./bin/synthtabs.js start",
         "test": "npm run build && npm run test:mocha",
-        "test:mocha": "nyc ts-mocha tests/**/*.spec.ts"
+        "test:mocha": "nyc ts-mocha tests/**/*.spec.ts teams-tests/**/*.spec.ts"
     },
     "files": [
         "dist",
         "bin",
         "src",
         "tests",
-        "default-pages",
-        "default-scripts",
-        "default-themes",
-        "page-scripts",
-        "required-pages",
-        "service-connectors",
-        "images"
+        "teams-default-pages",
+        "teams-default-scripts",
+        "teams-default-themes",
+        "teams-page-scripts",
+        "teams-required-pages",
+        "teams-service-connectors",
+        "teams-tests"
     ]
 }
