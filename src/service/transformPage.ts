@@ -2,8 +2,9 @@ import { AgentArgs, AgentCompletion, SystemMessage, UserMessage } from "../model
 import { listScripts } from "../scripts";
 import * as cheerio from "cheerio";
 import { ThemeInfo } from "../themes";
-import { CONNECTOR_REGISTRY, ConnectorsConfig, ConnectorOAuthConfig } from "../connectors";
+import { getConnectorRegistry, ConnectorsConfig, ConnectorOAuthConfig } from "../connectors";
 import { AgentConfig } from "../agents";
+import { Customizer } from "../customizer";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -24,6 +25,10 @@ export interface TransformPageArgs extends AgentArgs {
     configuredConnectors?: ConnectorsConfig;
     /** User's configured A2A agents (from settings). */
     configuredAgents?: AgentConfig[];
+    /** Pre-built route hints string (from buildRouteHints). Falls back to full serverAPIs. */
+    routeHints?: string;
+    /** Custom transform instructions from Customizer. */
+    customTransformInstructions?: string[];
 }
 
 export type ChangeOp =
@@ -83,7 +88,7 @@ export async function transformPage(args: TransformPageArgs): Promise<AgentCompl
                 .filter(([, cfg]) => cfg.enabled && cfg.apiKey);
             if (entries.length > 0) {
                 const blocks = entries.map(([id, cfg]) => {
-                    const def = CONNECTOR_REGISTRY.find(d => d.id === id);
+                    const def = getConnectorRegistry().find(d => d.id === id);
                     if (!def) return `- ${id}`;
                     let block = `- ${def.name} (id: "${id}", category: ${def.category})\n  Base URL: ${def.baseUrl}`;
                     if (def.hints) {
@@ -124,7 +129,8 @@ export async function transformPage(args: TransformPageArgs): Promise<AgentCompl
             agentsBlock = `<CONFIGURED_AGENTS>\nThe user has configured these agents:\n\n${agentBlocks.join('\n\n')}\n\n${AGENT_API_REFERENCE}`;
         }
 
-        const systemMessage = [currentPage, serverAPIs, serverScripts, connectorsBlock, agentsBlock, themeBlock, messageFormat].filter(s => s).join('\n\n');
+        const routeHintsBlock = args.routeHints ?? serverAPIs;
+        const systemMessage = [currentPage, routeHintsBlock, serverScripts, connectorsBlock, agentsBlock, themeBlock, messageFormat].filter(s => s).join('\n\n');
         const system: SystemMessage = {
             role: 'system',
             content: systemMessage
@@ -132,7 +138,8 @@ export async function transformPage(args: TransformPageArgs): Promise<AgentCompl
 
         const userInstr = args.instructions || '';
         const modelInstr = args.modelInstructions || '';
-        const instructions = [userInstr, modelInstr, transformInstr].filter(s => s.trim() !== '').join('\n');
+        const customInstr = (args.customTransformInstructions ?? []).join('\n');
+        const instructions = [userInstr, modelInstr, transformInstr, customInstr].filter(s => s.trim() !== '').join('\n');
         const prompt: UserMessage = {
             role: 'user',
             content: `<USER_MESSAGE>\n${message}\n\n<INSTRUCTIONS>\n${instructions}`
@@ -704,6 +711,146 @@ Stream with attachments:
 IMPORTANT: Always check synthos.agents.list({ enabled: true }) before calling an agent.
 If no agents are configured, show the user a link to Settings > Agents (/settings?tab=agents).`;
 
+// ---------------------------------------------------------------------------
+// Route hint blocks — keyed by feature group so they can be filtered
+// ---------------------------------------------------------------------------
+
+export const DEFAULT_ROUTE_HINTS = new Map<string, string>([
+    ['data', `GET /api/data/:page/:table
+description: Retrieve all rows from a page-scoped table (tables are stored per-page). Supports pagination via query params.
+query params: limit (number, optional) — max rows to return; offset (number, optional, default 0) — rows to skip
+response (without limit): Array of JSON rows [{ id: string, ... }]
+response (with limit): { items: [{ id: string, ... }], total: number, offset: number, limit: number, hasMore: boolean }
+
+GET /api/data/:page/:table/:id
+description: Retrieve a single row from a page-scoped table
+response: JSON row { id: string, ... }
+
+POST /api/data/:page/:table
+description: Replaces or adds a single row to a page-scoped table and returns the row
+request: JSON row { id?: string, ... }
+response: { id: string, ... }
+
+DELETE /api/data/:page/:table/:id
+description: Delete a single row from a page-scoped table
+response: { success: true }
+
+  synthos.data.list(table, opts?)       — GET /api/data/:page/:table  (auto-scoped to current page; opts: { limit?, offset? } — when limit is set, returns { items, total, offset, limit, hasMore })
+  synthos.data.get(table, id)           — GET /api/data/:page/:table/:id  (auto-scoped to current page)
+  synthos.data.save(table, row)         — POST /api/data/:page/:table  (auto-scoped to current page)
+  synthos.data.remove(table, id)        — DELETE /api/data/:page/:table/:id  (auto-scoped to current page)`],
+
+    ['api', `POST /api/generate/image
+description: Generate an image based on a prompt
+request: { prompt: string, shape: 'square' | 'portrait' | 'landscape', style: 'vivid' | 'natural' }
+response: { url: string }
+
+POST /api/generate/completion
+description: Generates a text completion based on a prompt
+request: { prompt: string, temperature?: number }
+response: { answer: string, explanation: string }
+
+  synthos.generate.image({ prompt, shape, style })       — POST /api/generate/image
+  synthos.generate.completion({ prompt, temperature? })  — POST /api/generate/completion`],
+
+    ['pages', `GET /api/pages
+description: Retrieve a list of all pages with metadata
+response: Array of { name: string, title: string, categories: string[], pinned: boolean, createdDate: string, lastModified: string, pageVersion: number, mode: 'unlocked' | 'locked' }
+
+GET /api/pages/:name
+description: Retrieve metadata for a single page
+response: { title: string, categories: string[], pinned: boolean, createdDate: string, lastModified: string, pageVersion: number, mode: 'unlocked' | 'locked' }
+
+POST /api/pages/:name
+description: Update page metadata (merge semantics — send only fields to change; lastModified is auto-set)
+request: { title?: string, categories?: string[], pinned?: boolean, mode?: 'unlocked' | 'locked' }
+response: Full metadata object
+
+DELETE /api/pages/:name
+description: Delete a user page (cannot delete required/system pages)
+response: { deleted: true }
+
+  synthos.pages.list()                  — GET /api/pages
+  synthos.pages.get(name)               — GET /api/pages/:name
+  synthos.pages.update(name, metadata)  — POST /api/pages/:name
+  synthos.pages.remove(name)            — DELETE /api/pages/:name`],
+
+    ['scripts', `POST /api/scripts/:id
+description: Execute a script with the passed in variables
+request: { [key: string]: string }
+response: string
+
+  synthos.scripts.run(id, variables)    — POST /api/scripts/:id`],
+
+    ['search', `POST /api/search/web
+description: Search the web using Brave Search (must be enabled in Settings > Connectors)
+request: { query: string, count?: number, country?: string, freshness?: string }
+response: { results: [{ title: string, url: string, description: string }] }
+
+  synthos.search.web(query, opts?)      — POST /api/search/web  (opts: { count?, country?, freshness? })`],
+
+    ['agents', `GET /api/agents
+description: List configured agents (A2A and OpenClaw). Supports ?enabled=true and ?provider=a2a|openclaw filters.
+response: [{ id: string, name: string, description: string, url: string, enabled: boolean, provider: 'a2a'|'openclaw', capabilities?: object }]
+
+POST /api/agents/:id/send
+description: Send a text message to an agent (works for both A2A and OpenClaw protocols) and receive a normalized response
+request: { message: string, attachments?: [{ fileName: string, mimeType: string, content: string }] }
+response: { kind: 'message'|'task', text?: string, raw: object }
+
+POST /api/agents/:id/stream
+description: Send a message and receive a streaming SSE response (text/event-stream). Each event is JSON: { kind: 'text'|'status'|'artifact'|'done'|'error', data: any }
+request: { message: string, attachments?: [{ fileName: string, mimeType: string, content: string }] }
+response: SSE stream
+
+  synthos.agents.list(opts?)             — GET /api/agents  (returns configured agents; opts: { enabled?, provider? }; returns [{ id, name, description, url, enabled, provider, capabilities }])
+  synthos.agents.send(agentId, message, attachments?) — POST /api/agents/:id/send  (sends a text message to any agent, returns normalized { kind, text, raw }; attachments: [{ fileName, mimeType, content }])
+  synthos.agents.sendStream(agentId, message, onEvent, attachments?) — POST /api/agents/:id/stream  (SSE streaming; onEvent receives { kind, data }; returns { close() } handle; attachments: [{ fileName, mimeType, content }])
+  synthos.agents.isEnabled(agentId)     — checks if an agent is enabled (returns Promise<boolean>)
+  synthos.agents.getCapabilities(agentId) — returns agent capabilities object (streaming, skills, etc.)`],
+
+    ['connectors', `GET /api/connectors
+description: List available connectors (REST API proxies). Supports ?category=X and ?id=X filters.
+response: [{ id: string, name: string, category: string, configured: boolean }]
+
+GET /api/connectors/:id
+description: Get full detail for a connector including its definition and configuration status
+response: { id, name, category, description, baseUrl, authStrategy, authKey, fields, configured, enabled, hasKey }
+
+POST /api/connectors (proxy call)
+description: Proxy a request through a configured connector. The connector attaches auth automatically.
+request: { connector: string, method: string, path: string, headers?: object, body?: any, query?: object }
+response: Upstream API response (JSON or text)
+
+  synthos.connectors.call(connector, method, path, opts?) — POST /api/connectors  (proxy call; opts: { headers?, body?, query? })
+  synthos.connectors.list(opts?)        — GET /api/connectors  (opts: { category?, id? })`],
+]);
+
+/**
+ * Assemble the <SERVER_APIS> prompt block, including only hints for enabled
+ * feature groups and any custom route hints from the Customizer.
+ */
+export function buildRouteHints(customizer: Customizer): string {
+    const blocks: string[] = ['<SERVER_APIS>'];
+
+    // Built-in hints — only include enabled groups
+    for (const [group, hints] of DEFAULT_ROUTE_HINTS) {
+        if (customizer.isEnabled(group)) {
+            blocks.push(hints);
+        }
+    }
+
+    // Custom route hints from fork
+    for (const hint of customizer.getRouteHints()) {
+        blocks.push(hint);
+    }
+
+    blocks.push('PAGE HELPERS (available globally as window.synthos):');
+    blocks.push('All methods return Promises. Prefer these helpers over raw fetch().');
+    return blocks.join('\n\n');
+}
+
+// Backward-compatible full serverAPIs string (used when no Customizer is passed)
 const serverAPIs =
 `<SERVER_APIS>
 GET /api/data/:page/:table

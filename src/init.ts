@@ -4,6 +4,7 @@ import { checkIfExists, copyFile, copyFiles, deleteFile, ensureFolderExists, lis
 import { PAGE_VERSION } from "./pages";
 import { DefaultSettings } from "./settings";
 import { getOutdatedThemes, parseThemeFilename } from "./themes";
+import { Customizer } from './customizer';
 
 export interface SynthOSConfig {
     pagesFolder: string;
@@ -12,18 +13,24 @@ export interface SynthOSConfig {
     defaultScriptsFolder: string;
     defaultThemesFolder: string;
     pageScriptsFolder: string;
+    serviceConnectorsFolder: string;
     debug: boolean;
     debugPageUpdates: boolean;
 }
 
-export function createConfig(pagesFolder = '.synthos', options?: { debug?: boolean; debugPageUpdates?: boolean }): SynthOSConfig {
+export function createConfig(
+    pagesFolder = '.synthos',
+    options?: { debug?: boolean; debugPageUpdates?: boolean },
+    customizer?: Customizer
+): SynthOSConfig {
     return {
         pagesFolder: path.join(process.cwd(), pagesFolder),
-        requiredPagesFolder: path.join(__dirname, '../required-pages'),
-        defaultPagesFolder: path.join(__dirname, '../default-pages'),
+        requiredPagesFolder: customizer?.requiredPagesFolder ?? path.join(__dirname, '../required-pages'),
+        defaultPagesFolder: customizer?.defaultPagesFolder ?? path.join(__dirname, '../default-pages'),
         defaultScriptsFolder: path.join(__dirname, '../default-scripts'),
-        defaultThemesFolder: path.join(__dirname, '../default-themes'),
-        pageScriptsFolder: path.join(__dirname, '../page-scripts'),
+        defaultThemesFolder: customizer?.defaultThemesFolder ?? path.join(__dirname, '../default-themes'),
+        pageScriptsFolder: customizer?.pageScriptsFolder ?? path.join(__dirname, '../page-scripts'),
+        serviceConnectorsFolder: customizer?.serviceConnectorsFolder ?? path.join(__dirname, '../service-connectors'),
         debug: options?.debug ?? false,
         debugPageUpdates: options?.debugPageUpdates ?? false
     };

@@ -1,4 +1,4 @@
-export { CONNECTOR_REGISTRY } from './registry';
+export { loadConnectorRegistry, getConnectorRegistry } from './registry';
 export type {
     AuthStrategy,
     ConnectorField,

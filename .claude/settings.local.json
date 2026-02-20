@@ -42,7 +42,10 @@
       "Bash(test:*)",
       "WebFetch(domain:docs.openclaw.ai)",
       "Bash(curl:*)",
-      "Bash(npm run test:mocha:*)"
+      "Bash(npm run test:mocha:*)",
+      "Bash(git -C \"C:/source/synthos\" log --oneline)",
+      "Bash(git -C \"C:/source/synthos\" log --oneline --all)",
+      "Bash(git -C C:/source/synthos log --oneline --all)"
     ]
   }
 }

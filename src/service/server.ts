@@ -6,8 +6,9 @@ import { useDataRoutes } from './useDataRoutes';
 import { useConnectorRoutes } from './useConnectorRoutes';
 import { useAgentRoutes } from './useAgentRoutes';
 import { cyan, yellow, formatTime } from './debugLog';
+import { customizer as defaultCustomizer, Customizer } from '../customizer';
 
-export function server(config: SynthOSConfig): Application {
+export function server(config: SynthOSConfig, customizer: Customizer = defaultCustomizer): Application {
     const app = express();
 
     // Debug request-logging middleware
@@ -29,19 +30,24 @@ export function server(config: SynthOSConfig): Application {
     app.use(express.json());
 
     // Page handling routes
-    usePageRoutes(config, app);
+    if (customizer.isEnabled('pages')) usePageRoutes(config, app, customizer);
 
     // API routes
-    useApiRoutes(config, app);
+    if (customizer.isEnabled('api')) useApiRoutes(config, app, customizer);
 
     // Connector routes
-    useConnectorRoutes(config, app);
+    if (customizer.isEnabled('connectors')) useConnectorRoutes(config, app);
 
     // Agent routes
-    useAgentRoutes(config, app);
+    if (customizer.isEnabled('agents')) useAgentRoutes(config, app);
 
     // Data routes
-    useDataRoutes(config, app);
+    if (customizer.isEnabled('data')) useDataRoutes(config, app);
+
+    // Custom routes from the Customizer
+    for (const installer of customizer.getExtraRoutes()) {
+        installer(config, app);
+    }
 
     return app;
 }

@@ -4,3 +4,4 @@ export * from './init';
 export * from './pages';
 export * from './scripts';
 export * from './settings';
+export * from './customizer';

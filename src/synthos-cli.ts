@@ -2,6 +2,7 @@ import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { server } from "./service";
 import { createConfig, init } from "./init";
+import { customizer } from "./customizer";
 
 const dynamicImport = new Function('specifier', `return import(specifier)`);
 
@@ -32,9 +33,9 @@ export async function run() {
                 })
                 .demandOption([]);
         }, async (args) => {
-            const config = createConfig('.synthos', { debug: args.debug, debugPageUpdates: args.debugPageUpdates });
+            const config = createConfig('.synthos', { debug: args.debug, debugPageUpdates: args.debugPageUpdates }, customizer);
             await init(config, args.pages);
-            await server(config).listen(args.port, async () => {
+            await server(config, customizer).listen(args.port, async () => {
                 console.log(`SynthOS server is running on http://localhost:${args.port}`);
                 
                 // Open using default browser

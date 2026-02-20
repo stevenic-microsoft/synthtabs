@@ -1,13 +1,14 @@
 import { loadPageMetadata, loadPageState, normalizePageName, PAGE_VERSION, REQUIRED_PAGES, savePageMetadata, savePageState, updatePageState } from "../pages";
 import { getModelEntry, hasConfiguredSettings, loadSettings } from "../settings";
 import { Application } from 'express';
-import { transformPage } from "./transformPage";
+import { transformPage, buildRouteHints } from "./transformPage";
 import { getModelInstructions } from "./modelInstructions";
 import { SynthOSConfig } from "../init";
 import { createCompletePrompt } from "./createCompletePrompt";
 import { completePrompt } from "../models";
 import { green, red, dim, estimateTokens } from "./debugLog";
 import { loadThemeInfo } from "../themes";
+import { Customizer } from "../customizer";
 import * as cheerio from 'cheerio';
 
 /**
@@ -91,7 +92,7 @@ function injectPageScript(html: string, pageVersion: number): string {
     return html + '\n' + tag;
 }
 
-export function usePageRoutes(config: SynthOSConfig, app: Application): void {
+export function usePageRoutes(config: SynthOSConfig, app: Application, customizer?: Customizer): void {
     // Redirect / to /home page
     app.get('/', (req, res) => res.redirect(HOME_PAGE_ROUTE));
     
@@ -304,7 +305,9 @@ export function usePageRoutes(config: SynthOSConfig, app: Application): void {
             const modelInstructions = getModelInstructions(builder.provider);
             const configuredConnectors = settings.connectors;
             const configuredAgents = settings.agents;
-            const result = await transformPage({ pagesFolder, pageState, message, instructions, modelInstructions, completePrompt, themeInfo, configuredConnectors, configuredAgents });
+            const routeHints = customizer ? buildRouteHints(customizer) : undefined;
+            const customTransformInstructions = customizer ? customizer.getTransformInstructions() : undefined;
+            const result = await transformPage({ pagesFolder, pageState, message, instructions, modelInstructions, completePrompt, themeInfo, configuredConnectors, configuredAgents, routeHints, customTransformInstructions });
             if (result.completed) {
                 const { html, changeCount } = result.value!;
                 if (config.debug) {

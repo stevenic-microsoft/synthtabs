@@ -45,7 +45,7 @@
         "typescript": "^4.2.3"
     },
     "scripts": {
-        "build": "tsc -b && node scripts/copy-connector-json.js",
+        "build": "tsc -b",
         "clean": "rimraf dist tsconfig.tsbuildinfo node_modules",
         "start": "node ./bin/synthos.js",
         "test": "npm run build && npm run test:mocha",
@@ -61,6 +61,7 @@
         "default-themes",
         "page-scripts",
         "required-pages",
+        "service-connectors",
         "images"
     ]
 }

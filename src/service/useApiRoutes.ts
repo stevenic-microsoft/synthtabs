@@ -15,6 +15,7 @@ import { executeScript } from "../scripts";
 import { listThemes, loadTheme, loadThemeInfo } from "../themes";
 import { migratePage } from "../migrations";
 import { loadPageWithFallback } from "./usePageRoutes";
+import { Customizer } from "../customizer";
 
 // ---------------------------------------------------------------------------
 // Service registry
@@ -48,7 +49,7 @@ const SERVICE_REGISTRY: ServiceDefinition[] = [
     }
 ];
 
-export function useApiRoutes(config: SynthOSConfig, app: Application): void {
+export function useApiRoutes(config: SynthOSConfig, app: Application, customizer?: Customizer): void {
     // List pages
     app.get('/api/pages', async (req, res) => {
         const pages = await listPages(config.pagesFolder, config.requiredPagesFolder);
@@ -428,6 +429,7 @@ export function useApiRoutes(config: SynthOSConfig, app: Application): void {
     });
 
     // Brainstorm endpoint
+    if (!customizer || customizer.isEnabled('brainstorm'))
     app.post('/api/brainstorm', async (req, res) => {
         await requiresSettings(res, config.pagesFolder, async (settings) => {
             const { context, messages } = req.body;
@@ -495,6 +497,7 @@ Return ONLY the JSON object.`};
     });
 
     // Define a route for running configured scripts
+    if (!customizer || customizer.isEnabled('scripts'))
     app.post('/api/scripts/:id', async (req, res) => {
         await requiresSettings(res, config.pagesFolder, async (settings) => {
             const { id } = req.params;
@@ -707,6 +710,7 @@ Return ONLY the JSON object.`};
     // Web Search (Brave Search API)
     // -----------------------------------------------------------------------
 
+    if (!customizer || customizer.isEnabled('search'))
     app.post('/api/search/web', async (req, res) => {
         try {
             const { query, count, country, freshness } = req.body;

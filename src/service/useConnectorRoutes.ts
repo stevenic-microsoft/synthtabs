@@ -2,7 +2,7 @@ import { Application } from 'express';
 import { SynthOSConfig } from '../init';
 import { loadSettings, saveSettings } from '../settings';
 import {
-    CONNECTOR_REGISTRY,
+    getConnectorRegistry,
     ConnectorSummary,
     ConnectorDetail,
     ConnectorCallRequest,
@@ -21,7 +21,7 @@ export function useConnectorRoutes(config: SynthOSConfig, app: Application): voi
             const categoryFilter = req.query.category as string | undefined;
             const idFilter = req.query.id as string | undefined;
 
-            const list: ConnectorSummary[] = CONNECTOR_REGISTRY
+            const list: ConnectorSummary[] = getConnectorRegistry(config.serviceConnectorsFolder)
                 .filter(def => {
                     if (categoryFilter && def.category !== categoryFilter) return false;
                     if (idFilter && def.id !== idFilter) return false;
@@ -54,7 +54,7 @@ export function useConnectorRoutes(config: SynthOSConfig, app: Application): voi
     app.get('/api/connectors/:id', async (req, res) => {
         try {
             const { id } = req.params;
-            const def = CONNECTOR_REGISTRY.find(d => d.id === id);
+            const def = getConnectorRegistry(config.serviceConnectorsFolder).find(d => d.id === id);
             if (!def) {
                 res.status(404).json({ error: `Connector "${id}" not found` });
                 return;
@@ -88,7 +88,7 @@ export function useConnectorRoutes(config: SynthOSConfig, app: Application): voi
     app.post('/api/connectors/:id', async (req, res) => {
         try {
             const { id } = req.params;
-            const def = CONNECTOR_REGISTRY.find(d => d.id === id);
+            const def = getConnectorRegistry(config.serviceConnectorsFolder).find(d => d.id === id);
             if (!def) {
                 res.status(404).json({ error: `Connector "${id}" not found` });
                 return;
@@ -164,7 +164,7 @@ export function useConnectorRoutes(config: SynthOSConfig, app: Application): voi
     app.get('/api/connectors/:id/authorize', async (req, res) => {
         try {
             const { id } = req.params;
-            const def = CONNECTOR_REGISTRY.find(d => d.id === id);
+            const def = getConnectorRegistry(config.serviceConnectorsFolder).find(d => d.id === id);
             if (!def || def.authStrategy !== 'oauth2') {
                 res.status(400).json({ error: `Connector "${id}" is not an OAuth2 connector` });
                 return;
@@ -214,7 +214,7 @@ export function useConnectorRoutes(config: SynthOSConfig, app: Application): voi
             const state = JSON.parse(stateRaw) as { connector: string };
             const connectorId = state.connector;
 
-            const def = CONNECTOR_REGISTRY.find(d => d.id === connectorId);
+            const def = getConnectorRegistry(config.serviceConnectorsFolder).find(d => d.id === connectorId);
             if (!def || def.authStrategy !== 'oauth2') {
                 res.status(400).json({ error: `Unknown OAuth2 connector: ${connectorId}` });
                 return;
@@ -326,7 +326,7 @@ export function useConnectorRoutes(config: SynthOSConfig, app: Application): voi
                 return;
             }
 
-            const def = CONNECTOR_REGISTRY.find(d => d.id === request.connector);
+            const def = getConnectorRegistry(config.serviceConnectorsFolder).find(d => d.id === request.connector);
             if (!def) {
                 res.status(404).json({ error: `Connector "${request.connector}" not found` });
                 return;
