@@ -1,0 +1,327 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SynthOS - APIs</title>
+    <script id="theme-info" src="/api/theme-info.js" data-locked="true"></script>
+    <link id="theme-css" rel="stylesheet" href="/api/theme.css" data-locked="true">
+    <style>.dialog-title{font-size:22px;font-weight:700;min-height:var(--header-min-height);padding:var(--header-padding-vertical) var(--header-padding-horizontal);line-height:var(--header-line-height);display:flex;align-items:center;justify-content:center;box-sizing:border-box;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;border-radius:12px;width:100%;max-width:800px;box-shadow:0 6px 25px var(--accent-glow);position:relative;z-index:1}.dialog-content{font-size:14px;color:rgba(224,224,224,.8);padding:15px 0;flex-grow:1;width:100%;max-width:800px;position:relative;z-index:1;overflow-y:auto}.api-section{margin:8px 0;border-radius:10px;width:100%;background:linear-gradient(135deg,rgba(102,126,234,.1) 0,rgba(118,75,162,.1) 100%);border:1px solid var(--border-color);overflow:hidden}.api-header{font-size:14px;cursor:pointer;background:linear-gradient(135deg,rgba(102,126,234,.2) 0,rgba(118,75,162,.2) 100%);padding:12px 15px;text-align:left;transition:.3s;color:var(--text-secondary);font-weight:500}.api-header:hover{background:linear-gradient(135deg,rgba(102,126,234,.3) 0,rgba(118,75,162,.3) 100%);color:var(--accent-tertiary)}.api-content{display:none;padding:12px 15px;background:rgba(15,15,35,.5);border-top:1px solid var(--border-color);font-size:13px;line-height:1.5}.api-input{margin-top:10px}.api-input input,.api-input select,.api-input textarea{width:100%;padding:10px 12px;margin-bottom:8px;border-radius:8px;border:1px solid var(--border-color);background:rgba(15,15,35,.8);color:var(--text-primary);font-size:13px;transition:.3s}.api-input input:focus,.api-input select:focus,.api-input textarea:focus{outline:0;border-color:var(--text-secondary);box-shadow:0 0 15px var(--accent-glow)}.api-input textarea{min-height:80px;resize:vertical}.api-input select{cursor:pointer}.api-input select option{background:var(--bg-tertiary);color:var(--text-primary)}.api-input button{padding:10px 18px;border:none;border-radius:20px;background:linear-gradient(135deg,var(--accent-primary) 0,var(--accent-secondary) 100%);color:#fff;cursor:pointer;transition:.3s;font-weight:500;font-size:13px;box-shadow:0 3px 15px var(--accent-glow)}.api-input button:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(102,126,234,.5)}.api-input button:disabled{background:rgba(102,126,234,.3);cursor:not-allowed;transform:none;box-shadow:none}.api-output{margin-top:10px;min-height:100px;max-height:200px;background:rgba(15,15,35,.8);color:var(--accent-tertiary);padding:12px;border-radius:8px;overflow-y:auto;white-space:pre-wrap;font-family:'Courier New',Courier,monospace;font-size:12px;border:1px solid var(--border-color)}.generated-image{max-width:100%;height:auto;margin-top:10px;border-radius:8px;border:1px solid var(--border-color);box-shadow:0 4px 20px var(--accent-glow)}.light-mode .dialog-content{color:rgba(45,38,64,.8)}.light-mode .api-content{background:rgba(255,255,255,.5)}.light-mode .api-input input,.light-mode .api-input select,.light-mode .api-input textarea,.light-mode .api-output{background:rgba(255,255,255,.8)}</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.0/mermaid.min.js"></script>
+    <script id="page-info" src="/api/page-info.js?page=apis"></script>
+</head>
+<body>
+    <div class="chat-panel" data-locked="true">
+        <div class="chat-header" data-locked="true">SynthOS</div>
+        <div class="chat-messages" id="chatMessages" data-locked="true">
+            <div class="chat-message"><p><strong>SynthOS:</strong> Expand the individual API operations to test calls.</p></div>
+        </div>
+        <div class="link-group" data-locked="true">
+            <a href="#" id="saveLink" data-locked="true">Save</a>
+            <a href="/pages" id="pagesLink" data-locked="true">Pages</a>
+            <a href="#" id="resetLink" data-locked="true">Reset</a>
+        </div>
+        <form action="/" method="POST" id="chatForm" data-locked="true">
+            <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message..." data-locked="true">
+            <button type="submit" class="chat-submit" data-locked="true">Send</button>
+        </form>
+    </div>
+    <div class="viewer-panel" id="viewerPanel">
+        <div class="dialog-title">API Explorer</div>
+        <div class="dialog-content">
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">GET /api/data/:page/:table</div>
+                <div class="api-content">
+                    This operation retrieves all rows from the specified page-scoped table. The response is an array of JSON objects, each representing a row in the table.
+                    <div class="api-input">
+                        <input type="text" placeholder="Page Name">
+                        <input type="text" placeholder="Table Name">
+                        <button onclick="callApi(event, 'GET', '/api/data/')">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">GET /api/data/:page/:table?limit=N&amp;offset=N</div>
+                <div class="api-content">
+                    Paginated variant. Returns a page of rows from the table. The response includes the items, total count, and whether more rows are available.
+                    Response: { items: [...], total: number, offset: number, limit: number, hasMore: boolean }
+                    <div class="api-input">
+                        <input type="text" placeholder="Page Name">
+                        <input type="text" placeholder="Table Name">
+                        <input type="text" placeholder="Limit">
+                        <input type="text" placeholder="Offset (optional)">
+                        <button onclick="callPaginatedApi(event)">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">GET /api/data/:page/:table/:id</div>
+                <div class="api-content">
+                    This operation retrieves a single row from the specified page-scoped table using the provided ID. The response is a JSON object representing the row.
+                    <div class="api-input">
+                        <input type="text" placeholder="Page Name">
+                        <input type="text" placeholder="Table Name">
+                        <input type="text" placeholder="ID">
+                        <button onclick="callApi(event, 'GET', '/api/data/')">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">POST /api/data/:page/:table</div>
+                <div class="api-content">
+                    This operation saves a single row to the specified page-scoped table. The request should include a JSON object representing the row. The response indicates success.
+                    <div class="api-input">
+                        <input type="text" placeholder="Page Name">
+                        <input type="text" placeholder="Table Name">
+                        <textarea placeholder="JSON Data"></textarea>
+                        <button onclick="callApi(event, 'POST', '/api/data/')">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">DELETE /api/data/:page/:table/:id</div>
+                <div class="api-content">
+                    This operation deletes a single row from the specified page-scoped table using the provided ID. The response indicates success.
+                    <div class="api-input">
+                        <input type="text" placeholder="Page Name">
+                        <input type="text" placeholder="Table Name">
+                        <input type="text" placeholder="ID">
+                        <button onclick="callApi(event, 'DELETE', '/api/data/')">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">GET /api/pages</div>
+                <div class="api-content">
+                    This operation retrieves a list of all available pages. The response is an array of page objects with name, title, categories, pinned, createdDate, lastModified, pageVersion, and mode.
+                    <div class="api-input">
+                        <button onclick="callApi(event, 'GET', '/api/pages')">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">GET /api/pages/:name</div>
+                <div class="api-content">
+                    This operation retrieves the metadata for a single page, including title, categories, pinned, createdDate, lastModified, pageVersion, and mode.
+                    <div class="api-input">
+                        <input type="text" placeholder="Page Name">
+                        <button onclick="callPageApi(event, 'GET')">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">POST /api/pages/:name</div>
+                <div class="api-content">
+                    This operation merges metadata for a page. Send only the fields you want to update. Supported fields: title (string), categories (array of strings), pinned (boolean), mode ("unlocked" | "locked"). The lastModified timestamp is auto-set on each update. The createdDate and pageVersion fields are preserved and cannot be overridden.
+                    <div class="api-input">
+                        <input type="text" placeholder="Page Name">
+                        <textarea placeholder="{ &quot;title&quot;: &quot;My Page&quot;, &quot;categories&quot;: [&quot;System&quot;], &quot;pinned&quot;: true, &quot;mode&quot;: &quot;unlocked&quot; }"></textarea>
+                        <button onclick="callPageApi(event, 'POST')">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">POST /api/pages/:name/pin</div>
+                <div class="api-content">
+                    This operation toggles the pinned status for a page. The request body should include pinned (boolean).
+                    <div class="api-input">
+                        <input type="text" placeholder="Page Name">
+                        <textarea placeholder="{ &quot;pinned&quot;: true }"></textarea>
+                        <button onclick="callPageApi(event, 'POST', '/pin')">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">DELETE /api/pages/:name</div>
+                <div class="api-content">
+                    This operation deletes a user page. Required (system) pages cannot be deleted. Returns 400 if the page is a required page, or 404 if not found.
+                    <div class="api-input">
+                        <input type="text" placeholder="Page Name">
+                        <button onclick="callPageApi(event, 'DELETE')">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">POST /api/pages/:name/copy</div>
+                <div class="api-content">
+                    This operation copies a page to a new name. The source page can be a user page or a required (system) page. The request body should include name (string, required), title (string, optional), and categories (array of strings, optional). Returns 409 if the target page already exists.
+                    <div class="api-input">
+                        <input type="text" placeholder="Page Name">
+                        <textarea placeholder="{ &quot;name&quot;: &quot;new-page-name&quot;, &quot;title&quot;: &quot;My Copy&quot;, &quot;categories&quot;: [&quot;Tools&quot;] }"></textarea>
+                        <button onclick="callPageApi(event, 'POST', '/copy')">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">POST /api/search/web</div>
+                <div class="api-content">
+                    This operation searches the web using Brave Search and returns a list of results. Requires Brave Search to be enabled in Settings &gt; Connectors.
+                    <div class="api-input">
+                        <input type="text" placeholder="Search query" id="webSearchQuery">
+                        <input type="number" placeholder="Count (optional, 1-20)" id="webSearchCount" min="1" max="20">
+                        <button onclick="webSearch(event)">Search</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">POST /api/generate/image</div>
+                <div class="api-content">
+                    This operation generates an image based on a prompt. You can specify the shape and style of the image.
+                    <div class="api-input">
+                        <input type="text" placeholder="Prompt" id="imagePrompt">
+                        <select id="imageShape">
+                            <option value="square">Square</option>
+                            <option value="portrait">Portrait</option>
+                            <option value="landscape">Landscape</option>
+                        </select>
+                        <select id="imageStyle">
+                            <option value="vivid">Vivid</option>
+                            <option value="natural">Natural</option>
+                        </select>
+                        <button onclick="generateImage(event)">Generate Image</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">POST /api/generate/completion</div>
+                <div class="api-content">
+                    This operation generates a text completion based on a prompt. You can optionally specify the temperature for controlling randomness.
+                    <div class="api-input">
+                        <textarea placeholder="Prompt" id="completionPrompt"></textarea>
+                        <input type="number" placeholder="Temperature (optional)" id="completionTemperature" step="0.1" min="0" max="1">
+                        <button onclick="generateCompletion(event)">Generate Completion</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">POST /api/scripts/:id</div>
+                <div class="api-content">
+                    This operation executes a script with the specified ID and passes in the provided variables. The response contains the output of the script execution.
+                    <div class="api-input">
+                        <input type="text" placeholder="Script ID" id="scriptId">
+                        <textarea placeholder="Variables (JSON format)" id="scriptVariables"></textarea>
+                        <button onclick="executeScript(event)">Execute Script</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">GET /api/connectors</div>
+                <div class="api-content">
+                    Lists all available connectors with their configuration status. Supports optional category and id query filters.
+                    <div class="api-input">
+                        <input type="text" placeholder="Category (optional)" id="connectorListCategory">
+                        <button onclick="listConnectors(event)">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">GET /api/connectors/:id</div>
+                <div class="api-content">
+                    Retrieves full detail for a single connector, including its definition and whether it is configured and enabled.
+                    <div class="api-input">
+                        <input type="text" placeholder="Connector ID" id="connectorDetailId">
+                        <button onclick="getConnectorDetail(event)">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">POST /api/connectors (proxy call)</div>
+                <div class="api-content">
+                    Proxies a request through a configured connector. The connector attaches authentication automatically based on its auth strategy.
+                    <div class="api-input">
+                        <input type="text" placeholder="Connector ID" id="connectorCallId">
+                        <select id="connectorCallMethod">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                        <input type="text" placeholder="Path (e.g. /res/v1/web/search)" id="connectorCallPath">
+                        <textarea placeholder="Query params JSON (optional, e.g. { &quot;q&quot;: &quot;test&quot; })" id="connectorCallQuery"></textarea>
+                        <textarea placeholder="Body JSON (optional)" id="connectorCallBody"></textarea>
+                        <button onclick="callConnector(event)">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">GET /api/agents</div>
+                <div class="api-content">
+                    Lists configured agents (A2A and OpenClaw). Supports optional filters: enabled (boolean) and provider (a2a|openclaw). Returns id, name, description, url, enabled, provider, and capabilities for each agent.
+                    <div class="api-input">
+                        <select id="agentListEnabled">
+                            <option value="">All</option>
+                            <option value="true">Enabled only</option>
+                        </select>
+                        <select id="agentListProvider">
+                            <option value="">All providers</option>
+                            <option value="a2a">A2A</option>
+                            <option value="openclaw">OpenClaw</option>
+                        </select>
+                        <button onclick="listAgents(event)">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">POST /api/agents/:id/send</div>
+                <div class="api-content">
+                    Sends a text message to an agent (works for both A2A and OpenClaw protocols). Returns a normalized response: { kind: 'message'|'task', text?: string, raw: object }. Optionally include an attachments array: [{ fileName: string, mimeType: string, content: string (base64 for binary) }].
+                    <div class="api-input">
+                        <input type="text" placeholder="Agent ID" id="agentSendId">
+                        <textarea placeholder="Message" id="agentSendMessage"></textarea>
+                        <button onclick="sendAgentMessage(event)">Send</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">POST /api/agents/:id/stream</div>
+                <div class="api-content">
+                    Sends a message and receives a streaming SSE response. Each event is JSON: { kind: 'text'|'status'|'artifact'|'done'|'error', data: any }. The stream ends with a [DONE] sentinel. Optionally include an attachments array: [{ fileName: string, mimeType: string, content: string (base64 for binary) }].
+                    <div class="api-input">
+                        <input type="text" placeholder="Agent ID" id="agentStreamId">
+                        <textarea placeholder="Message" id="agentStreamMessage"></textarea>
+                        <button onclick="streamAgentMessage(event)">Stream</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+            <div class="api-section">
+                <div class="api-header" onclick="toggleSection(this)">PATCH /api/agents/:id</div>
+                <div class="api-content">
+                    Toggle an agent's enabled/disabled state or update its name and description. Send only the fields to change.
+                    <div class="api-input">
+                        <input type="text" placeholder="Agent ID" id="agentPatchId">
+                        <textarea placeholder="{ &quot;enabled&quot;: true }" id="agentPatchBody"></textarea>
+                        <button onclick="patchAgent(event)">Submit</button>
+                    </div>
+                    <div class="api-output"></div>
+                </div>
+            </div>
+        </div>
+        <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
+    </div>
+    <div id="instructions" style="display: none;" data-locked="true"></div>
+    <div id="thoughts" style="display: none;" data-locked="true"></div>
+    <script id="api-explorer">function toggleSection(header){const content=header.nextElementSibling;content.style.display="block"===content.style.display?"none":"block"}function callApi(event,method,endpoint){event.preventDefault();const button=event.target;button.disabled=!0;const inputs=event.target.parentElement.querySelectorAll("input, textarea");let url=endpoint,data={};inputs.forEach(input=>{"Page Name"===input.placeholder?url+=input.value:"Table Name"===input.placeholder||"ID"===input.placeholder?url+="/"+input.value:"JSON Data"===input.placeholder&&(data=JSON.parse(input.value))}),fetch(url,{method:method,headers:{"Content-Type":"application/json"},body:"POST"===method?JSON.stringify(data):null}).then(response=>response.json()).then(data=>{console.log("Success:",data),event.target.parentElement.nextElementSibling.textContent=JSON.stringify(data,null,2)}).catch(error=>{console.error("Error:",error),alert("API call failed! Check console for details.")}).finally(()=>{button.disabled=!1})}function callPaginatedApi(event){event.preventDefault();const button=event.target;button.disabled=!0;const inputs=event.target.parentElement.querySelectorAll("input");let page="",table="",limit="",offset="";inputs.forEach(input=>{"Page Name"===input.placeholder?page=input.value:"Table Name"===input.placeholder?table=input.value:"Limit"===input.placeholder?limit=input.value:"Offset (optional)"===input.placeholder&&(offset=input.value)});let url="/api/data/"+encodeURIComponent(page)+"/"+encodeURIComponent(table)+"?limit="+encodeURIComponent(limit);offset&&(url+="&offset="+encodeURIComponent(offset)),fetch(url).then(response=>response.json()).then(data=>{event.target.parentElement.nextElementSibling.textContent=JSON.stringify(data,null,2)}).catch(error=>{console.error("Error:",error),alert("API call failed! Check console for details.")}).finally(()=>{button.disabled=!1})}function callPageApi(event,method,suffix){event.preventDefault();const button=event.target;button.disabled=!0;const inputs=event.target.parentElement.querySelectorAll("input, textarea");let pageName="",data=null;inputs.forEach(input=>{"Page Name"===input.placeholder?pageName=input.value:"TEXTAREA"===input.tagName&&(data=JSON.parse(input.value))});const url="/api/pages/"+encodeURIComponent(pageName)+(suffix||"");fetch(url,{method:method,headers:{"Content-Type":"application/json"},body:"POST"===method?JSON.stringify(data):null}).then(response=>response.json()).then(data=>{event.target.parentElement.nextElementSibling.textContent=JSON.stringify(data,null,2)}).catch(error=>{console.error("Error:",error),alert("API call failed! Check console for details.")}).finally(()=>{button.disabled=!1})}function generateImage(event){event.preventDefault();const button=event.target;button.disabled=!0;const prompt=document.getElementById("imagePrompt").value,shape=document.getElementById("imageShape").value,style=document.getElementById("imageStyle").value,outputBox=event.target.parentElement.nextElementSibling;fetch("/api/generate/image",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:prompt,shape:shape,style:style})}).then(response=>response.json()).then(data=>{if(console.log("Success:",data),outputBox.textContent=JSON.stringify(data,null,2),data.url){const img=document.createElement("img");img.src=data.url,img.alt="Generated Image",img.className="generated-image",outputBox.appendChild(img)}}).catch(error=>{console.error("Error:",error),alert("Image generation failed! Check console for details.")}).finally(()=>{button.disabled=!1})}function generateCompletion(event){event.preventDefault();const button=event.target;button.disabled=!0;const prompt=document.getElementById("completionPrompt").value,temperature=document.getElementById("completionTemperature").value,outputBox=event.target.parentElement.nextElementSibling;fetch("/api/generate/completion",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:prompt,temperature:parseFloat(temperature)||void 0})}).then(response=>response.json()).then(data=>{console.log("Success:",data),outputBox.textContent=JSON.stringify(data,null,2)}).catch(error=>{console.error("Error:",error),alert("Completion generation failed! Check console for details.")}).finally(()=>{button.disabled=!1})}function webSearch(event){event.preventDefault();var button=event.target;button.disabled=!0;var query=document.getElementById("webSearchQuery").value,count=document.getElementById("webSearchCount").value,outputBox=event.target.parentElement.nextElementSibling,body={query:query};count&&(body.count=parseInt(count,10)),fetch("/api/search/web",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}).then(function(response){return response.json()}).then(function(data){outputBox.textContent=JSON.stringify(data,null,2)}).catch(function(error){console.error("Error:",error),alert("Web search failed! Check console for details.")}).finally(function(){button.disabled=!1})}function executeScript(event){event.preventDefault();const button=event.target;button.disabled=!0;const scriptId=document.getElementById("scriptId").value,variables=JSON.parse(document.getElementById("scriptVariables").value),outputBox=event.target.parentElement.nextElementSibling;fetch(`/api/scripts/${scriptId}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(variables)}).then(response=>response.json()).then(data=>{console.log("Success:",data),outputBox.textContent=JSON.stringify(data,null,2)}).catch(error=>{console.error("Error:",error),alert("Script execution failed! Check console for details.")}).finally(()=>{button.disabled=!1})}function listConnectors(event){event.preventDefault();var button=event.target;button.disabled=!0;var category=document.getElementById("connectorListCategory").value;var url="/api/connectors";if(category)url+="?category="+encodeURIComponent(category);var outputBox=event.target.parentElement.nextElementSibling;fetch(url).then(function(r){return r.json()}).then(function(data){outputBox.textContent=JSON.stringify(data,null,2)}).catch(function(err){console.error("Error:",err);alert("Failed! Check console.")}).finally(function(){button.disabled=!1})}function getConnectorDetail(event){event.preventDefault();var button=event.target;button.disabled=!0;var id=document.getElementById("connectorDetailId").value;var outputBox=event.target.parentElement.nextElementSibling;fetch("/api/connectors/"+encodeURIComponent(id)).then(function(r){return r.json()}).then(function(data){outputBox.textContent=JSON.stringify(data,null,2)}).catch(function(err){console.error("Error:",err);alert("Failed! Check console.")}).finally(function(){button.disabled=!1})}function callConnector(event){event.preventDefault();var button=event.target;button.disabled=!0;var body={connector:document.getElementById("connectorCallId").value,method:document.getElementById("connectorCallMethod").value,path:document.getElementById("connectorCallPath").value};var queryVal=document.getElementById("connectorCallQuery").value;if(queryVal)try{body.query=JSON.parse(queryVal)}catch(e){}var bodyVal=document.getElementById("connectorCallBody").value;if(bodyVal)try{body.body=JSON.parse(bodyVal)}catch(e){}var outputBox=event.target.parentElement.nextElementSibling;fetch("/api/connectors",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}).then(function(r){return r.json()}).then(function(data){outputBox.textContent=JSON.stringify(data,null,2)}).catch(function(err){console.error("Error:",err);alert("Failed! Check console.")}).finally(function(){button.disabled=!1})}function listAgents(event){event.preventDefault();var button=event.target;button.disabled=!0;var enabled=document.getElementById("agentListEnabled").value;var provider=document.getElementById("agentListProvider").value;var url="/api/agents";var params=[];if(enabled)params.push("enabled="+enabled);if(provider)params.push("provider="+encodeURIComponent(provider));if(params.length)url+="?"+params.join("&");var outputBox=event.target.parentElement.nextElementSibling;fetch(url).then(function(r){return r.json()}).then(function(data){outputBox.textContent=JSON.stringify(data,null,2)}).catch(function(err){console.error("Error:",err);alert("Failed! Check console.")}).finally(function(){button.disabled=!1})}function sendAgentMessage(event){event.preventDefault();var button=event.target;button.disabled=!0;var id=document.getElementById("agentSendId").value;var message=document.getElementById("agentSendMessage").value;var outputBox=event.target.parentElement.nextElementSibling;fetch("/api/agents/"+encodeURIComponent(id)+"/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:message})}).then(function(r){return r.json()}).then(function(data){outputBox.textContent=JSON.stringify(data,null,2)}).catch(function(err){console.error("Error:",err);alert("Failed! Check console.")}).finally(function(){button.disabled=!1})}function streamAgentMessage(event){event.preventDefault();var button=event.target;button.disabled=!0;var id=document.getElementById("agentStreamId").value;var message=document.getElementById("agentStreamMessage").value;var outputBox=event.target.parentElement.nextElementSibling;outputBox.textContent="Streaming...\n";fetch("/api/agents/"+encodeURIComponent(id)+"/stream",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:message})}).then(function(res){var reader=res.body.getReader();var decoder=new TextDecoder();var buffer="";function pump(){return reader.read().then(function(result){if(result.done){button.disabled=!1;return}buffer+=decoder.decode(result.value,{stream:!0});var lines=buffer.split("\n");buffer=lines.pop()||"";for(var i=0;i<lines.length;i++){var line=lines[i];if(line.indexOf("data: ")===0){var data=line.substring(6);if(data==="[DONE]"){outputBox.textContent+="\n[DONE]";button.disabled=!1;return}try{var event=JSON.parse(data);outputBox.textContent+=JSON.stringify(event)+"\n"}catch(e){}}}return pump()})}return pump()}).catch(function(err){console.error("Error:",err);outputBox.textContent+="Error: "+err.message;button.disabled=!1})}function patchAgent(event){event.preventDefault();var button=event.target;button.disabled=!0;var id=document.getElementById("agentPatchId").value;var body;try{body=JSON.parse(document.getElementById("agentPatchBody").value)}catch(e){alert("Invalid JSON");button.disabled=!1;return}var outputBox=event.target.parentElement.nextElementSibling;fetch("/api/agents/"+encodeURIComponent(id),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}).then(function(r){return r.json()}).then(function(data){outputBox.textContent=JSON.stringify(data,null,2)}).catch(function(err){console.error("Error:",err);alert("Failed! Check console.")}).finally(function(){button.disabled=!1})}</script>
+<script id="page-helpers" src="/api/page-helpers.js?v=2" data-locked="true"></script>
+<script id="page-script" src="/api/page-script.js?v=2" data-locked="true"></script>
+</body></html>

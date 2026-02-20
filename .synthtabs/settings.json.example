@@ -1,0 +1,32 @@
+{
+    "version": 2,
+    "theme": "nebula-dawn",
+    "models": [
+        {
+            "use": "builder",
+            "provider": "Anthropic",
+            "configuration": {
+                "apiKey": "",
+                "model": ""
+            },
+            "imageQuality": "standard",
+            "instructions": "",
+            "logCompletions": false
+        },
+        {
+            "use": "chat",
+            "provider": "Anthropic",
+            "configuration": {
+                "apiKey": "",
+                "model": ""
+            },
+            "imageQuality": "standard",
+            "instructions": "",
+            "logCompletions": false
+        }
+    ],
+    "features": [],
+    "services": {},
+    "connectors": {},
+    "agents": []
+}

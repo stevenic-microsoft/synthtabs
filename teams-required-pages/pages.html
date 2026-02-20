@@ -1,0 +1,919 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SynthOS - Pages</title>
+    <script id="theme-info" src="/api/theme-info.js" data-locked="true"></script>
+    <link id="theme-css" rel="stylesheet" href="/api/theme.css" data-locked="true">
+    <style>
+        /* Advanced options */
+        .advanced-options { margin-top: 8px }
+        .advanced-toggle { background: 0 0; border: none; color: var(--text-secondary); font-size: 13px; cursor: pointer; padding: 8px 0; display: flex; align-items: center; gap: 6px; transition: color .2s }
+        .advanced-toggle:hover { color: var(--accent-primary) }
+        .toggle-icon { font-size: 10px; transition: transform .2s }
+        .toggle-icon.open { transform: rotate(90deg) }
+        .advanced-content { padding-left: 16px; border-left: 2px solid var(--border-color); margin-left: 4px }
+
+        /* Header */
+        .saved-pages { font-size: 22px; font-weight: 700; min-height: var(--header-min-height); padding: var(--header-padding-vertical) var(--header-padding-horizontal); line-height: var(--header-line-height); display: flex; align-items: center; justify-content: center; box-sizing: border-box; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: #fff; border-radius: 12px; width: 100%; box-shadow: 0 6px 25px var(--accent-glow); position: relative; z-index: 1; margin-bottom: 20px }
+
+        /* Category sections */
+        .page-category { width: 100%; margin-bottom: 20px; position: relative; z-index: 1 }
+        .category-title { font-size: 16px; color: var(--text-secondary); margin-bottom: 12px; padding-left: 5px; border-left: 3px solid var(--accent-tertiary) }
+        .page-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px }
+
+        /* Page links */
+        .page-link { padding: 12px 16px; background: linear-gradient(135deg, rgba(102,126,234,.15) 0, rgba(118,75,162,.15) 100%); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-primary); text-decoration: none; text-align: center; font-size: 14px; transition: .3s; cursor: pointer; user-select: none; white-space: nowrap; overflow: hidden; position: relative }
+        .page-link:hover { background: linear-gradient(135deg, rgba(102,126,234,.3) 0, rgba(118,75,162,.3) 100%); border-color: var(--text-secondary); box-shadow: 0 4px 15px var(--accent-glow); color: var(--accent-tertiary); transform: translateY(-2px) }
+        .page-link .scroll-text { display: inline-block; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis }
+        .page-link.scrolling .scroll-text { text-overflow: clip; overflow: visible; animation: scrollText var(--scroll-duration, 3s) linear infinite }
+        @keyframes scrollText { 0%, 10% { transform: translateX(0) } 100%, 90% { transform: translateX(var(--scroll-distance, -50%)) } }
+
+        /* Pinned pages */
+        .page-link.pinned { background: linear-gradient(135deg, rgba(102,126,234,.35) 0, rgba(118,75,162,.35) 100%); border: 2px solid var(--accent-tertiary); box-shadow: 0 2px 12px var(--accent-glow) }
+        .page-link.pinned:hover { background: linear-gradient(135deg, rgba(102,126,234,.5) 0, rgba(118,75,162,.5) 100%); box-shadow: 0 4px 20px var(--accent-glow) }
+
+        /* Builder page */
+        .page-link.builder-page { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: #fff; border: none; box-shadow: 0 4px 20px var(--accent-glow); font-weight: 600 }
+        .page-link.builder-page:hover { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); filter: brightness(1.1); box-shadow: 0 6px 25px var(--accent-glow); color: #fff; transform: translateY(-2px) }
+
+        /* Light mode pinned overrides */
+        .light-mode .page-link.pinned { background: linear-gradient(135deg, rgba(102,126,234,.3) 0, rgba(192,84,212,.25) 100%); border-color: var(--accent-secondary) }
+        .light-mode .page-link.pinned:hover { background: linear-gradient(135deg, rgba(102,126,234,.45) 0, rgba(192,84,212,.4) 100%) }
+
+        /* Filter bar */
+        .filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: nowrap }
+        .filter-buttons-container { display: flex; gap: 8px; flex-shrink: 1; min-width: 0; overflow: hidden }
+        .filter-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: 0 0; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: .2s; white-space: nowrap; flex-shrink: 0 }
+        .filter-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary) }
+        .filter-btn.active { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: #fff; border-color: transparent }
+
+        /* More dropdown */
+        .more-dropdown { position: relative; flex-shrink: 0 }
+        .more-btn { position: relative }
+        .more-menu { position: absolute; top: 100%; left: 0; margin-top: 4px; min-width: 150px; max-height: 250px; overflow-y: auto; border-radius: 8px; padding: 4px 0; box-shadow: 0 8px 30px rgba(0,0,0,.4); display: none; border: 1px solid var(--border-color); background: rgba(30,30,50,.95); z-index: 100 }
+        .more-menu.show { display: block }
+        .more-menu-item { padding: 8px 16px; font-size: 13px; cursor: pointer; color: var(--text-primary); transition: background .15s; white-space: nowrap }
+        .more-menu-item:hover { background: linear-gradient(135deg, rgba(102,126,234,.3) 0, rgba(118,75,162,.3) 100%) }
+        .more-menu-item.active { background: linear-gradient(135deg, rgba(102,126,234,.2) 0, rgba(118,75,162,.2) 100%); color: var(--accent-tertiary) }
+
+        /* Search */
+        .search-input { margin-left: auto; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-color); background: 0 0; color: var(--text-primary); font-size: 13px; outline: 0; width: 180px; min-width: 120px; flex-shrink: 0; transition: border-color .2s }
+        .search-input:focus { border-color: var(--accent-primary) }
+        .search-input::placeholder { color: var(--text-secondary) }
+
+        /* Context menu */
+        .context-menu { position: fixed; z-index: 1000; min-width: 180px; border-radius: 8px; padding: 4px 0; box-shadow: 0 8px 30px rgba(0,0,0,.4); display: none; border: 1px solid var(--border-color); background: rgba(30,30,50,.95) }
+        .context-menu-item { padding: 8px 16px; font-size: 13px; cursor: pointer; color: var(--text-primary); transition: background .15s }
+        .context-menu-item:hover { background: linear-gradient(135deg, rgba(102,126,234,.3) 0, rgba(118,75,162,.3) 100%) }
+        .light-mode .context-menu, .light-mode .more-menu { background: rgba(255,255,255,.97); box-shadow: 0 8px 30px rgba(0,0,0,.15) }
+
+        /* Upgrade badge & toast */
+        .version-badge { display: block; font-size: 10px; color: var(--accent-tertiary); margin-top: 4px; opacity: .8 }
+        .page-link.needs-upgrade { border: 1px dashed var(--accent-tertiary); background: linear-gradient(135deg, rgba(102,126,234,.08) 0, rgba(118,75,162,.08) 100%); animation: 3s ease-in-out infinite upgradeGlow; overflow: visible; z-index: 2 }
+        .page-link.needs-upgrade:hover { background: linear-gradient(135deg, rgba(102,126,234,.2) 0, rgba(118,75,162,.2) 100%); border-color: var(--accent-primary) }
+        @keyframes upgradeGlow { 0%, 100% { box-shadow: 0 0 0 transparent } 50% { box-shadow: 0 0 12px var(--accent-glow) } }
+        .upgrade-badge { position: absolute; top: -6px; right: -6px; font-size: 9px; color: #fff; font-weight: 600; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); padding: 2px 7px; border-radius: 10px; line-height: 1.3; box-shadow: 0 2px 8px var(--accent-glow); pointer-events: none; z-index: 10 }
+        .light-mode .page-link.needs-upgrade { background: linear-gradient(135deg, rgba(102,126,234,.06) 0, rgba(192,84,212,.06) 100%) }
+        .upgrade-toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: #fff; border-radius: 8px; font-size: 13px; box-shadow: 0 4px 15px var(--accent-glow); z-index: 2000; opacity: 0; transform: translateY(10px); transition: opacity .3s, transform .3s }
+        .upgrade-toast.show { opacity: 1; transform: translateY(0) }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.1/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.0/mermaid.min.js"></script>
+    <script id="page-info" src="/api/page-info.js?page=pages2"></script>
+</head>
+
+<body>
+    <div class="chat-panel" data-locked="true">
+        <div class="chat-header" data-locked="true">SynthOS</div>
+        <div class="chat-messages" id="chatMessages" data-locked="true">
+            <div class="chat-message">
+                <p><strong>SynthOS:</strong> Here are all of the created pages. Right-click any page to pin it to
+                    favorites, edit its definition, or copy it to a new page.</p>
+            </div>
+        </div>
+        <div class="link-group" data-locked="true">
+            <a href="#" id="saveLink" data-locked="true">Save</a>
+            <a href="/pages" id="pagesLink" data-locked="true">Pages</a>
+            <a href="#" id="resetLink" data-locked="true">Reset</a>
+        </div>
+        <form action="/" method="POST" id="chatForm" data-locked="true">
+            <input type="text" class="chat-input" id="chatInput" name="message" placeholder="Type a message..." data-locked="true">
+            <button type="submit" class="chat-submit" data-locked="true">Send</button>
+        </form>
+    </div>
+    <div class="viewer-panel" id="viewerPanel" style="justify-content: flex-start; align-items: stretch;">
+        <div class="saved-pages">Pages<button id="importBtn" style="position: absolute; right: 16px; padding: 4px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.15); color: #fff; font-size: 13px; cursor: pointer; transition: background .2s; line-height: 1.4;" onmouseover="this.style.background='rgba(255,255,255,.3)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">Import</button></div>
+        <input type="file" id="importFileInput" accept=".zip" style="display:none">
+
+        <!-- Favorites section (hidden when empty) -->
+        <div id="favoritesSection" class="page-category" style="display: none;">
+            <h2 class="category-title">Favorites</h2>
+            <div id="favoritesGrid" class="page-grid"></div>
+        </div>
+
+        <!-- All Pages section with filter bar -->
+        <div class="page-category">
+            <h2 class="category-title">Pages</h2>
+            <div id="filterBar" class="filter-bar">
+                <div class="filter-buttons-container">
+                    <button class="filter-btn active" data-category="All">All</button>
+                </div>
+                <div class="more-dropdown" id="moreDropdown" style="display: none;">
+                    <button class="filter-btn more-btn" id="moreBtn">More ▾</button>
+                    <div class="more-menu" id="moreMenu"></div>
+                </div>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search pages...">
+            </div>
+            <div id="pagesGrid" class="page-grid"></div>
+        </div>
+
+        <!-- Edit Page Modal -->
+        <div id="editPageModal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">Edit Page Definition</div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Display Title</label>
+                        <input type="text" id="editPageTitle" class="form-input" placeholder="Enter display title...">
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; opacity: 0.8;">Page
+                            name: <span id="editPageNameDisplay"></span></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Categories (comma-separated)</label>
+                        <input type="text" id="editPageCategories" class="form-input" placeholder="e.g. Tools, Games, Utilities">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label checkbox-label">
+                            <input type="checkbox" id="editPagePinned">
+                            <span>Pinned to Favorites</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label checkbox-label">
+                            <input type="checkbox" id="editPageLocked">
+                            <span>Locked</span>
+                        </label>
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; opacity: 0.8;">
+                            Locked pages are read-only and cannot be modified through chat.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label checkbox-label">
+                            <input type="checkbox" id="editPageShowInAll" checked>
+                            <span>Show in All</span>
+                        </label>
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; opacity: 0.8;">
+                            When unchecked, this page is hidden from the "All" filter and only appears under its category.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="modal-btn modal-btn-danger" id="deletePageBtn">Delete Page</button>
+                    <div class="modal-footer-right">
+                        <button class="modal-btn modal-btn-secondary" id="editCancelBtn">Cancel</button>
+                        <button class="modal-btn modal-btn-primary" id="editSaveBtn">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Copy Page Modal -->
+        <div id="copyPageModal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">Copy to New Page</div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Display Title</label>
+                        <input type="text" id="copyPageTitle" class="form-input" placeholder="Enter display title...">
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; opacity: 0.8;">
+                            Source: <span id="copySourcePageDisplay"></span></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Categories (comma-separated)</label>
+                        <input type="text" id="copyPageCategories" class="form-input" placeholder="e.g. Tools, Games, Utilities">
+                    </div>
+                    <div class="advanced-options">
+                        <button type="button" class="advanced-toggle" id="advancedToggle">
+                            <span class="toggle-icon">▶</span> Advanced Options
+                        </button>
+                        <div class="advanced-content" id="advancedContent" style="display: none;">
+                            <div class="form-group" style="margin-top: 12px;">
+                                <label class="form-label">Custom Page ID</label>
+                                <input type="text" id="copyNewPageName" class="form-input" placeholder="Auto-generated from title...">
+                                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; opacity: 0.8;">
+                                    Used in the URL. Leave blank to auto-generate from title.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="modal-footer-right">
+                        <button class="modal-btn modal-btn-secondary" id="copyCancelBtn">Cancel</button>
+                        <button class="modal-btn modal-btn-primary" id="copyConfirmBtn">Create Copy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteConfirmModal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">Confirm Delete</div>
+                <div class="modal-body">
+                    <p style="color: var(--text-primary); margin: 0;">Are you sure you want to delete "<span id="deletePageNameDisplay2"></span>"? This cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <div class="modal-footer-right">
+                        <button class="modal-btn modal-btn-secondary" id="deleteCancelBtn">Cancel</button>
+                        <button class="modal-btn modal-btn-danger" id="deleteConfirmBtn">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
+    </div>
+
+    <!-- Context menu -->
+    <div id="contextMenu" class="context-menu">
+        <div id="pinMenuItem" class="context-menu-item"></div>
+        <div id="editMenuItem" class="context-menu-item">Edit page definition</div>
+        <div id="copyMenuItem" class="context-menu-item">Copy to new page</div>
+        <div id="updateMenuItem" class="context-menu-item">Update page</div>
+        <div style="height: 1px; background: var(--border-color); margin: 4px 0;"></div>
+        <div id="shareMenuItem" class="context-menu-item">Download page</div>
+    </div>
+    <div id="instructions" style="display: none;" data-locked="true"></div>
+    <div id="thoughts" style="display: none;" data-locked="true"></div>
+
+    <!-- Toast container -->
+    <div id="upgradeToast" class="upgrade-toast"></div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // ── State ──
+        var allPages = [];
+        var activeCategory = 'All';
+        var searchTerm = '';
+        var contextTarget = null;
+        var currentEditPage = null;
+        var currentCopySource = null;
+        var currentDeletePage = null;
+        var visibleCategories = [];
+        var overflowCategories = [];
+        var BUILDER_PAGE = 'builder';
+
+        // MRU: most-recently-used categories get priority for visible slots
+        var pagesMru = (function() {
+            try { return JSON.parse(localStorage.getItem('synthos_pagesMru')) || []; }
+            catch(e) { return []; }
+        })();
+        function pagesMruTouch(cat) {
+            if (cat === 'All') return;
+            pagesMru = pagesMru.filter(function(c) { return c !== cat; });
+            pagesMru.unshift(cat);
+            if (pagesMru.length > 20) pagesMru.length = 20;
+            try { localStorage.setItem('synthos_pagesMru', JSON.stringify(pagesMru)); } catch(e) {}
+        }
+
+        // ── DOM refs ──
+        var favoritesSection = document.getElementById('favoritesSection');
+        var favoritesGrid = document.getElementById('favoritesGrid');
+        var filterBar = document.getElementById('filterBar');
+        var pagesGrid = document.getElementById('pagesGrid');
+        var searchInput = document.getElementById('searchInput');
+        var moreDropdown = document.getElementById('moreDropdown');
+        var moreBtn = document.getElementById('moreBtn');
+        var moreMenu = document.getElementById('moreMenu');
+        var contextMenu = document.getElementById('contextMenu');
+        var pinMenuItem = document.getElementById('pinMenuItem');
+        var editMenuItem = document.getElementById('editMenuItem');
+        var copyMenuItem = document.getElementById('copyMenuItem');
+        var updateMenuItem = document.getElementById('updateMenuItem');
+        var editPageModal = document.getElementById('editPageModal');
+        var copyPageModal = document.getElementById('copyPageModal');
+        var deleteConfirmModal = document.getElementById('deleteConfirmModal');
+        var editPageNameDisplay = document.getElementById('editPageNameDisplay');
+        var editPageTitle = document.getElementById('editPageTitle');
+        var editPageCategories = document.getElementById('editPageCategories');
+        var editPagePinned = document.getElementById('editPagePinned');
+        var editPageLocked = document.getElementById('editPageLocked');
+        var editPageShowInAll = document.getElementById('editPageShowInAll');
+        var editCancelBtn = document.getElementById('editCancelBtn');
+        var editSaveBtn = document.getElementById('editSaveBtn');
+        var deletePageBtn = document.getElementById('deletePageBtn');
+        var copySourcePageDisplay = document.getElementById('copySourcePageDisplay');
+        var copyPageTitle = document.getElementById('copyPageTitle');
+        var copyPageCategories = document.getElementById('copyPageCategories');
+        var copyNewPageName = document.getElementById('copyNewPageName');
+        var copyCancelBtn = document.getElementById('copyCancelBtn');
+        var copyConfirmBtn = document.getElementById('copyConfirmBtn');
+        var deletePageNameDisplay2 = document.getElementById('deletePageNameDisplay2');
+        var deleteCancelBtn = document.getElementById('deleteCancelBtn');
+        var deleteConfirmBtn = document.getElementById('deleteConfirmBtn');
+        var loadingOverlay = document.getElementById('loadingOverlay');
+        var shareMenuItem = document.getElementById('shareMenuItem');
+        var importBtn = document.getElementById('importBtn');
+        var importFileInput = document.getElementById('importFileInput');
+
+        // ── Helpers ──
+
+        function displayName(page) {
+            return page.title || page.name;
+        }
+
+        // ── Page link creation (final version: scroll-text + upgrade badge + context menu) ──
+
+        function createPageLink(page, isBuilder) {
+            var latestVersion = window.pageInfo ? window.pageInfo.latestPageVersion : 0;
+            var needsUpgrade = !isBuilder && page.pageVersion < latestVersion;
+
+            var a = document.createElement('a');
+            a.href = '/' + page.name;
+
+            var title = displayName(page);
+            var span = document.createElement('span');
+            span.className = 'scroll-text';
+            span.textContent = title;
+            a.appendChild(span);
+            a.title = title;
+
+            var classes = 'page-link';
+            if (isBuilder) {
+                classes += ' builder-page';
+            } else if (needsUpgrade) {
+                classes += ' needs-upgrade';
+            } else if (page.pinned) {
+                classes += ' pinned';
+            }
+            a.className = classes;
+
+            if (needsUpgrade) {
+                var badge = document.createElement('span');
+                badge.className = 'upgrade-badge';
+                badge.textContent = 'Update';
+                a.appendChild(badge);
+            }
+
+            if (needsUpgrade) {
+                a.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    upgradePage(page.name);
+                });
+            }
+
+            a.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                showContextMenu(e, page);
+            });
+
+            a.addEventListener('mouseenter', function() {
+                var textWidth = span.scrollWidth;
+                var containerWidth = a.clientWidth - 32;
+                if (textWidth > containerWidth) {
+                    var scrollDistance = textWidth - containerWidth + 20;
+                    var duration = Math.max(2, scrollDistance / 30);
+                    a.style.setProperty('--scroll-distance', '-' + scrollDistance + 'px');
+                    a.style.setProperty('--scroll-duration', duration + 's');
+                    a.classList.add('scrolling');
+                }
+            });
+
+            a.addEventListener('mouseleave', function() {
+                a.classList.remove('scrolling');
+            });
+
+            return a;
+        }
+
+        // ── Context menu (final version: hides builder items, shows update for outdated) ──
+
+        function showContextMenu(e, page) {
+            contextTarget = page;
+            var isBuilder = page.name === BUILDER_PAGE;
+
+            pinMenuItem.style.display = isBuilder ? 'none' : '';
+            editMenuItem.style.display = isBuilder ? 'none' : '';
+            if (!isBuilder) {
+                pinMenuItem.textContent = page.pinned ? 'Unpin from Favorites' : 'Pin to Favorites';
+            }
+
+            var latestVersion = window.pageInfo ? window.pageInfo.latestPageVersion : 0;
+            updateMenuItem.style.display = page.pageVersion < latestVersion ? '' : 'none';
+
+            shareMenuItem.style.display = isBuilder ? 'none' : '';
+
+            contextMenu.style.left = e.clientX + 'px';
+            contextMenu.style.top = e.clientY + 'px';
+            contextMenu.style.display = 'block';
+        }
+
+        function hideContextMenu() {
+            contextMenu.style.display = 'none';
+            contextTarget = null;
+        }
+
+        function hideMoreMenu() {
+            moreMenu.classList.remove('show');
+        }
+
+        // ── Rendering ──
+
+        function renderFavorites() {
+            favoritesGrid.innerHTML = '';
+            var builderPage = allPages.find(function(p) { return p.name === 'builder'; });
+            if (builderPage) favoritesGrid.appendChild(createPageLink(builderPage, true));
+
+            var pinned = allPages
+                .filter(function(p) { return p.pinned && p.name !== 'builder'; })
+                .sort(function(a, b) { return displayName(a).localeCompare(displayName(b)); });
+            pinned.forEach(function(p) { favoritesGrid.appendChild(createPageLink(p)); });
+
+            favoritesSection.style.display = (builderPage || pinned.length > 0) ? '' : 'none';
+        }
+
+        function getAllCategories() {
+            var cats = new Set();
+            allPages
+                .filter(function(p) { return p.name !== 'builder'; })
+                .forEach(function(p) { p.categories.forEach(function(c) { cats.add(c); }); });
+            return Array.from(cats).sort();
+        }
+
+        function renderFilterBar() {
+            var container = document.querySelector('.filter-buttons-container');
+            container.innerHTML = '';
+            moreMenu.innerHTML = '';
+
+            var allBtn = document.createElement('button');
+            allBtn.className = 'filter-btn' + (activeCategory === 'All' ? ' active' : '');
+            allBtn.textContent = 'All';
+            allBtn.dataset.category = 'All';
+            allBtn.addEventListener('click', function() { setCategory('All'); });
+            container.appendChild(allBtn);
+
+            visibleCategories.forEach(function(cat) {
+                var btn = document.createElement('button');
+                btn.className = 'filter-btn' + (activeCategory === cat ? ' active' : '');
+                btn.textContent = cat;
+                btn.dataset.category = cat;
+                btn.addEventListener('click', function() { setCategory(cat); });
+                container.appendChild(btn);
+            });
+
+            if (overflowCategories.length > 0) {
+                moreDropdown.style.display = '';
+                moreBtn.className = 'filter-btn more-btn' + (overflowCategories.includes(activeCategory) ? ' active' : '');
+                overflowCategories.forEach(function(cat) {
+                    var item = document.createElement('div');
+                    item.className = 'more-menu-item' + (activeCategory === cat ? ' active' : '');
+                    item.textContent = cat;
+                    item.addEventListener('click', function() { setCategory(cat); hideMoreMenu(); });
+                    moreMenu.appendChild(item);
+                });
+            } else {
+                moreDropdown.style.display = 'none';
+            }
+        }
+
+        function calculateVisibleCategories() {
+            var allCats = getAllCategories();
+            if (!filterBar) return;
+
+            var availableWidth = filterBar.offsetWidth - (searchInput.offsetWidth + 8) - 50 - 16;
+            visibleCategories = [];
+            overflowCategories = [];
+
+            var temp = document.createElement('button');
+            temp.className = 'filter-btn';
+            temp.style.visibility = 'hidden';
+            temp.style.position = 'absolute';
+            document.body.appendChild(temp);
+
+            // Measure "More" button width
+            temp.textContent = 'More \u25BE';
+            var moreBtnWidth = temp.offsetWidth + 8;
+
+            // Measure each category button
+            var catWidths = {};
+            allCats.forEach(function(cat) {
+                temp.textContent = cat;
+                catWidths[cat] = temp.offsetWidth + 8;
+            });
+            document.body.removeChild(temp);
+
+            // Sort categories: MRU first, then alphabetical
+            var sorted = allCats.slice().sort(function(a, b) {
+                var ai = pagesMru.indexOf(a);
+                var bi = pagesMru.indexOf(b);
+                var aInMru = ai !== -1;
+                var bInMru = bi !== -1;
+                if (aInMru && !bInMru) return -1;
+                if (!aInMru && bInMru) return 1;
+                if (aInMru && bInMru) return ai - bi;
+                return a.localeCompare(b);
+            });
+
+            var usedWidth = 0;
+            var overflowing = false;
+            for (var i = 0; i < sorted.length; i++) {
+                var cat = sorted[i];
+                var remaining = sorted.length - i;
+                if (!overflowing && usedWidth + catWidths[cat] <= availableWidth - (remaining > 1 ? moreBtnWidth : 0)) {
+                    visibleCategories.push(cat);
+                    usedWidth += catWidths[cat];
+                } else {
+                    overflowing = true;
+                    overflowCategories.push(cat);
+                }
+            }
+            if (overflowCategories.length === 1) {
+                if (usedWidth + catWidths[overflowCategories[0]] <= availableWidth) {
+                    visibleCategories.push(overflowCategories.pop());
+                }
+            }
+        }
+
+        function renderPages() {
+            pagesGrid.innerHTML = '';
+            var term = searchTerm.toLowerCase();
+            allPages.forEach(function(p) {
+                if (p.name === 'builder') return;
+                var inCategory = activeCategory === 'All'
+                    ? (term || p.showInAll !== false)
+                    : p.categories.includes(activeCategory);
+                if (!inCategory) return;
+                if (term && !p.name.toLowerCase().includes(term) && !displayName(p).toLowerCase().includes(term)) return;
+                pagesGrid.appendChild(createPageLink(p));
+            });
+        }
+
+        function setCategory(cat) {
+            activeCategory = cat;
+            pagesMruTouch(cat);
+            renderFilterBar();
+            renderPages();
+        }
+
+        function renderAll() {
+            renderFavorites();
+            calculateVisibleCategories();
+            renderFilterBar();
+            renderPages();
+        }
+
+        // ── Upgrade logic ──
+
+        function showUpgradeToast(message) {
+            var toast = document.getElementById('upgradeToast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(function() { toast.classList.remove('show'); }, 3000);
+        }
+
+        async function upgradePage(pageName) {
+            loadingOverlay.style.display = 'flex';
+            try {
+                var res = await fetch('/api/pages/' + encodeURIComponent(pageName) + '/upgrade', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                var data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Upgrade failed');
+                if (!data.upgraded) return false;
+                await loadPages();
+                showUpgradeToast('Page upgraded successfully');
+                return true;
+            } catch (err) {
+                console.error('Error upgrading page:', err);
+                alert('Failed to upgrade page: ' + err.message);
+                return false;
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        }
+
+        // ── Modal helpers ──
+
+        function closeEditModal() {
+            editPageModal.classList.remove('show');
+            currentEditPage = null;
+        }
+
+        function closeCopyModal() {
+            copyPageModal.classList.remove('show');
+            currentCopySource = null;
+        }
+
+        function closeDeleteModal() {
+            deleteConfirmModal.classList.remove('show');
+            currentDeletePage = null;
+        }
+
+        // ── Event listeners ──
+
+        // Search
+        searchInput.addEventListener('input', function(e) {
+            searchTerm = e.target.value;
+            renderPages();
+        });
+
+        // More dropdown
+        moreBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            moreMenu.classList.toggle('show');
+        });
+
+        // Close menus on click
+        document.addEventListener('click', function() {
+            hideContextMenu();
+            hideMoreMenu();
+        });
+        contextMenu.addEventListener('click', function(e) { e.stopPropagation(); });
+
+        // ── Pin handler ──
+        pinMenuItem.addEventListener('click', async function() {
+            if (!contextTarget) return;
+            var pageName = contextTarget.name;
+            var newPinned = !contextTarget.pinned;
+            var categories = contextTarget.categories || [];
+            hideContextMenu();
+            try {
+                var res = await fetch('/api/pages/' + encodeURIComponent(pageName), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ categories: categories, pinned: newPinned })
+                });
+                if (!res.ok) {
+                    var errorText = await res.text();
+                    throw new Error('Failed to update page metadata: ' + errorText);
+                }
+                var pageIndex = allPages.findIndex(function(p) { return p.name === pageName; });
+                if (pageIndex !== -1) allPages[pageIndex].pinned = newPinned;
+                renderAll();
+                await loadPages();
+            } catch (err) {
+                console.error('Error toggling pin:', err);
+                alert('Failed to update pin status: ' + err.message);
+            }
+        });
+
+        // ── Edit modal ──
+        editMenuItem.addEventListener('click', function() {
+            if (!contextTarget) return;
+            currentEditPage = contextTarget;
+            editPageNameDisplay.textContent = contextTarget.name;
+            editPageTitle.value = contextTarget.title || '';
+            editPageCategories.value = (contextTarget.categories || []).join(', ');
+            editPagePinned.checked = contextTarget.pinned || false;
+            editPageLocked.checked = contextTarget.mode === 'locked';
+            editPageShowInAll.checked = contextTarget.showInAll !== false;
+            hideContextMenu();
+            editPageModal.classList.add('show');
+        });
+
+        editCancelBtn.addEventListener('click', closeEditModal);
+
+        editSaveBtn.addEventListener('click', async function() {
+            if (!currentEditPage) return;
+            var newTitle = editPageTitle.value.trim();
+            var newCategories = editPageCategories.value.split(',').map(function(c) { return c.trim(); }).filter(function(c) { return c.length > 0; });
+            var newPinned = editPagePinned.checked;
+            var newMode = editPageLocked.checked ? 'locked' : 'unlocked';
+            var newShowInAll = editPageShowInAll.checked;
+            try {
+                var res = await fetch('/api/pages/' + encodeURIComponent(currentEditPage.name), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: newTitle || undefined,
+                        categories: newCategories,
+                        pinned: newPinned,
+                        showInAll: newShowInAll,
+                        mode: newMode
+                    })
+                });
+                if (!res.ok) throw new Error('Failed to update page');
+                closeEditModal();
+                await loadPages();
+            } catch (err) {
+                console.error('Error saving page:', err);
+                alert('Failed to save changes: ' + err.message);
+            }
+        });
+
+        // Edit modal mousedown-guarded close
+        var editModalMouseDown = null;
+        editPageModal.addEventListener('mousedown', function(e) { editModalMouseDown = e.target; });
+        editPageModal.addEventListener('click', function(e) {
+            if (e.target === editPageModal && editModalMouseDown === editPageModal) closeEditModal();
+            editModalMouseDown = null;
+        });
+
+        // ── Delete modal ──
+        deletePageBtn.addEventListener('click', function() {
+            if (!currentEditPage) return;
+            currentDeletePage = currentEditPage;
+            deletePageNameDisplay2.textContent = displayName(currentEditPage);
+            closeEditModal();
+            deleteConfirmModal.classList.add('show');
+        });
+
+        deleteCancelBtn.addEventListener('click', closeDeleteModal);
+
+        deleteConfirmBtn.addEventListener('click', async function() {
+            if (!currentDeletePage) return;
+            var pageName = currentDeletePage.name;
+            closeDeleteModal();
+            try {
+                var res = await fetch('/api/pages/' + encodeURIComponent(pageName), { method: 'DELETE' });
+                if (!res.ok) {
+                    var data = await res.json().catch(function() { return {}; });
+                    throw new Error(data.error || 'Failed to delete page');
+                }
+                await loadPages();
+            } catch (err) {
+                console.error('Error deleting page:', err);
+                alert('Failed to delete page: ' + err.message);
+            }
+        });
+
+        // Delete modal mousedown-guarded close
+        var deleteModalMouseDown = null;
+        deleteConfirmModal.addEventListener('mousedown', function(e) { deleteModalMouseDown = e.target; });
+        deleteConfirmModal.addEventListener('click', function(e) {
+            if (e.target === deleteConfirmModal && deleteModalMouseDown === deleteConfirmModal) closeDeleteModal();
+            deleteModalMouseDown = null;
+        });
+
+        // ── Copy modal ──
+        copyMenuItem.addEventListener('click', function() {
+            if (!contextTarget) return;
+            currentCopySource = contextTarget;
+            copySourcePageDisplay.textContent = displayName(contextTarget);
+            copyPageTitle.value = '';
+            copyPageCategories.value = (contextTarget.categories || []).join(', ');
+            copyNewPageName.value = '';
+            hideContextMenu();
+            copyPageModal.classList.add('show');
+            copyPageTitle.focus();
+        });
+
+        copyCancelBtn.addEventListener('click', closeCopyModal);
+
+        copyConfirmBtn.addEventListener('click', async function() {
+            if (!currentCopySource) return;
+            var newTitle = copyPageTitle.value.trim();
+            var newName = copyNewPageName.value.trim();
+            if (!newName && newTitle) newName = newTitle;
+            if (!newName) {
+                alert('Please enter a title or page name.');
+                copyPageTitle.focus();
+                return;
+            }
+            newName = newName.toLowerCase().replace(/\s+/g, '_');
+            newName = newName.replace(/[^a-z0-9_-]/g, '');
+            if (!newName) {
+                alert('Page name must contain at least one valid character (letters, numbers, hyphens, or underscores).');
+                copyPageTitle.focus();
+                return;
+            }
+            var newCategories = copyPageCategories.value.split(',').map(function(c) { return c.trim(); }).filter(function(c) { return c.length > 0; });
+            try {
+                var body = { name: newName, title: newTitle, categories: newCategories };
+                var res = await fetch('/api/pages/' + encodeURIComponent(currentCopySource.name) + '/copy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (!res.ok) {
+                    var data = await res.json().catch(function() { return {}; });
+                    throw new Error(data.error || 'Failed to copy page');
+                }
+                closeCopyModal();
+                window.location.href = '/' + newName;
+            } catch (err) {
+                console.error('Error copying page:', err);
+                alert('Failed to copy page: ' + err.message);
+            }
+        });
+
+        // Copy modal mousedown-guarded close
+        var copyModalMouseDown = null;
+        copyPageModal.addEventListener('mousedown', function(e) { copyModalMouseDown = e.target; });
+        copyPageModal.addEventListener('click', function(e) {
+            if (e.target === copyPageModal && copyModalMouseDown === copyPageModal) closeCopyModal();
+            copyModalMouseDown = null;
+        });
+
+        // ── Advanced toggle ──
+        document.getElementById('advancedToggle').addEventListener('click', function() {
+            var content = document.getElementById('advancedContent');
+            var icon = this.querySelector('.toggle-icon');
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.classList.add('open');
+            } else {
+                content.style.display = 'none';
+                icon.classList.remove('open');
+            }
+        });
+
+        // ── Update menu item ──
+        updateMenuItem.addEventListener('click', async function() {
+            if (!contextTarget) return;
+            var pageName = contextTarget.name;
+            hideContextMenu();
+            await upgradePage(pageName);
+        });
+
+        // ── Share handler ──
+        shareMenuItem.addEventListener('click', async function() {
+            if (!contextTarget) return;
+            var page = contextTarget;
+            var pageName = page.name;
+            hideContextMenu();
+            try {
+                var res = await fetch('/api/pages/' + encodeURIComponent(pageName) + '/export');
+                if (!res.ok) throw new Error('Failed to export page');
+                var blob = await res.blob();
+                var fileName = pageName + '.zip';
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error('Error sharing page:', err);
+                alert('Failed to share page: ' + err.message);
+            }
+        });
+
+        // ── Import handler ──
+        importBtn.addEventListener('click', function() {
+            importFileInput.click();
+        });
+
+        importFileInput.addEventListener('change', async function() {
+            var file = importFileInput.files[0];
+            if (!file) return;
+            importFileInput.value = '';
+            loadingOverlay.style.display = 'flex';
+            try {
+                var buffer = await file.arrayBuffer();
+                var res = await fetch('/api/pages/import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/zip' },
+                    body: buffer
+                });
+                var data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Import failed');
+                await loadPages();
+                showUpgradeToast('Imported page: ' + (data.title || data.name));
+            } catch (err) {
+                console.error('Error importing page:', err);
+                alert('Failed to import page: ' + err.message);
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        });
+
+        // ── Escape key closes all modals ──
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeEditModal();
+                closeCopyModal();
+                closeDeleteModal();
+            }
+        });
+
+        // ── Resize observer for filter bar ──
+        var resizeObserver = new ResizeObserver(function() {
+            calculateVisibleCategories();
+            renderFilterBar();
+        });
+        resizeObserver.observe(filterBar);
+
+        // ── Load pages and render ──
+        async function loadPages() {
+            try {
+                var res = await fetch('/api/pages');
+                if (!res.ok) throw new Error('Failed to fetch pages');
+                allPages = await res.json();
+                renderAll();
+            } catch (err) {
+                console.error('Error fetching pages:', err);
+            }
+        }
+
+        loadPages();
+    })();
+    </script>
+<script id="page-helpers" src="/api/page-helpers.js?v=2" data-locked="true"></script>
+<script id="page-script" src="/api/page-script.js?v=2" data-locked="true"></script>
+</body></html>
