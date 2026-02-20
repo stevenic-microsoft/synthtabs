@@ -794,14 +794,14 @@ Return ONLY the JSON object.`};
             // Backup original page to .migrated/ before overwriting
             const migratedFolder = path.join(config.pagesFolder, '.migrated');
 
-            // Handle legacy flat file (.synthos/pagename.html)
+            // Handle legacy flat file (<localFolder>/pagename.html)
             const flatPath = path.join(config.pagesFolder, `${name}.html`);
             if (await checkIfExists(flatPath)) {
                 await copyFile(flatPath, migratedFolder);
                 await deleteFile(flatPath);
             }
 
-            // Handle folder-based page (.synthos/pages/name/)
+            // Handle folder-based page (<localFolder>/pages/name/)
             const folderPath = path.join(config.pagesFolder, 'pages', name);
             if (await checkIfExists(folderPath)) {
                 await copyFolderRecursive(folderPath, path.join(migratedFolder, name));
