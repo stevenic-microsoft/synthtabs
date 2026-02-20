@@ -34,6 +34,10 @@ export class TeamsCustomizer extends Customizer {
     get serviceConnectorsFolder(): string {
         return path.join(__dirname, '../../teams-service-connectors');
     }
+
+    get tabsListRoute(): string {
+        return '/tabs';
+    }
 }
 
 const transformInstructions = `The viewer panel automatically fills the full available space. App content stretches to fill the full viewer width and height so do not add the "full-viewer" class to the viewer-panel element.

@@ -50,6 +50,12 @@ export class Customizer {
         return path.join(__dirname, '../../service-connectors');
     }
 
+    /** Route path for the "browse all pages/tabs" listing page.
+     *  Override in a derived class to change the redirect target for outdated pages. */
+    get tabsListRoute(): string {
+        return '/pages';
+    }
+
     // --- Feature group control ---
     // Built-in groups: 'pages', 'api', 'connectors', 'agents',
     //   'data', 'brainstorm', 'search', 'scripts'

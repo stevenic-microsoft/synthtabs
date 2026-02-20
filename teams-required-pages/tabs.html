@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teams - Pages</title>
+    <title>Teams - Tabs</title>
     <script id="theme-info" src="/api/theme-info.js" data-locked="true"></script>
     <link id="theme-css" rel="stylesheet" href="/api/theme.css" data-locked="true">
     <style>
@@ -107,7 +107,7 @@
 
 <body>
     <div class="viewer-panel" id="viewerPanel" style="justify-content: flex-start; align-items: stretch;">
-        <div class="saved-pages">Pages<button id="importBtn" style="position:absolute;right:16px;padding:6px 14px;border-radius:4px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;font-size:13px;cursor:pointer;transition:background 0.2s;line-height:1.4;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">Import</button></div>
+        <div class="saved-pages">Tabs<button id="importBtn" style="position:absolute;right:16px;padding:6px 14px;border-radius:4px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;font-size:13px;cursor:pointer;transition:background 0.2s;line-height:1.4;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">Import</button></div>
         <input type="file" id="importFileInput" accept=".zip" style="display:none">
 
         <!-- Favorites section (hidden when empty) -->
@@ -118,7 +118,7 @@
 
         <!-- All Pages section with filter bar -->
         <div class="page-category">
-            <h2 class="category-title">Pages</h2>
+            <h2 class="category-title">Tabs</h2>
             <div id="filterBar" class="filter-bar">
                 <div class="filter-buttons-container">
                     <button class="filter-btn active" data-category="All">All</button>
@@ -127,7 +127,7 @@
                     <button class="filter-btn more-btn" id="moreBtn">More ▾</button>
                     <div class="more-menu" id="moreMenu"></div>
                 </div>
-                <input type="text" class="search-input" id="searchInput" placeholder="Search pages...">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search tabs...">
             </div>
             <div id="pagesGrid" class="page-grid"></div>
         </div>
@@ -242,13 +242,13 @@
         <div class="chat-panel-header" data-locked="true"><span class="chat-panel-header__title">Tab Designer</span><button class="chat-panel-close" aria-label="Close chat panel">&times;</button></div>
         <div class="chat-messages" id="chatMessages" data-locked="true">
             <div class="chat-message">
-                <p><strong>Teams:</strong> Here are all of the created pages. Right-click any page to pin it to
-                    favorites, edit its definition, or copy it to a new page.</p>
+                <p><strong>Teams:</strong> Here are all of your tabs. Right-click any tab to pin it to
+                    favorites, edit its definition, or copy it to a new tab.</p>
             </div>
         </div>
         <div class="link-group" data-locked="true">
             <a href="#" id="saveLink" data-locked="true">Save</a>
-            <a href="/pages" id="pagesLink" data-locked="true">Pages</a>
+            <a href="/tabs" id="pagesLink" data-locked="true">Tabs</a>
             <a href="#" id="resetLink" data-locked="true">Reset</a>
         </div>
         <form action="/" method="POST" id="chatForm" data-locked="true">

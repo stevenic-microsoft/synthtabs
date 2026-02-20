@@ -82,7 +82,7 @@
 
         // Pages link is never renamed
         var pagesLink = document.getElementById('pagesLink');
-        if (pagesLink) attach(pagesLink, 'Browse all pages');
+        if (pagesLink) attach(pagesLink, 'Browse all tabs');
 
         // Save and Reset tooltips deferred — locked-mode renames them on DOMContentLoaded
         document.addEventListener('DOMContentLoaded', function() {
