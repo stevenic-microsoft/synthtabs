@@ -1,6 +1,6 @@
 export { Customizer, RouteInstaller } from './Customizer';
-export { TeamsCustomizer } from './TeamsCustomizer';
-import { TeamsCustomizer } from './TeamsCustomizer';
+import { Customizer } from './Customizer';
 
-// Default instance — uses Teams-specific folders and .synthtabs local folder.
-export const customizer = new TeamsCustomizer();
+// Default instance — enables everything, uses base folders.
+// Fork developers: replace this with your derived class instance.
+export const customizer = new Customizer();

@@ -45,15 +45,7 @@
       "Bash(npm run test:mocha:*)",
       "Bash(git -C \"C:/source/synthos\" log --oneline)",
       "Bash(git -C \"C:/source/synthos\" log --oneline --all)",
-      "Bash(git -C C:/source/synthos log --oneline --all)",
-      "Bash(wc:*)",
-      "Bash(where.exe:*)",
-      "Bash(winget install:*)",
-      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")",
-      "Bash(git fetch:*)",
-      "Bash(git checkout:*)",
-      "Bash(git merge:*)",
-      "Bash(git commit:*)"
+      "Bash(git -C C:/source/synthos log --oneline --all)"
     ]
   }
 }
