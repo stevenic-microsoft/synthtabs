@@ -17,7 +17,7 @@ export async function run() {
                     default: 4242
                 })
                 .option('pages', {
-                    describe: `Include default pages when initializing a new .synthos folder.`,
+                    describe: `Include default pages when initializing a new local folder.`,
                     type: 'boolean',
                     default: true
                 })
@@ -33,7 +33,7 @@ export async function run() {
                 })
                 .demandOption([]);
         }, async (args) => {
-            const config = createConfig('.synthos', { debug: args.debug, debugPageUpdates: args.debugPageUpdates }, customizer);
+            const config = createConfig(customizer.localFolder, { debug: args.debug, debugPageUpdates: args.debugPageUpdates }, customizer);
             await init(config, args.pages);
             await server(config, customizer).listen(args.port, async () => {
                 console.log(`SynthOS server is running on http://localhost:${args.port}`);

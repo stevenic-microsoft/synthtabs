@@ -14,6 +14,14 @@ export class Customizer {
     /** Custom instructions appended to transformPage's instruction block. */
     protected customTransformInstructions: string[] = [];
 
+    // --- Local data folder ---
+    // Override in a derived class to change the local project folder name.
+
+    /** Name of the local data folder created in the user's project directory. */
+    get localFolder(): string {
+        return '.synthos';
+    }
+
     // --- Content folder paths ---
     // Override these in a derived class to point to your fork's folders.
 
