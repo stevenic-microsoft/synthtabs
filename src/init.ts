@@ -7,6 +7,7 @@ import { getOutdatedThemes, parseThemeFilename } from "./themes";
 import { Customizer } from './customizer';
 
 export interface SynthOSConfig {
+    localFolder: string;
     pagesFolder: string;
     requiredPagesFolder: string;
     defaultPagesFolder: string;
@@ -24,6 +25,7 @@ export function createConfig(
     customizer?: Customizer
 ): SynthOSConfig {
     return {
+        localFolder: pagesFolder,
         pagesFolder: path.join(process.cwd(), pagesFolder),
         requiredPagesFolder: customizer?.requiredPagesFolder ?? path.join(__dirname, '../required-pages'),
         defaultPagesFolder: customizer?.defaultPagesFolder ?? path.join(__dirname, '../default-pages'),
@@ -43,7 +45,7 @@ export async function init(config: SynthOSConfig, includeDefaultPages: boolean =
         return false;
     }
 
-    console.log(`Initializing .synthos folder...`);
+    console.log(`Initializing ${config.localFolder} folder...`);
 
     // Create pages folder
     await ensureFolderExists(config.pagesFolder);
@@ -54,7 +56,7 @@ export async function init(config: SynthOSConfig, includeDefaultPages: boolean =
     await saveFile(path.join(config.pagesFolder, 'settings.json.example'), JSON.stringify(DefaultSettings, null, 4));
 
     // Setup default scripts
-    console.log(`Copying default scripts to .synthos folder...`);
+    console.log(`Copying default scripts to ${config.localFolder} folder...`);
     const scriptsFolder = path.join(config.pagesFolder, 'scripts');
     await ensureFolderExists(scriptsFolder);
     switch (process.platform) {
@@ -73,17 +75,17 @@ export async function init(config: SynthOSConfig, includeDefaultPages: boolean =
             break;
     }  
 
-    await saveFile(path.join(scriptsFolder, 'example.sh'), '#!/bin/bash\n\n# This is an example script\n\n# You can run this script using the following command:\n# sh .synthos/scripts/example.sh\n\n# This script will print "Hello, World!" to the console\n\necho "Hello, World!"\n');
+    await saveFile(path.join(scriptsFolder, 'example.sh'), `#!/bin/bash\n\n# This is an example script\n\n# You can run this script using the following command:\n# sh ${config.localFolder}/scripts/example.sh\n\n# This script will print "Hello, World!" to the console\n\necho "Hello, World!"\n`);
 
     // Setup default themes
-    console.log(`Copying default themes to .synthos folder...`);
+    console.log(`Copying default themes to ${config.localFolder} folder...`);
     const themesFolder = path.join(config.pagesFolder, 'themes');
     await ensureFolderExists(themesFolder);
     await copyFiles(config.defaultThemesFolder, themesFolder);
 
     // Copy pages
     if (includeDefaultPages) {
-        console.log(`Copying default pages to .synthos folder...`);
+        console.log(`Copying default pages to ${config.localFolder} folder...`);
         await copyDefaultPages(config.defaultPagesFolder, config.pagesFolder);
     }
 
@@ -94,7 +96,7 @@ async function repairMissingFolders(config: SynthOSConfig): Promise<void> {
     // Rebuild scripts folder from defaults if missing
     const scriptsFolder = path.join(config.pagesFolder, 'scripts');
     if (!await checkIfExists(scriptsFolder)) {
-        console.log(`Restoring default scripts to .synthos folder...`);
+        console.log(`Restoring default scripts to ${config.localFolder} folder...`);
         await ensureFolderExists(scriptsFolder);
         switch (process.platform) {
             case 'win32':
@@ -111,13 +113,13 @@ async function repairMissingFolders(config: SynthOSConfig): Promise<void> {
                 await copyFile(path.join(config.defaultScriptsFolder, 'linux-terminal.json'), scriptsFolder);
                 break;
         }
-        await saveFile(path.join(scriptsFolder, 'example.sh'), '#!/bin/bash\n\n# This is an example script\n\n# You can run this script using the following command:\n# sh .synthos/scripts/example.sh\n\n# This script will print "Hello, World!" to the console\n\necho "Hello, World!"\n');
+        await saveFile(path.join(scriptsFolder, 'example.sh'), `#!/bin/bash\n\n# This is an example script\n\n# You can run this script using the following command:\n# sh ${config.localFolder}/scripts/example.sh\n\n# This script will print "Hello, World!" to the console\n\necho "Hello, World!"\n`);
     }
 
     // Rebuild themes folder from defaults if missing
     const themesFolder = path.join(config.pagesFolder, 'themes');
     if (!await checkIfExists(themesFolder)) {
-        console.log(`Restoring default themes to .synthos folder...`);
+        console.log(`Restoring default themes to ${config.localFolder} folder...`);
         await ensureFolderExists(themesFolder);
         await copyFiles(config.defaultThemesFolder, themesFolder);
     } else {
@@ -152,7 +154,7 @@ async function repairMissingFolders(config: SynthOSConfig): Promise<void> {
         // No pages folder and no flat files — rebuild from defaults
         const htmlFiles = (await listFiles(config.pagesFolder)).filter(f => f.endsWith('.html'));
         if (htmlFiles.length === 0) {
-            console.log(`Restoring default pages to .synthos/pages/ folder...`);
+            console.log(`Restoring default pages to ${config.localFolder}/pages/ folder...`);
             await copyDefaultPages(config.defaultPagesFolder, config.pagesFolder);
         } else {
             await ensureFolderExists(pagesSubdir);
@@ -160,7 +162,7 @@ async function repairMissingFolders(config: SynthOSConfig): Promise<void> {
     }
 
     // Migrate any stray flat .html files from root into pages/<name>/
-    await migrateFlatPages(config.pagesFolder);
+    await migrateFlatPages(config.pagesFolder, config.localFolder);
 }
 
 function toTitleCase(name: string): string {
@@ -171,12 +173,12 @@ function toTitleCase(name: string): string {
         .replace(/\b\w/g, c => c.toUpperCase());
 }
 
-async function migrateFlatPages(pagesFolder: string): Promise<void> {
+async function migrateFlatPages(pagesFolder: string, localFolder: string): Promise<void> {
     const pagesSubdir = path.join(pagesFolder, 'pages');
     const htmlFiles = (await listFiles(pagesFolder)).filter(f => f.endsWith('.html'));
     if (htmlFiles.length === 0) return;
 
-    console.log(`Migrating ${htmlFiles.length} page(s) to .synthos/pages/ folder...`);
+    console.log(`Migrating ${htmlFiles.length} page(s) to ${localFolder}/pages/ folder...`);
     await ensureFolderExists(pagesSubdir);
     const now = new Date().toISOString();
 

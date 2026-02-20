@@ -23,7 +23,7 @@ export interface PageInfo {
 export type PageMetadata = Omit<PageInfo, 'name'>;
 
 export async function loadPageMetadata(pagesFolder: string, name: string, fallbackFolder?: string): Promise<PageMetadata | undefined> {
-    // 1. Try user override: .synthos/pages/<name>/page.json
+    // 1. Try user override: <localFolder>/pages/<name>/page.json
     const metadataPath = path.join(pagesFolder, 'pages', name, 'page.json');
     if (await checkIfExists(metadataPath)) {
         try {
