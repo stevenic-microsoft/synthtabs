@@ -53,7 +53,13 @@
       "Bash(git fetch:*)",
       "Bash(git checkout:*)",
       "Bash(git merge:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git -C /c/source/synthtabs log --oneline -20 --name-status -- '*theme*' '*Theme*')",
+      "Bash(git -C /c/source/synthtabs diff main...HEAD -- '*theme*' '*Theme*')",
+      "Bash(python3:*)",
+      "Bash(git -C /c/source/synthtabs diff main...HEAD -- src/)",
+      "Bash(git -C /c/source/synthtabs diff main...HEAD -- src/themes.ts src/settings.ts)",
+      "Bash(git -C /c/source/synthtabs diff main HEAD -- src/themes.ts src/settings.ts)"
     ]
   }
 }
